@@ -9,7 +9,7 @@ logging.getLogger(__name__)
 
 
 def cmd_line():
-
+    generate_parser()
     return
 
 
@@ -28,12 +28,12 @@ def generate_parser():
                             metavar='FILE',
                             dest='data_file',
                             help='Specify input data file')
-    parser_run.add_argument('-F', '--file',
-                            type=str,
-                            required=True,
-                            metavar='FILE',
-                            dest='data_file',
-                            help='Specify input data file')
+    # parser_run.add_argument('-F', '--file',
+    #                         type=str,
+    #                         required=True,
+    #                         metavar='FILE',
+    #                         dest='data_file',
+    #                         help='Specify input data file')
 
 
 
