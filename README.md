@@ -2,19 +2,15 @@
 FORC analysis in Python.
 
 ## Basic Information
----
-Documentation:
+Documentation: I'm working on it
 
-Download:
-
-| Dependencies |
-| --- |
-| Python 3.6+ |
-| Numpy |
-| Scipy |
-| Matplotlib |
-| PyQt5 |
-| Numba |
+Dependencies:
+* Python 3.6+
+* numpy
+* scipy
+* matplotlib
+* pyqt5
+* numba
 
 ## Installation
 
