@@ -6,3 +6,5 @@ class ForcError(Exception):
 class IOError(ForcError):
     pass
 
+class DataFormatError(ForcError):
+    pass
