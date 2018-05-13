@@ -41,6 +41,22 @@ class Forc:
         raise errors.DataFormatError("No data found in file.")
 
     def _extract_next_forc(self, lines, i):
+        """Extract the next curve from the data.
+        
+        Parameters
+        ----------
+        lines : str
+            Raw csv data in string format, from a PMC-type formatted file.
+        i : int
+            Index of first point in the curve to extract.
+        Returns
+        -------
+        tuple of arrays
+            (fields, moments)
+        """
+
+        
+        
 
         h, m = [], []
         while lines[i][0] in ['+', '-']:
