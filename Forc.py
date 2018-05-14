@@ -54,10 +54,7 @@ class Forc:
         tuple of arrays
             (fields, moments)
         """
-
         
-        
-
         h, m = [], []
         while lines[i][0] in ['+', '-']:
             split_line = lines[i].split(',')
