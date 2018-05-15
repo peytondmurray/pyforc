@@ -5,11 +5,11 @@ import sys
 import main
 
 
-def test_cmd():
+def test_gui():
     sys.argv = ['main.py',
                 'gui']
-    main.cmd_line()
+    main.parse_arguments()
 
 
 if __name__ == '__main__':
-    test_cmd()
+    test_gui()
