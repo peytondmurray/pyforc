@@ -8,6 +8,26 @@ log = logging.getLogger(__name__)
 
 
 class ForcBase(abc.ABC):
+    """Base class for all FORC subclasses.
+
+    Attributes
+    ----------
+    h : ndarray
+        2D array of floats containing the field H at each data point.
+
+    hr : ndarray
+        2D array of floats containing the reversal field H_r at each data point.
+
+    m : ndarray
+        2D array of floats containing the magnetization M at each point.
+
+    T : ndarray
+        2D array of floats containing the temperature T at each point
+
+    drift_points : ndarray
+        1D array of magnetization values corresponding to drift measurements. If no drift measurements
+        were taken, these are taken from the last points in each reversal curve.
+    """
 
     def __init__(self, input):
 
@@ -21,8 +41,20 @@ class ForcBase(abc.ABC):
 
         return
 
+    np.ndarray
+
 
 class PMCForc(ForcBase):
+    """FORC class for PMC-formatted data. See the PMC format spec for more info. Magnetization (and, if present,
+    temperature) data is optionally drift corrected upon instantiation before being interpolated on a
+    uniform grid in (H, H_r) space.
+
+
+    Parameters
+    ----------
+    input : str
+        Path to PMC formatted data file.
+    """
 
     def __init__(self, input):
 
@@ -37,7 +69,7 @@ class PMCForc(ForcBase):
         self._from_file(input)
 
         return
-    
+
     def _from_file(self, path):
         file = pathlib.Path(path)
         log.info("Extracting data from file: {}".format(file))
@@ -58,11 +90,12 @@ class PMCForc(ForcBase):
         has been measured in (Hc, Hb) coordinates, the header will contain references to the limits of the
         measured data. If the measurement has been done in (Hc, Hb), drift points are necessary before the
         start of each reversal curve, which affects how the data is extracted.
-        
+
         Parameters
         ----------
         lines : str
             Lines from a PMC-formatted data file.
+
         Returns
         -------
         bool
@@ -77,11 +110,12 @@ class PMCForc(ForcBase):
     def _has_temperature(self, line):
         """Checks for temperature measurements in a file. If line has 3 data values, the third is considered
         a temperature measurement.
-        
+
         Parameters
         ----------
         line : str
             PMC formatted line to check
+
         Returns
         -------
         bool
@@ -92,13 +126,13 @@ class PMCForc(ForcBase):
 
     def _extract_raw_data(self, lines):
         """Extracts the raw data from lines of a PMC-formatted csv file.
-        
+
         Parameters
         ----------
         lines : str
             Contents of a PMC-formatted data file.
         """
-        
+
         i = self._find_first_data_point(lines)
         if self._has_temperature(lines[i]):
             self._T = []
@@ -119,16 +153,17 @@ class PMCForc(ForcBase):
 
     def _find_first_data_point(self, lines):
         """Return the index of the first data point in the PMC-formatted lines.
-        
+
         Parameters
         ----------
         lines : str
             Contents of a PMC-formatted data file.
+
         Raises
         ------
         errors.DataFormatError
             If no lines begin with '+' or '-', an error is raised. Data points must begin with '+' or
-        
+
         Returns
         -------
         int
@@ -139,16 +174,17 @@ class PMCForc(ForcBase):
         for i in range(len(lines)):
             if lines[i][0] in ['+', '-']:
                 return i
-        
+
         raise errors.DataFormatError("No data found in file. Check data format spec.")
 
     def _extract_next_forc(self, lines):
         """Extract the next curve from the data.
-        
+
         Parameters
         ----------
         lines : str
             Raw csv data in string format, from a PMC-type formatted file.
+
         Returns
         -------
         int
@@ -157,7 +193,7 @@ class PMCForc(ForcBase):
 
         _h, _m, _hr, _T = [], [], [], []
         i = 0
-        
+
         while lines[i][0] in ['+', '-']:
             split_line = lines[i].split(',')
             _h.append(float(split_line[0]))
@@ -172,14 +208,14 @@ class PMCForc(ForcBase):
         self.m.append(_m)
         if self.T is not None:
             self.T.append(_T)
-        
+
         return len(_h)
 
     def _extract_drift_point(self, line):
-        """Extract the drift point from the specified input line. Only records the moment, 
+        """Extract the drift point from the specified input line. Only records the moment,
         not the measurement field from the drift point (the field isn't used in any drift correction).
         Appends the drift point to self.drift_points.
-        
+
         Parameters
         ----------
         line : str
@@ -188,4 +224,3 @@ class PMCForc(ForcBase):
 
         self.drift_points.append(float(line.split(sep=',')[-1]))
         return
-

@@ -5,6 +5,7 @@ import sys
 import main
 import Forc
 
+
 @pytest.mark.skip
 def test_gui():
     sys.argv = ['main.py',
