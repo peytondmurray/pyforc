@@ -7,12 +7,11 @@ import abc
 log = logging.getLogger(__name__)
 
 
-class ForcBase(abc.ABCMeta):
+class ForcBase(abc.ABC):
 
     def __init__(self, input):
 
-        # super(ForcBase, self).__init__()
-        abc.ABCMeta.__init__()
+        super(ForcBase, self).__init__()
 
         self.h = None
         self.hr = None
@@ -27,8 +26,7 @@ class PMCForc(ForcBase):
 
     def __init__(self, input):
 
-        # super(PMCForc, self).__init__(input)
-        ForcBase.__init__(input)
+        super(PMCForc, self).__init__(input)
 
         self.h = []               # Field
         self.hr = []              # Reversal field
