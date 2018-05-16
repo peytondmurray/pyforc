@@ -1,16 +1,39 @@
 import numpy as np
 import pathlib
 import errors
+import logging
+import abc
+
+log = logging.getLogger(__name__)
 
 
-class Forc:
+class ForcBase(abc.ABCMeta):
 
     def __init__(self, input):
+
+        # super(ForcBase, self).__init__()
+        abc.ABCMeta.__init__()
+
+        self.h = None
+        self.hr = None
+        self.m = None
+        self.T = None
+        self.drift_points = None
+
+        return
+
+
+class PMCForc(ForcBase):
+
+    def __init__(self, input):
+
+        # super(PMCForc, self).__init__(input)
+        ForcBase.__init__(input)
 
         self.h = []               # Field
         self.hr = []              # Reversal field
         self.m = []               # Moment
-        self.T = None               # Temperature (if any)
+        self.T = None             # Temperature (if any)
         self.drift_points = []    # Drift points
 
         self._from_file(input)
@@ -18,8 +41,9 @@ class Forc:
         return
     
     def _from_file(self, path):
-        
         file = pathlib.Path(path)
+        log.info("Extracting data from file: {}".format(file))
+
         try:
             with open(file, 'r') as f:
                 lines = f.readlines()
@@ -27,7 +51,7 @@ class Forc:
             print("Error opening specified data file: {}".format(file))
             raise
 
-        raw_data = self._extract_raw_data(lines)
+        self._extract_raw_data(lines)
 
         return
 
@@ -69,19 +93,26 @@ class Forc:
         return len(line.split(sep=',')) == 3
 
     def _extract_raw_data(self, lines):
+        """Extracts the raw data from lines of a PMC-formatted csv file.
+        
+        Parameters
+        ----------
+        lines : str
+            Contents of a PMC-formatted data file.
+        """
         
         i = self._find_first_data_point(lines)
         if self._has_temperature(lines[i]):
             self._T = []
 
         if self._has_drift_points(lines):
-            while i < len(lines):
+            while i < len(lines) and lines[i][0] == '\n':
                 self._extract_drift_point(lines[i])
                 i += 2
                 i += self._extract_next_forc(lines[i:])
                 i += 1
         else:
-            while i < len(lines):
+            while i < len(lines) and lines[i][0] == '\n':
                 i += self._extract_next_forc(lines[i:])
                 self._extract_drift_point(lines[i-1:])
                 i += 1
