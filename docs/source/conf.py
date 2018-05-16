@@ -43,6 +43,7 @@ extensions = [
     'sphinx.ext.napoleon'
 ]
 
+autodoc_mock_imports = ['PyQt5', 'PyQt5.QtGui', 'PyQt5.QtCore', 'PyQt5.QtWidgets']
 napoleon_use_ivar = True
 
 mathjax_path = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js"
