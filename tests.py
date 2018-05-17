@@ -5,10 +5,10 @@ import sys
 import main
 import Forc
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.collections as mc
-
+# import matplotlib.pyplot as plt
+# import matplotlib.cm as cm
+# import matplotlib.collections as mc
+import altair as alt
 
 @pytest.mark.skip
 def test_gui():

@@ -3,6 +3,9 @@ import pathlib
 import errors
 import logging
 import abc
+import pandas as pd
+import scipy.interpolate as si
+import scipy.ndimage as sn
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +57,7 @@ class PMCForc(ForcBase):
         Path to PMC formatted data file.
     """
 
-    def __init__(self, input):
+    def __init__(self, input, step, method='nearest', drift=False, radius=4, density=3):
 
         super(PMCForc, self).__init__(input)
 
@@ -65,6 +68,9 @@ class PMCForc(ForcBase):
         self.drift_points = []    # Drift points
 
         self._from_file(input)
+        if drift:
+            self._drift_correction(radius=radius, density=density)
+        self._interpolate(step=step, method=method)
 
         return
 
@@ -241,3 +247,38 @@ class PMCForc(ForcBase):
             return self.h.shape
         else:
             raise ValueError("self.h has not been interpolated to numpy.ndarray! Type: {}".format(type(self.h)))
+
+    def _interpolate(self, step, method='nearest'):
+        _h, _hr = np.meshgrid(np.linspace(np.min(self.h), np.max(self.h), step),
+                              np.linspace(np.min(self.hr), np.max(self.hr), step))
+
+        data_xy = np.concatenate((np.ravel(self.h), np.ravel(self.hr)), axis=1)
+
+        _m = si.griddata(data_xy, np.ravel(self.m), (_h, _hr), method=method)
+        if self.T is not None:
+            self.T = si.griddata(data_xy, np.ravel(self.T), (_h, _hr), method=method)
+
+        self.h = _h
+        self.hr = _hr
+        self.m = _m
+
+        return
+
+    def _drift_correction(self, radius=4, density=3):
+
+        kernel_size = 2*radius+1
+        kernel = np.ones(kernel_size)/kernel_size
+
+        average_drift = np.mean(self.drift_points)
+        moving_average = sn.convolve(self.drift_points, kernel, mode='nearest')
+        interpolated_drift = si.interp1d(np.arange(start=0, stop=len(self.drift_points), step=density),
+                                         moving_average[::density],
+                                         kind='cubic')
+
+        for i in range(len(self.m)):
+            drift = (interpolated_drift(i) - average_drift)
+            self.drift_points[i] -= drift
+            for j in range(len(self.m[i])):
+                self.m[i][j] -= drift
+
+        return
