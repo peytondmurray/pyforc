@@ -71,6 +71,14 @@ class PMCForc(ForcBase):
         return
 
     def _from_file(self, path):
+        """Read a PMC-formatted file from path.
+
+        Parameters
+        ----------
+        path : str
+            Path to PMC-formatted csv file.
+        """
+
         file = pathlib.Path(path)
         log.info("Extracting data from file: {}".format(file))
 

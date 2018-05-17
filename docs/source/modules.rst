@@ -9,3 +9,4 @@ PyFORC
    errors
    main
    tests
+   util
