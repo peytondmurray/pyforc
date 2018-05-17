@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/peytondmurray/PyFORC.svg?branch=master)](https://travis-ci.org/peytondmurray/PyFORC)
+[![Documentation Status](https://readthedocs.org/projects/pyforc/badge/?version=latest)](http://pyforc.readthedocs.io/en/latest/?badge=latest)
+
 
 # PyFORC
 FORC analysis in Python.
