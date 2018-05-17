@@ -3,3 +3,4 @@ scipy
 matplotlib
 numba
 PyQt5
+pytest

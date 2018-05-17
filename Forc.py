@@ -41,8 +41,6 @@ class ForcBase(abc.ABC):
 
         return
 
-    np.ndarray
-
 
 class PMCForc(ForcBase):
     """FORC class for PMC-formatted data. See the PMC format spec for more info. Magnetization (and, if present,
@@ -69,6 +67,10 @@ class PMCForc(ForcBase):
         self._from_file(input)
 
         return
+
+    @classmethod
+    def from_file(cls, path):
+        return cls(path)
 
     def _from_file(self, path):
         """Read a PMC-formatted file from path.
@@ -146,13 +148,13 @@ class PMCForc(ForcBase):
             self._T = []
 
         if self._has_drift_points(lines):
-            while i < len(lines) and lines[i][0] == '\n':
+            while i < len(lines) and lines[i][0] in ['+', '-']:
                 self._extract_drift_point(lines[i])
                 i += 2
                 i += self._extract_next_forc(lines[i:])
                 i += 1
         else:
-            while i < len(lines) and lines[i][0] == '\n':
+            while i < len(lines) and lines[i][0]in ['+', '-']:
                 i += self._extract_next_forc(lines[i:])
                 self._extract_drift_point(lines[i-1:])
                 i += 1
@@ -232,3 +234,10 @@ class PMCForc(ForcBase):
 
         self.drift_points.append(float(line.split(sep=',')[-1]))
         return
+
+    @property
+    def shape(self):
+        if isinstance(self.h, np.ndarray):
+            return self.h.shape
+        else:
+            raise ValueError("self.h has not been interpolated to numpy.ndarray! Type: {}".format(type(self.h)))
