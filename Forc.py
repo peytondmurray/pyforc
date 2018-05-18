@@ -53,13 +53,13 @@ class PMCForc(ForcBase):
 
     Parameters
     ----------
-    input : str
+    path : str
         Path to PMC formatted data file.
     """
 
-    def __init__(self, input, step, method='nearest', drift=False, radius=4, density=3):
+    def __init__(self, path, step, method='nearest', drift=False, radius=4, density=3):
 
-        super(PMCForc, self).__init__(input)
+        super(PMCForc, self).__init__(None)
 
         self.h = []               # Field
         self.hr = []              # Reversal field
@@ -67,7 +67,18 @@ class PMCForc(ForcBase):
         self.T = None             # Temperature (if any)
         self.drift_points = []    # Drift points
 
-        self._from_file(input)
+        self._h_min = np.nan
+        self._h_max = np.nan
+        self._hr_min = np.nan
+        self._hr_max = np.nan
+        self._m_min = np.nan
+        self._m_max = np.nan
+        self._T_min = np.nan
+        self._T_max = np.nan
+
+        self._from_file(path)
+        self._update_data_limits()
+
         if drift:
             self._drift_correction(radius=radius, density=density)
         self._interpolate(step=step, method=method)
@@ -75,8 +86,8 @@ class PMCForc(ForcBase):
         return
 
     @classmethod
-    def from_file(cls, path):
-        return cls(path)
+    def from_file(cls, path, step, method='nearest', drift=False, radius=4, density=3):
+        return cls(path, step, method, drift, radius, density)
 
     def _from_file(self, path):
         """Read a PMC-formatted file from path.
@@ -249,14 +260,17 @@ class PMCForc(ForcBase):
             raise ValueError("self.h has not been interpolated to numpy.ndarray! Type: {}".format(type(self.h)))
 
     def _interpolate(self, step, method='nearest'):
-        _h, _hr = np.meshgrid(np.linspace(np.min(self.h), np.max(self.h), step),
-                              np.linspace(np.min(self.hr), np.max(self.hr), step))
 
-        data_xy = np.concatenate((np.ravel(self.h), np.ravel(self.hr)), axis=1)
+        _h, _hr = np.meshgrid(np.arange(self._h_min, self._h_max, step),
+                              np.arange(self._hr_min, self._hr_max, step))
 
-        _m = si.griddata(data_xy, np.ravel(self.m), (_h, _hr), method=method)
+        data_hhr = [[self.h[i][j], self.hr[i][j]] for i in range(len(self.h)) for j in range(len(self.h[i]))]
+        data_m = [self.m[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
+
+        _m = si.griddata(np.array(data_hhr), np.array(data_m), (_h, _hr), method=method)
         if self.T is not None:
-            self.T = si.griddata(data_xy, np.ravel(self.T), (_h, _hr), method=method)
+            data_T = [self.T[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
+            self.T = si.griddata(np.array(data_hhr), np.array(data_T), (_h, _hr), method=method)
 
         self.h = _h
         self.hr = _hr
@@ -282,3 +296,60 @@ class PMCForc(ForcBase):
                 self.m[i][j] -= drift
 
         return
+
+    def _update_data_limits(self):
+
+        if isinstance(self.h, list):
+            # numpy.ravel doesn't work properly on ragged lists. Need to manually flatten the lists.
+            _h = []
+            _hr = []
+            _m = []
+
+            for i in range(len(self.h)):
+                _h.extend(self.h[i])
+                _hr.extend(self.hr[i])
+                _m.extend(self.m[i])
+
+            _h = np.array(_h)
+            _hr = np.array(_hr)
+            _m = np.array(_m)
+
+            if self.T is not None:
+                _T = []
+                for i in range(len(self.h)):
+                    _T.extend(self.T[i])
+                _T = np.array(_T)
+
+        elif isinstance(self.h, np.ndarray):
+            _h = self.h
+            _hr = self.hr
+            _m = self.m
+            _T = self.T
+
+        else:
+            raise ValueError("Data is an unintended type: {}".format(type(self.h)))
+
+        self._h_min = np.nanmin(_h)
+        self._h_max = np.nanmax(_h)
+        self._hr_min = np.nanmin(_hr)
+        self._hr_max = np.nanmax(_hr)
+        self._m_min = np.nanmin(_m)
+        self._m_max = np.nanmax(_m)
+
+        if self.T is None or np.all(np.isnan(self.T)):
+            self._T_min = np.nan
+            self._T_max = np.nan
+        else:
+            self._T_min = np.nanmin(_T)
+            self._T_max = np.nanmax(_T)
+
+        return
+
+    def h_range(self):
+        return (self._h_min, self._h_max)
+
+    def hr_range(self):
+        return (self._hr_min, self._hr_max)
+
+    def m_range(self):
+        return (self._m_min, self._m_max)

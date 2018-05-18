@@ -8,7 +8,9 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # import matplotlib.cm as cm
 # import matplotlib.collections as mc
-import altair as alt
+import bokeh.plotting as bp
+import bokeh.models.mappers as bmm
+
 
 @pytest.mark.skip
 def test_gui():
@@ -25,24 +27,38 @@ def test_Forc():
 
 
 def test_PMCForc_import():
-    data = Forc.PMCForc('./test_data/test_forc')
-    n_forcs = len(data.h)
-    colors = [cm.viridis(x) for x in np.linspace(0.6, 0, n_forcs)]
+    data = Forc.PMCForc('./test_data/test_forc',
+                        step=35,
+                        drift=False)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    bp.output_file("test_fig.html")
+    # plot = bp.figure(title="FORCs",
+    #                  x_axis_label='H',
+    #                  y_axis_label='M')
 
-    lines = mc.LineCollection([list(zip(data.h[i], data.m[i])) for i in range(len(data.h))], colors=colors)
+    # for i in range(data.shape[0]):
+    #     plot.line(data.h[i], data.m[i], line_width=2)
 
-    ax.add_collection(lines)
-    ax.autoscale()
-    ax.margins(0.1)
-    # for i in range(n_forcs):
-    #     lines.append([data.h[i], data.m[i], {'linestyle': '-', 'color': colors[i]}])
+    # bp.show(plot)
 
-    # plt.plot(*lines)
+    plot = bp.figure(x_range=data.h_range(),
+                     y_range=data.hr_range(),
+                     toolbar_location=None)
 
-    plt.show()
+    color_mapper = bmm.LinearColorMapper(palette='Viridis256',
+                                         low=data.m_range()[0],
+                                         high=data.m_range()[1])
+
+    plot.image(image=[data.m],
+               color_mapper=color_mapper,
+               dh=[1],
+               dw=[1],
+               x=[0],
+               y=[0])
+
+    bp.show(plot)
+
+    return
 
 
 if __name__ == '__main__':
