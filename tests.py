@@ -10,6 +10,9 @@ import numpy as np
 # import matplotlib.collections as mc
 import bokeh.plotting as bp
 import bokeh.models.mappers as bmm
+import bokeh.sampledata.iris as bsi
+import bokeh.models as bm
+import colorcet as cc
 
 
 @pytest.mark.skip
@@ -20,41 +23,50 @@ def test_gui():
     return
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_Forc():
-    Forc.PMCForc('./test_data/test_forc')
+    Forc.PMCForc('./test_data/test_forc',
+                 step=35,
+                 drift=False)
     return
 
 
+@pytest.mark.skip
 def test_PMCForc_import():
     data = Forc.PMCForc('./test_data/test_forc',
                         step=35,
                         drift=False)
 
     bp.output_file("test_fig.html")
-    # plot = bp.figure(title="FORCs",
-    #                  x_axis_label='H',
-    #                  y_axis_label='M')
 
-    # for i in range(data.shape[0]):
-    #     plot.line(data.h[i], data.m[i], line_width=2)
+    hmin, hmax = data.h_range()
+    hrmin, hrmax = data.hr_range()
 
-    # bp.show(plot)
+    ratio = (hmax-hmin)/(hrmax-hrmin)
+
+    plot_size = 300
 
     plot = bp.figure(x_range=data.h_range(),
                      y_range=data.hr_range(),
-                     toolbar_location=None)
+                     match_aspect=True,
+                     sizing_mode='fixed',
+                     plot_width=int(plot_size*ratio),
+                     plot_height=plot_size)
 
-    color_mapper = bmm.LinearColorMapper(palette='Viridis256',
+    color_mapper = bmm.LinearColorMapper(palette=cc.coolwarm,
                                          low=data.m_range()[0],
-                                         high=data.m_range()[1])
+                                         high=data.m_range()[1],
+                                         nan_color='white')
 
-    plot.image(image=[data.m],
+    m = data.m
+    m[data.h < data.hr] = np.nan
+
+    plot.image(image=[m],
                color_mapper=color_mapper,
-               dh=[1],
-               dw=[1],
-               x=[0],
-               y=[0])
+               dh=-1*np.diff(data.hr_range()),
+               dw=-1*np.diff(data.h_range()),
+               x=data.h_range()[0],
+               y=data.hr_range()[0])
 
     bp.show(plot)
 
