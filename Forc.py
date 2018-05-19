@@ -65,6 +65,7 @@ class PMCForc(ForcBase):
         self.hr = []              # Reversal field
         self.m = []               # Moment
         self.T = None             # Temperature (if any)
+        self.rho = None           # FORC distribution.
         self.drift_points = []    # Drift points
 
         self._h_min = np.nan
@@ -272,6 +273,8 @@ class PMCForc(ForcBase):
             data_T = [self.T[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
             self.T = si.griddata(np.array(data_hhr), np.array(data_T), (_h, _hr), method=method)
 
+        _m[_h < _hr] = np.nan
+
         self.h = _h
         self.hr = _hr
         self.m = _m
@@ -353,3 +356,20 @@ class PMCForc(ForcBase):
 
     def m_range(self):
         return (self._m_min, self._m_max)
+
+    def _extend_dataset(self, sf, method):
+
+        return
+
+    def _compute_forc_sg(self, sf):
+
+        return
+
+    def compute_forc_distribution(self, sf=3, method='savitzky-golay', extension='flat'):
+
+        self._extend_dataset(sf=3, method=extension)
+
+        if method == 'savitzky-golay':
+            self._compute_forc_sg(sf=3)
+
+        return

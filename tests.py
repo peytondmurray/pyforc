@@ -58,10 +58,7 @@ def test_PMCForc_import():
                                          high=data.m_range()[1],
                                          nan_color='white')
 
-    m = data.m
-    m[data.h < data.hr] = np.nan
-
-    plot.image(image=[m],
+    plot.image(image=[data.m],
                color_mapper=color_mapper,
                dh=-1*np.diff(data.hr_range()),
                dw=-1*np.diff(data.h_range()),
