@@ -6,6 +6,7 @@ import abc
 # import pandas as pd
 import scipy.interpolate as si
 import scipy.ndimage as sn
+import extensionlib
 
 log = logging.getLogger(__name__)
 
@@ -357,26 +358,6 @@ class PMCForc(ForcBase):
     def m_range(self):
         return (self._m_min, self._m_max)
 
-    def _extend_flat(self, shape):
-        m_extend = np.ones(shape)
-        for i in range(m_extend.shape[0]):
-                for j in range(m_extend.shape[1]):
-                    m_extend[i, j] = self._get_first_non_nan(self.m[i, 0])
-        return
-
-    def _get_first_non_nan(self, arr):
-        for i in range(arr.shape[0]):
-            if not np.isnan(arr[i]):
-                return arr[i]
-
-        raise ValueError("Everything is nan!")
-
-    def _extend_slope(self, shape, n_fit_points):
-        m_extend = np.ones(shape)
-
-        raise NotImplementedError
-        return
-
     def _extend_dataset(self, sf, method):
 
         if method == 'truncate':
@@ -389,16 +370,16 @@ class PMCForc(ForcBase):
         self.hr = np.concatenate((hr_extend, self.hr), axis=1)
 
         if method == 'flat':
-            m_extend = self._extend_flat(h_extend.shape)
+            m_extend = self._extend_flat(h_extend, self.m)
         elif method == 'slope':
-            m_extend = self._extend_slope(h_extend.shape)
+            m_extend = self._extend_slope(h_extend, self.m)
         else:
             raise NotImplementedError
 
         self.m = np.concatenate((m_extend, self.m), axis=1)
 
         if self.T is not None:
-            self.T = np.concatenate((T_extend, self.T), axis=1)
+            self.T = np.concatenate((h_extend*np.nan, self.T), axis=1)
 
         self._update_data_limits()
 
@@ -416,3 +397,30 @@ class PMCForc(ForcBase):
             self._compute_forc_sg(sf=3)
 
         return
+
+    @classmethod
+    def _extend_flat(cls, h, m):
+        m_extend = np.empty(h.shape)
+        for i in range(m_extend.shape[0]):
+                for j in range(m_extend.shape[1]):
+                    m_extend[i, j] = cls._arg_first_not_nan(m[i])
+        return m_extend
+
+    @staticmethod
+    def _arg_first_not_nan(arr):
+        i = np.argwhere(np.logical_not(np.isnan(arr)))
+        if i.shape[0] == 0:
+            raise ValueError("Array is only filled with nan values")
+        else:
+            return i[0][0]
+
+    @classmethod
+    def _extend_slope(cls, h, m, n_fit_points=10):
+        m_extend = np.empty(h.shape)
+        for i in range(m_extend.shape[0]):
+
+            j = cls._arg_first_not_nan(m[i])
+            line = si.interp1d(h[i, j:j+n_fit_points], h[i, j:j+n_fit_points], kind='linear')
+            m_extend[i] = np.array(map(line, h[i]))
+
+        return m_extend
