@@ -357,7 +357,50 @@ class PMCForc(ForcBase):
     def m_range(self):
         return (self._m_min, self._m_max)
 
+    def _extend_flat(self, shape):
+        m_extend = np.ones(shape)
+        for i in range(m_extend.shape[0]):
+                for j in range(m_extend.shape[1]):
+                    m_extend[i, j] = self._get_first_non_nan(self.m[i, 0])
+        return
+
+    def _get_first_non_nan(self, arr):
+        for i in range(arr.shape[0]):
+            if not np.isnan(arr[i]):
+                return arr[i]
+
+        raise ValueError("Everything is nan!")
+
+    def _extend_slope(self, shape, n_fit_points):
+        m_extend = np.ones(shape)
+
+        raise NotImplementedError
+        return
+
     def _extend_dataset(self, sf, method):
+
+        if method == 'truncate':
+            return
+
+        h_extend, hr_extend = np.meshgrid(np.linspace(self._h_min - 2*sf, self._h_min, 2*sf),
+                                          np.linspace(self._hr_min, self._hr_max, self.shape[0]))
+
+        self.h = np.concatenate((h_extend, self.h), axis=1)
+        self.hr = np.concatenate((hr_extend, self.hr), axis=1)
+
+        if method == 'flat':
+            m_extend = self._extend_flat(h_extend.shape)
+        elif method == 'slope':
+            m_extend = self._extend_slope(h_extend.shape)
+        else:
+            raise NotImplementedError
+
+        self.m = np.concatenate((m_extend, self.m), axis=1)
+
+        if self.T is not None:
+            self.T = np.concatenate((T_extend, self.T), axis=1)
+
+        self._update_data_limits()
 
         return
 
