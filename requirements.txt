@@ -4,5 +4,3 @@ matplotlib
 numba
 PyQt5
 pytest
-bokeh
-colorcet

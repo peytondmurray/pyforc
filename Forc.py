@@ -6,7 +6,7 @@ import abc
 # import pandas as pd
 import scipy.interpolate as si
 import scipy.ndimage as sn
-import extensionlib
+import scipy.optimize as so
 
 log = logging.getLogger(__name__)
 
@@ -78,12 +78,14 @@ class PMCForc(ForcBase):
         self._T_min = np.nan
         self._T_max = np.nan
 
+        self.step = step
+
         self._from_file(path)
-        self._update_data_limits()
+        self._update_data_range()
 
         if drift:
             self._drift_correction(radius=radius, density=density)
-        self._interpolate(step=step, method=method)
+        self._interpolate(method=method)
 
         return
 
@@ -261,10 +263,10 @@ class PMCForc(ForcBase):
         else:
             raise ValueError("self.h has not been interpolated to numpy.ndarray! Type: {}".format(type(self.h)))
 
-    def _interpolate(self, step, method='nearest'):
+    def _interpolate(self, method='nearest'):
 
-        _h, _hr = np.meshgrid(np.arange(self._h_min, self._h_max, step),
-                              np.arange(self._hr_min, self._hr_max, step))
+        _h, _hr = np.meshgrid(np.arange(self._h_min, self._h_max, self.step),
+                              np.arange(self._hr_min, self._hr_max, self.step))
 
         data_hhr = [[self.h[i][j], self.hr[i][j]] for i in range(len(self.h)) for j in range(len(self.h[i]))]
         data_m = [self.m[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
@@ -301,8 +303,7 @@ class PMCForc(ForcBase):
 
         return
 
-    def _update_data_limits(self):
-
+    def _update_data_range(self):
         if isinstance(self.h, list):
             # numpy.ravel doesn't work properly on ragged lists. Need to manually flatten the lists.
             _h = []
@@ -358,30 +359,33 @@ class PMCForc(ForcBase):
     def m_range(self):
         return (self._m_min, self._m_max)
 
+    @property
+    def extent(self):
+        return (self._h_min, self._h_max, self._hr_min, self._hr_max)
+
     def _extend_dataset(self, sf, method):
 
         if method == 'truncate':
             return
 
-        h_extend, hr_extend = np.meshgrid(np.linspace(self._h_min - 2*sf, self._h_min, 2*sf),
-                                          np.linspace(self._hr_min, self._hr_max, self.shape[0]))
+        h_extend, hr_extend = np.meshgrid(np.arange(self._h_min - 2*sf*self.step, self._h_min, self.step),
+                                          np.arange(self._hr_min, self._hr_max, self.step))
 
         self.h = np.concatenate((h_extend, self.h), axis=1)
         self.hr = np.concatenate((hr_extend, self.hr), axis=1)
+        self.m = np.concatenate((h_extend*np.nan, self.m), axis=1)
 
         if method == 'flat':
-            m_extend = self._extend_flat(h_extend, self.m)
+            self._extend_flat(self.h, self.m)
         elif method == 'slope':
-            m_extend = self._extend_slope(h_extend, self.m)
+            self._extend_slope(self.h, self.m)
         else:
             raise NotImplementedError
-
-        self.m = np.concatenate((m_extend, self.m), axis=1)
 
         if self.T is not None:
             self.T = np.concatenate((h_extend*np.nan, self.T), axis=1)
 
-        self._update_data_limits()
+        self._update_data_range()
 
         return
 
@@ -400,11 +404,10 @@ class PMCForc(ForcBase):
 
     @classmethod
     def _extend_flat(cls, h, m):
-        m_extend = np.empty(h.shape)
-        for i in range(m_extend.shape[0]):
-                for j in range(m_extend.shape[1]):
-                    m_extend[i, j] = cls._arg_first_not_nan(m[i])
-        return m_extend
+        for i in range(m.shape[0]):
+            first_data_index = cls._arg_first_not_nan(m[i])
+            m[i, 0:first_data_index] = m[i, first_data_index]
+        return
 
     @staticmethod
     def _arg_first_not_nan(arr):
@@ -416,11 +419,40 @@ class PMCForc(ForcBase):
 
     @classmethod
     def _extend_slope(cls, h, m, n_fit_points=10):
-        m_extend = np.empty(h.shape)
-        for i in range(m_extend.shape[0]):
+        print('fitting')
+
+        def line(x, a, b):
+            return a*x + b
+
+        for i in range(m.shape[0]):
 
             j = cls._arg_first_not_nan(m[i])
-            line = si.interp1d(h[i, j:j+n_fit_points], h[i, j:j+n_fit_points], kind='linear')
-            m_extend[i] = np.array(map(line, h[i]))
+            popt, _ = so.curve_fit(line, h[i, j:j+n_fit_points], m[i, j:j+n_fit_points])
+            m[i, 0:j] = line(h[i, 0:j], *popt)
 
-        return m_extend
+        return
+
+    def major_loop(self):
+        h = np.empty(2*self.shape[1])
+        m = np.empty(2*self.shape[1])
+
+        # The descending curve is just the (reversal points, concatenated with the uppermost reversal curve) reversed.
+        bad_h = self.h[self.shape[0]-1].copy()
+        _h = self.h[self.shape[0]-1].copy()
+        _m = self.m[self.shape[0]-1].copy()
+        for i in range(self.shape[0]):
+            _h[i] = self.hr[i, 0]
+            _m[i] = self.m[i, self.h[i] >= self.hr[i, 0]][0]
+
+            # print(_h[i], bad_h[i])
+
+        # print(np.equal(_h, self.h[0]))
+
+        h[:self.shape[1]] = np.flip(bad_h, axis=0)
+        m[:self.shape[1]] = np.flip(_m, axis=0)
+
+        # Ascending curve is just the lowermost hysteresis curve
+        m[self.shape[1]:] = self.m[0]
+        h[self.shape[1]:] = self.h[0]
+
+        return h, m

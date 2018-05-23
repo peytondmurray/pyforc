@@ -5,14 +5,11 @@ import sys
 import main
 import Forc
 import numpy as np
-# import matplotlib.pyplot as plt
-# import matplotlib.cm as cm
-# import matplotlib.collections as mc
-import bokeh.plotting as bp
-import bokeh.models.mappers as bmm
-import bokeh.sampledata.iris as bsi
-import bokeh.models as bm
-import colorcet as cc
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.collections as mc
+import plotter
+
 
 
 @pytest.mark.skip
@@ -34,41 +31,24 @@ def test_Forc():
 @pytest.mark.skip
 def test_PMCForc_import():
     data = Forc.PMCForc('./test_data/test_forc',
-                        step=35,
+                        step=100,
                         drift=False)
 
-    bp.output_file("test_fig.html")
+    data._extend_dataset(sf=3, method='flat')
 
-    hmin, hmax = data.h_range()
-    hrmin, hrmax = data.hr_range()
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    axes[0].imshow(data.m,
+                   extent=data.extent,
+                   cmap='RdBu_r',
+                   origin='lower')
 
-    ratio = (hmax-hmin)/(hrmax-hrmin)
+    axes[0].plot(data.hr_range(), data.hr_range(), '-k')
+    plotter.h_vs_m(axes[1], data, mask='outline', points='reversal')
+    plotter.h_hr_points(axes[0], data)
 
-    plot_size = 300
-
-    plot = bp.figure(x_range=data.h_range(),
-                     y_range=data.hr_range(),
-                     match_aspect=True,
-                     sizing_mode='fixed',
-                     plot_width=int(plot_size*ratio),
-                     plot_height=plot_size)
-
-    color_mapper = bmm.LinearColorMapper(palette=cc.coolwarm,
-                                         low=data.m_range()[0],
-                                         high=data.m_range()[1],
-                                         nan_color='white')
-
-    plot.image(image=[data.m],
-               color_mapper=color_mapper,
-               dh=-1*np.diff(data.hr_range()),
-               dw=-1*np.diff(data.h_range()),
-               x=data.h_range()[0],
-               y=data.hr_range()[0])
-
-    bp.show(plot)
+    plt.show()
 
     return
-
 
 if __name__ == '__main__':
     # test_gui()
