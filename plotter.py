@@ -24,8 +24,8 @@ def h_vs_m(ax, forc, mask='outline', points='none', cmap='viridis'):
                                   color=colors[i]))
 
         if mask == 'outline':
-            h, m = forc.major_loop()
-            ax.plot(h, m, ':', color='k', alpha=1.0)
+            h, hr, m = forc.major_loop()
+            ax.plot(h, m, ':', color='r', linewidth=2, alpha=1.0)
 
     if points == 'reversal':
         hr = forc.hr[:, 0]
@@ -39,6 +39,12 @@ def h_vs_m(ax, forc, mask='outline', points='none', cmap='viridis'):
     ax.set(xlabel=r"$H$",
            ylabel=r"$H_r$")
 
+    return
+
+
+def hhr_space_h_vs_m(ax, forc):
+    h, hr, m = forc.major_loop()
+    ax.plot(h, hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3)
     return
 
 

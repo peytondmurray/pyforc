@@ -44,7 +44,8 @@ def test_PMCForc_import():
 
     axes[0].plot(data.hr_range(), data.hr_range(), '-k')
     plotter.h_vs_m(axes[1], data, mask='outline', points='reversal')
-    plotter.h_hr_points(axes[0], data)
+    # plotter.h_hr_points(axes[0], data)
+    plotter.hhr_space_h_vs_m(axes[0], data)
 
     plt.show()
 

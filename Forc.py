@@ -433,26 +433,26 @@ class PMCForc(ForcBase):
         return
 
     def major_loop(self):
-        h = np.empty(2*self.shape[1])
-        m = np.empty(2*self.shape[1])
-
-        # The descending curve is just the (reversal points, concatenated with the uppermost reversal curve) reversed.
-        bad_h = self.h[self.shape[0]-1].copy()
-        _h = self.h[self.shape[0]-1].copy()
-        _m = self.m[self.shape[0]-1].copy()
+        upper_curve = self.shape[0]-1
+        upper_curve_length = np.sum(self.h[upper_curve] >= self.hr[upper_curve, 0])
+        h = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
+        hr = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
+        m = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
+        
+        for i in range(upper_curve_length-1):
+            pt_index = self.shape[1]-1-i
+            h[i] = self.h[upper_curve, pt_index]
+            hr[i] = self.hr[upper_curve, pt_index]
+            m[i] = self.m[upper_curve, pt_index]
         for i in range(self.shape[0]):
-            _h[i] = self.hr[i, 0]
-            _m[i] = self.m[i, self.h[i] >= self.hr[i, 0]][0]
+            forc_index = self.shape[0]-1-i
+            major_loop_index = upper_curve_length-1+i
+            h[major_loop_index] = self.hr[forc_index, 0]
+            hr[major_loop_index] = self.hr[forc_index, 0]
+            m[major_loop_index] = self.m[forc_index, self.h[forc_index] >= self.hr[forc_index, 0]][0]
 
-            # print(_h[i], bad_h[i])
+        h[self.shape[0]+upper_curve_length-2:] = self.h[0, self.h[0] >= self.hr[0, 0]]
+        hr[self.shape[0]+upper_curve_length-2:] = self.hr[0, self.h[0] >= self.hr[0, 0]]
+        m[self.shape[0]+upper_curve_length-2:] = self.m[0, self.h[0] >= self.hr[0, 0]]
 
-        # print(np.equal(_h, self.h[0]))
-
-        h[:self.shape[1]] = np.flip(bad_h, axis=0)
-        m[:self.shape[1]] = np.flip(_m, axis=0)
-
-        # Ascending curve is just the lowermost hysteresis curve
-        m[self.shape[1]:] = self.m[0]
-        h[self.shape[1]:] = self.h[0]
-
-        return h, m
+        return h, hr, m
