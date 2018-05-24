@@ -51,3 +51,24 @@ def hhr_space_h_vs_m(ax, forc):
 def h_hr_points(ax, forc):
     ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
     return
+
+
+def rho_hhr(ax, forc, cmap='RdBu_r'):
+    ax.imshow(forc.rho,
+              extent=forc.extent,
+              cmap=cmap,
+              origin='lower')
+
+    return
+
+
+def m_hhr(ax, forc, cmap='RdBu_r'):
+    ax.imshow(forc.m,
+              extent=forc.extent,
+              cmap=cmap,
+              origin='lower')
+    return
+
+
+def hhr_line(ax, forc):
+    ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')

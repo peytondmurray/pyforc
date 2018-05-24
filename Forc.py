@@ -391,7 +391,25 @@ class PMCForc(ForcBase):
 
     def _compute_forc_sg(self, sf):
 
+        kernel = self._sg_kernel(sf, self.step, self.step)
+        self.rho = sn.convolve(self.m, kernel, mode='constant', cval=np.nan, origin=(sf, sf))
+
         return
+
+    @staticmethod
+    def _sg_kernel(sf, step_x, step_y):
+
+        xx, yy = np.meshgrid(np.linspace(sf*step_x, -sf*step_x, 2*sf+1),
+                             np.linspace(sf*step_y, -sf*step_y, 2*sf+1))
+
+        xx = np.reshape(xx, (-1, 1))
+        yy = np.reshape(yy, (-1, 1))
+
+        coefficients = np.linalg.pinv(np.hstack((np.ones_like(xx), xx, xx**2, yy, yy**2, xx*yy)))
+
+        kernel = np.reshape(coefficients[5, :], (2*sf+1, 2*sf+1))
+
+        return kernel
 
     def compute_forc_distribution(self, sf=3, method='savitzky-golay', extension='flat'):
 
@@ -399,6 +417,8 @@ class PMCForc(ForcBase):
 
         if method == 'savitzky-golay':
             self._compute_forc_sg(sf=3)
+        else:
+            raise NotImplementedError("method {} not implemented for FORC distribution calculation".format(method))
 
         return
 
@@ -433,12 +453,22 @@ class PMCForc(ForcBase):
         return
 
     def major_loop(self):
+        """Construct a major loop from the FORC data. Takes all of the uppermost curve, and appends the reversal points
+        from each curve to create the descending hysteresis curve. Uses the lowermost curve as the ascending
+        hysteresis curve.
+
+        Returns
+        -------
+        tuple of arrays
+            h-values, hr-values, m-values as 1D arrays.
+        """
+
         upper_curve = self.shape[0]-1
         upper_curve_length = np.sum(self.h[upper_curve] >= self.hr[upper_curve, 0])
         h = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
         hr = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
         m = np.empty(2*(self.shape[0]+upper_curve_length-1)-1)*0
-        
+
         for i in range(upper_curve_length-1):
             pt_index = self.shape[1]-1-i
             h[i] = self.h[upper_curve, pt_index]

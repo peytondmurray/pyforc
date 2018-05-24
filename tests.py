@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.collections as mc
-import plotter
+import plotting
 
 
 
@@ -20,7 +20,7 @@ def test_gui():
     return
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_Forc():
     Forc.PMCForc('./test_data/test_forc',
                  step=35,
@@ -29,7 +29,7 @@ def test_Forc():
 
 
 @pytest.mark.skip
-def test_PMCForc_import():
+def PMCForc_import_and_plot():
     data = Forc.PMCForc('./test_data/test_forc',
                         step=100,
                         drift=False)
@@ -37,20 +37,34 @@ def test_PMCForc_import():
     data._extend_dataset(sf=3, method='flat')
 
     fig, axes = plt.subplots(nrows=1, ncols=2)
-    axes[0].imshow(data.m,
-                   extent=data.extent,
-                   cmap='RdBu_r',
-                   origin='lower')
-
-    axes[0].plot(data.hr_range(), data.hr_range(), '-k')
-    plotter.h_vs_m(axes[1], data, mask='outline', points='reversal')
-    # plotter.h_hr_points(axes[0], data)
-    plotter.hhr_space_h_vs_m(axes[0], data)
+    plotting.m_hhr(axes[0], data)
+    plotting.hhr_line(axes[0], data)
+    plotting.h_vs_m(axes[1], data, mask='outline', points='reversal')
+    plotting.hhr_space_h_vs_m(axes[0], data)
 
     plt.show()
 
     return
 
+
+@pytest.mark.skip
+def PMCForc_calculate_sg_FORC():
+    data = Forc.PMCForc('./test_data/test_forc',
+                        step=50,
+                        drift=False)
+
+    data.compute_forc_distribution(sf=3, method='savitzky-golay', extension='flat')
+
+    fig, axes = plt.subplots(nrows=2, ncols=1)
+    plotting.m_hhr(axes[0], data)
+    plotting.rho_hhr(axes[1], data)
+
+    plt.show()
+    return
+
+
+
 if __name__ == '__main__':
     # test_gui()
-    test_PMCForc_import()
+    # test_PMCForc_import()
+    PMCForc_calculate_sg_FORC()
