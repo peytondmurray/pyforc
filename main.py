@@ -7,14 +7,15 @@ import logging
 import PyQt5
 import PyFORCGUI
 
-log = logging.getLogger(__name__)
+# log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
 
 
 def parse_arguments():
     parser = generate_parser()
     args = vars(parser.parse_args())
 
-    log.info('mode = {}'.format(args['mode']))
+    logging.info('mode = {}'.format(args['mode']))
 
     if args['mode'] == 'gui':
         start_gui()

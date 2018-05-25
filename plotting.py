@@ -53,20 +53,36 @@ def h_hr_points(ax, forc):
     return
 
 
-def rho_hhr(ax, forc, cmap='RdBu_r'):
-    ax.imshow(forc.rho,
+def rho_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
+
+    if mask:
+        rho = forc.rho.copy()
+        rho[forc.h <= forc.hr] = np.nan
+    else:
+        rho = forc.rho
+
+    ax.imshow(rho,
               extent=forc.extent,
               cmap=cmap,
-              origin='lower')
+              origin='lower',
+              interpolation=interpolation)
 
     return
 
 
-def m_hhr(ax, forc, cmap='RdBu_r'):
-    ax.imshow(forc.m,
+def m_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
+
+    if mask:
+        m = forc.m.copy()
+        m[forc.h <= forc.hr] = np.nan
+    else:
+        m = forc.m
+
+    ax.imshow(m,
               extent=forc.extent,
               cmap=cmap,
-              origin='lower')
+              origin='lower',
+              interpolation=interpolation)
     return
 
 

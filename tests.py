@@ -9,7 +9,12 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.collections as mc
 import plotting
+import logging
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
+# console_handler = logging.StreamHandler()
+# console_handler.setFormatter(formatter)
+# log.addHandler(console_handler)
 
 
 @pytest.mark.skip
@@ -49,9 +54,8 @@ def PMCForc_import_and_plot():
 
 @pytest.mark.skip
 def PMCForc_calculate_sg_FORC():
-    data = Forc.PMCForc('./test_data/test_forc',
-                        step=50,
-                        drift=False)
+    logging.info("Calculating savitzky-golay!")
+    data = Forc.PMCForc('./test_data/test_forc', drift=False)
 
     data.compute_forc_distribution(sf=3, method='savitzky-golay', extension='flat')
 

@@ -59,7 +59,7 @@ class PMCForc(ForcBase):
         Path to PMC formatted data file.
     """
 
-    def __init__(self, path, step, method='nearest', drift=False, radius=4, density=3):
+    def __init__(self, path, step=None, method='nearest', drift=False, radius=4, density=3):
 
         super(PMCForc, self).__init__(None)
 
@@ -79,13 +79,17 @@ class PMCForc(ForcBase):
         self._T_min = np.nan
         self._T_max = np.nan
 
-        self.step = step
-
         self._from_file(path)
         self._update_data_range()
 
         if drift:
             self._drift_correction(radius=radius, density=density)
+
+        if step is None:
+            self.step = self._determine_step()
+        else:
+            self.step = step
+
         self._interpolate(method=method)
 
         return
@@ -264,8 +268,27 @@ class PMCForc(ForcBase):
         else:
             raise ValueError("self.h has not been interpolated to numpy.ndarray! Type: {}".format(type(self.h)))
 
-    def _interpolate(self, method='nearest'):
+    def _determine_step(self):
+        """Calculate the field step size. Only works along the h-direction, since that's where most of the points live
+        in hhr space. Takes the mean of the field steps along each reversal curve, then takes the mean of those means
+        as the field step size.
 
+        #TODO could this be better? make a histogram and do a fit?
+
+        Returns
+        -------
+        float
+            Field step size.
+        """
+
+        step_sizes = np.empty(len(self.h))
+
+        for i in range(step_sizes.shape[0]):
+            step_sizes[i] = np.mean(np.diff(self.h[i], n=1))
+
+        return np.mean(step_sizes)
+
+    def _interpolate(self, method='nearest'):
         _h, _hr = np.meshgrid(np.arange(self._h_min, self._h_max, self.step),
                               np.arange(self._hr_min, self._hr_max, self.step))
 
@@ -412,6 +435,8 @@ class PMCForc(ForcBase):
         return kernel
 
     def compute_forc_distribution(self, sf=3, method='savitzky-golay', extension='flat'):
+
+        log.debug("Computing FORC distribution: sf={}, method={}, extension={}".format(sf, method, extension))
 
         self._extend_dataset(sf=3, method=extension)
 
