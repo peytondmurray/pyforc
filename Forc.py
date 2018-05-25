@@ -5,8 +5,9 @@ import logging
 import abc
 # import pandas as pd
 import scipy.interpolate as si
-import scipy.ndimage as sn
+import scipy.ndimage.filters as snf
 import scipy.optimize as so
+import util
 
 log = logging.getLogger(__name__)
 
@@ -290,7 +291,7 @@ class PMCForc(ForcBase):
         kernel = np.ones(kernel_size)/kernel_size
 
         average_drift = np.mean(self.drift_points)
-        moving_average = sn.convolve(self.drift_points, kernel, mode='nearest')
+        moving_average = snf.convolve(self.drift_points, kernel, mode='nearest')
         interpolated_drift = si.interp1d(np.arange(start=0, stop=len(self.drift_points), step=density),
                                          moving_average[::density],
                                          kind='cubic')
@@ -389,12 +390,11 @@ class PMCForc(ForcBase):
 
         return
 
-    def _compute_forc_sg(self, sf):
-
-        kernel = self._sg_kernel(sf, self.step, self.step)
-        self.rho = sn.convolve(self.m, kernel, mode='constant', cval=np.nan, origin=(sf, sf))
-
-        return
+    @classmethod
+    def _compute_forc_sg(cls, m, sf, step_x, step_y):
+        kernel = cls._sg_kernel(sf, step_x, step_y)
+        # return snf.convolve(m, kernel, mode='constant', cval=np.nan)
+        return util.fast_symmetric_convolve(m, kernel)
 
     @staticmethod
     def _sg_kernel(sf, step_x, step_y):
@@ -416,7 +416,7 @@ class PMCForc(ForcBase):
         self._extend_dataset(sf=3, method=extension)
 
         if method == 'savitzky-golay':
-            self._compute_forc_sg(sf=3)
+            self.rho = self._compute_forc_sg(self.m, sf=3, step_x=self.step, step_y=self.step)
         else:
             raise NotImplementedError("method {} not implemented for FORC distribution calculation".format(method))
 
