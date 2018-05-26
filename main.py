@@ -7,7 +7,6 @@ import logging
 import PyQt5
 import PyFORCGUI
 
-# log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
 
 
