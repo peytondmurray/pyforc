@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1091</width>
+    <width>651</width>
     <height>909</height>
    </rect>
   </property>
@@ -15,45 +15,25 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Log</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QListWidget" name="d_log">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="d_progress">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <item row="1" column="2">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>609</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="b_undo">
+      <property name="text">
+       <string>Undo</string>
+      </property>
+     </widget>
     </item>
     <item row="0" column="3" rowspan="2">
      <layout class="QGridLayout" name="gridLayout_4">
@@ -510,26 +490,6 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="b_undo">
-      <property name="text">
-       <string>Undo</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>609</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="0" column="1" colspan="2">
      <widget class="QTabWidget" name="t_tabs">
       <property name="currentIndex">
@@ -562,7 +522,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
            <item row="0" column="0" colspan="2">
-            <widget class="QCheckBox" name="checkBox_2">
+            <widget class="QCheckBox" name="f_drift">
              <property name="text">
               <string>Drift Correction</string>
              </property>
@@ -577,7 +537,7 @@
               <string>Density:</string>
              </property>
              <property name="buddy">
-              <cstring>spinBox_5</cstring>
+              <cstring>f_drift_density</cstring>
              </property>
             </widget>
            </item>
@@ -587,7 +547,7 @@
               <string>Kernel size:</string>
              </property>
              <property name="buddy">
-              <cstring>spinBox_6</cstring>
+              <cstring>f_drift_kernel</cstring>
              </property>
             </widget>
            </item>
@@ -597,7 +557,7 @@
               <string>Interpolation:</string>
              </property>
              <property name="buddy">
-              <cstring>comboBox_2</cstring>
+              <cstring>f_dataset_interpolation_type</cstring>
              </property>
             </widget>
            </item>
@@ -609,7 +569,7 @@
             </widget>
            </item>
            <item row="4" column="1" colspan="2">
-            <widget class="QCheckBox" name="checkBox_3">
+            <widget class="QCheckBox" name="f_step_auto">
              <property name="text">
               <string>Auto</string>
              </property>
@@ -619,7 +579,7 @@
             </widget>
            </item>
            <item row="4" column="3">
-            <widget class="QLineEdit" name="lineEdit">
+            <widget class="QLineEdit" name="f_step_manual">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -629,7 +589,7 @@
             </widget>
            </item>
            <item row="3" column="3">
-            <widget class="QComboBox" name="comboBox_2">
+            <widget class="QComboBox" name="f_dataset_interpolation_type">
              <item>
               <property name="text">
                <string>nearest</string>
@@ -648,7 +608,7 @@
             </widget>
            </item>
            <item row="2" column="3">
-            <widget class="QSpinBox" name="spinBox_6">
+            <widget class="QSpinBox" name="f_drift_kernel">
              <property name="buttonSymbols">
               <enum>QAbstractSpinBox::NoButtons</enum>
              </property>
@@ -661,7 +621,7 @@
             </widget>
            </item>
            <item row="1" column="3">
-            <widget class="QSpinBox" name="spinBox_5">
+            <widget class="QSpinBox" name="f_drift_density">
              <property name="buttonSymbols">
               <enum>QAbstractSpinBox::NoButtons</enum>
              </property>
@@ -710,12 +670,12 @@
               <string>Curve to fit:</string>
              </property>
              <property name="buddy">
-              <cstring>spinBox</cstring>
+              <cstring>f_slope_curve_to_fit</cstring>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
-            <widget class="QSpinBox" name="spinBox">
+            <widget class="QSpinBox" name="f_slope_curve_to_fit">
              <property name="buttonSymbols">
               <enum>QAbstractSpinBox::NoButtons</enum>
              </property>
@@ -730,12 +690,12 @@
               <string>Fraction of curve to fit:</string>
              </property>
              <property name="buddy">
-              <cstring>spinBox_2</cstring>
+              <cstring>f_slope_fraction_of_curve</cstring>
              </property>
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QSpinBox" name="spinBox_2">
+            <widget class="QSpinBox" name="f_slope_fraction_of_curve">
              <property name="buttonSymbols">
               <enum>QAbstractSpinBox::NoButtons</enum>
              </property>
@@ -748,7 +708,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="f_auto_slope">
              <property name="text">
               <string>Auto</string>
              </property>
@@ -783,7 +743,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBox_3">
+            <widget class="QSpinBox" name="f_smoothing_factor">
              <property name="buttonSymbols">
               <enum>QAbstractSpinBox::NoButtons</enum>
              </property>
@@ -809,7 +769,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="f_extension_type">
              <item>
               <property name="text">
                <string>flat</string>
@@ -838,7 +798,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="spinBox_4">
+            <widget class="QSpinBox" name="f_extension_n_fit_points">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -978,6 +938,46 @@
       </widget>
      </widget>
     </item>
+    <item row="0" column="0" rowspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Log</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="d_log">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="d_progress">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -985,7 +985,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1091</width>
+     <width>651</width>
      <height>21</height>
     </rect>
    </property>
@@ -993,13 +993,12 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionLoad"/>
-    <addaction name="actionAdvanced_Settings"/>
+    <addaction name="a_load"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="d_status"/>
-  <action name="actionLoad">
+  <action name="a_load">
    <property name="text">
     <string>Load...</string>
    </property>
@@ -1013,7 +1012,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>checkBox</sender>
+   <sender>f_auto_slope</sender>
    <signal>clicked(bool)</signal>
    <receiver>f_linear_subtraction_slope</receiver>
    <slot>setDisabled(bool)</slot>
@@ -1029,9 +1028,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>checkBox_3</sender>
+   <sender>f_step_auto</sender>
    <signal>clicked(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>f_step_manual</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
