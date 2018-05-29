@@ -1,5 +1,7 @@
 from PyQt5 import QtWidgets
 import PyFORCGUIBase
+import multiprocessing as mp
+import worker
 
 
 class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
@@ -8,6 +10,11 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
         self._setup_buttons()
+
+        self.jobs = mp.Queue()
+        self.worker = worker.Worker(self, self.jobs)
+        self.worker.job_done.connect(self.update)
+
         return
 
     def _setup_buttons(self):
@@ -54,6 +61,14 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
     def _setup_widget_triggers(self):
 
         self.f_extension_type.currentTextChanged.connect(self._update_extension_widgets)
+        return
+
+    def _add_queue_item(self, job, label):
+        """Puts a job into the jobs queue, and adds a corresponding item with loading icon to the jobs display widget.
+        """
+        self.d_jobs.addItem(QtWidgets.QListWidgetItem(icon=QtWidgets.QIcon('plz_wait.png'),
+                                                      text=label))
+        self.jobs.put(job)
         return
 
     def import_file(self):
@@ -135,4 +150,12 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         return
 
     def undo(self):
+        return
+
+    def update(self):
+        """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
+
+
+        """
+
         return

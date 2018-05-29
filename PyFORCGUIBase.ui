@@ -951,7 +951,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="d_log">
+       <widget class="QListWidget" name="d_jobs">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
           <horstretch>0</horstretch>
