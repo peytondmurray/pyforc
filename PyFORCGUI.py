@@ -15,7 +15,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         self.jobs = mp.Queue()
         self.worker = worker.Worker(self, self.jobs)
         self.worker.job_done.connect(self.update_status)
-        print("Done with init")
         self.worker.start()
         return
 
@@ -159,6 +158,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
 
         """
 
-        print("Updating!")
+        1 == 1
+        # print("Updating!")
 
         return

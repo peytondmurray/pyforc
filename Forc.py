@@ -8,6 +8,7 @@ import scipy.interpolate as si
 import scipy.ndimage.filters as snf
 import scipy.optimize as so
 import util
+import numba as nb
 
 log = logging.getLogger(__name__)
 
