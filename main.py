@@ -7,7 +7,7 @@ import logging
 import PyQt5
 import PyFORCGUI
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
 
 
 def parse_arguments():
@@ -67,13 +67,16 @@ def run():
 
 
 def start_gui():
+    print("Starting GUI")
     app = PyQt5.QtWidgets.QApplication(sys.argv)
     win = PyFORCGUI.PyFORCGUI()
     win.setWindowTitle("PyFORC")
     win.show()
     sys.exit(app.exec_())
+    print("Done?")
     return
 
 
 if __name__ == '__main__':
-    parse_arguments()
+    # parse_arguments()
+    start_gui()

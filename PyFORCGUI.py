@@ -9,12 +9,14 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
-        self._setup_buttons()
+
+        # self._setup_buttons()
 
         self.jobs = mp.Queue()
         self.worker = worker.Worker(self, self.jobs)
-        self.worker.job_done.connect(self.update)
-
+        self.worker.job_done.connect(self.update_status)
+        print("Done with init")
+        self.worker.start()
         return
 
     def _setup_buttons(self):
@@ -152,10 +154,11 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
     def undo(self):
         return
 
-    def update(self):
+    def update_status(self):
         """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
 
-
         """
+
+        print("Updating!")
 
         return
