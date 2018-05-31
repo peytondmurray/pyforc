@@ -2,7 +2,7 @@ import numpy as np
 import numba as nb
 
 
-@nb.jit(nb.float64[:, :](nb.float64[:, :], nb.float64[:, :]), nopython=True)
+@nb.jit(nb.float64[:, :](nb.float64[:, :], nb.float64[:, :]), nopython=True, nogil=True)
 def fast_symmetric_convolve(input, kernel):
     result = np.empty_like(input, dtype=np.float64)*np.nan
     sf_y, sf_x = (kernel.shape[0]-1)//2, (kernel.shape[1]-1)//2

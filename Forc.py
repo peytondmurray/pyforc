@@ -9,6 +9,7 @@ import scipy.ndimage.filters as snf
 import scipy.optimize as so
 import util
 import numba as nb
+import pickle
 
 log = logging.getLogger(__name__)
 
@@ -512,3 +513,15 @@ class PMCForc(ForcBase):
         m[self.shape[0]+upper_curve_length-2:] = self.m[0, self.h[0] >= self.hr[0, 0]]
 
         return h, hr, m
+
+
+class ForcError(Exception):
+    pass
+
+
+class IOError(ForcError):
+    pass
+
+
+class DataFormatError(ForcError):
+    pass

@@ -1,25 +1,39 @@
-from multiprocessing import Process
-from PyQt5 import QtCore, QtWidgets, QtGui
+# from multiprocessing import Process
+from PyQt5 import QtCore, QtWidgets, QtGui, QThread
 
 
-class Worker(Process, QtCore.QObject):
+# class Worker(QtCore.QObject, Process):
 
-    job_done = QtCore.pyqtSignal()
+#     job_done = QtCore.pyqtSignal()
 
-    def __init__(self, parent_gui, job_queue):
-        QtCore.QObject.__init__(self)
-        Process.__init__(self)
+#     def __init__(self, parent_gui, input_queue):
+#         QtCore.QObject.__init__(self)
+#         Process.__init__(self)
 
-        self.job_queue = job_queue
-        self.parent_gui = parent_gui
+#         self.input_queue = input_queue
+#         return
 
+#     def run(self):
+#         while True:
+#             job = self.input_queue.get()
+#             if job == 'CLOSE':
+#                 break
+#             else:
+#                 job[0](*job[1])
+#                 self.job_done.emit()
+
+
+class Worker():
+
+    def __init__(self, input_queue):
+        self.input_queue = input_queue
         return
 
-    def run(self):
+    def get_tasks(self):
         while True:
-            job = self.job_queue.get()
-            if job == 'CLOSE':
+            task = self.input_queue.get()
+            if task == "DONE":
                 break
             else:
-                job[0](*job[1])
-                self.job_done.emit()
+                task[0](*task[1], **task[2])
+        return

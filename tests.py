@@ -10,6 +10,7 @@ import matplotlib.cm as cm
 import matplotlib.collections as mc
 import plotting
 import logging
+import pickle
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s | %(filename)s:%(lineno)d | %(levelname)s: %(message)s')
 # console_handler = logging.StreamHandler()
@@ -64,6 +65,15 @@ def PMCForc_calculate_sg_FORC():
     plotting.rho_hhr(axes[1], data)
 
     plt.show()
+    return
+
+
+@pytest.mark.skip
+def pickle_test():
+    data = Forc.PMCForc('./test_data/test_forc', drift=False)
+    with open('testpickle', 'wb') as f:
+        pickle.dump(data, f)
+    print('Pickle success!')
     return
 
 
