@@ -43,7 +43,7 @@ def h_vs_m(ax, forc, mask='outline', points='none', cmap='viridis'):
 
 
 def hhr_space_h_vs_m(ax, forc):
-    h, hr, m = forc.major_loop()
+    h, hr, _ = forc.major_loop()
     ax.plot(h, hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3)
     return
 

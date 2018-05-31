@@ -1,6 +1,5 @@
 import numpy as np
 import pathlib
-import errors
 import logging
 import abc
 # import pandas as pd
@@ -213,7 +212,7 @@ class PMCForc(ForcBase):
             if lines[i][0] in ['+', '-']:
                 return i
 
-        raise errors.DataFormatError("No data found in file. Check data format spec.")
+        raise DataFormatError("No data found in file. Check data format spec.")
 
     def _extract_next_forc(self, lines):
         """Extract the next curve from the data.

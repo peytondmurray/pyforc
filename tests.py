@@ -42,7 +42,7 @@ def PMCForc_import_and_plot():
 
     data._extend_dataset(sf=3, method='flat')
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
+    _, axes = plt.subplots(nrows=1, ncols=2)
     plotting.m_hhr(axes[0], data)
     plotting.hhr_line(axes[0], data)
     plotting.h_vs_m(axes[1], data, mask='outline', points='reversal')
@@ -60,7 +60,7 @@ def PMCForc_calculate_sg_FORC():
 
     data.compute_forc_distribution(sf=3, method='savitzky-golay', extension='flat')
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
+    _, axes = plt.subplots(nrows=2, ncols=1)
     plotting.m_hhr(axes[0], data)
     plotting.rho_hhr(axes[1], data)
 
