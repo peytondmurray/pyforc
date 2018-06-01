@@ -6,12 +6,16 @@ import numpy as np
 
 def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
 
+    mask = mask.lower()
+    points = points.lower()
+    cmap = cmap.lower()
+
     cmap = cm.get_cmap(cmap)
     colors = [cmap(x) for x in np.linspace(0, 0.4, forc.shape[0])]
 
     if points in ['none', 'reversal']:
 
-        if mask.lower() == 'h>hr':
+        if mask.lower() == 'h<hr':
             for i in range(forc.shape[0]):
                 h = forc.h[i]
                 m = forc.m[i]
