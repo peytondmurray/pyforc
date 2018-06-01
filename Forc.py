@@ -111,12 +111,15 @@ class PMCForc(ForcBase):
         file = pathlib.Path(path)
         log.info("Extracting data from file: {}".format(file))
 
-        try:
-            with open(file, 'r') as f:
-                lines = f.readlines()
-        except ...:
-            print("Error opening specified data file: {}".format(file))
-            raise
+        # try:
+        #     with open(file, 'r') as f:
+        #         lines = f.readlines()
+        # except ...:
+        #     print("Error opening specified data file: {}".format(file))
+        #     raise
+
+        with open(file, 'r') as f:
+            lines = f.readlines()
 
         self._extract_raw_data(lines)
 
@@ -316,11 +319,21 @@ class PMCForc(ForcBase):
 
         average_drift = np.mean(self.drift_points)
         moving_average = snf.convolve(self.drift_points, kernel, mode='nearest')
-        interpolated_drift = si.interp1d(np.arange(start=0, stop=len(self.drift_points), step=density),
-                                         moving_average[::density],
-                                         kind='cubic')
+        interpolated_drift_indices = np.arange(start=0, stop=len(self.drift_points), step=1)
 
-        for i in range(len(self.m)):
+        if len(self.drift_points) % density == 0:
+            interpolated_drift = si.interp1d(np.arange(start=0, stop=len(self.drift_points), step=density),
+                                             moving_average[::density],
+                                             kind='cubic')
+        else:
+            interpolated_drift = si.interp1d(np.hstack((np.arange(start=0, stop=len(self.drift_points), step=density),
+                                                        len(self.drift_points)-1)),
+                                             np.hstack((moving_average[::density],
+                                                        np.array(moving_average[-1]))),
+                                             kind='cubic')
+
+
+        for i in interpolated_drift_indices:
             drift = (interpolated_drift(i) - average_drift)
             self.drift_points[i] -= drift
             for j in range(len(self.m[i])):

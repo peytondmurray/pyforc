@@ -1,5 +1,4 @@
 import pathlib
-import errors
 import argparse
 import logging
 import sys

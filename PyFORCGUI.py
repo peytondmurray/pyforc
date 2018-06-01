@@ -2,6 +2,18 @@ from PyQt5 import QtWidgets
 import PyFORCGUIBase
 import multiprocessing as mp
 import worker
+import plotting
+import Forc
+import logging
+import pathlib
+
+# REMOVE LATER
+import matplotlib
+matplotlib.use('Qt5Agg')
+import matplotlib.pyplot as plt
+#
+
+log = logging.getLogger(__name__)
 
 
 class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
@@ -10,11 +22,15 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
 
-        # self._setup_buttons()
+        self._setup_buttons()
 
-        self.jobs = mp.Queue()
-        self.worker = worker.Worker(self, self.jobs)
-        self.worker.job_done.connect(self.update_status)
+        self._data = []
+
+        log.info("Starting worker thread.")
+        self.queued_jobs = mp.Queue()
+        self.finished_jobs = mp.Queue()
+        self.worker = worker.WorkerThread(input_queue=self.queued_jobs, output_queue=self.finished_jobs, parent=self)
+        self.worker.finished.connect(self.update_status)
         self.worker.start()
         return
 
@@ -60,7 +76,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         return
 
     def _setup_widget_triggers(self):
-
         self.f_extension_type.currentTextChanged.connect(self._update_extension_widgets)
         return
 
@@ -73,6 +88,17 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         return
 
     def import_file(self):
+        path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a data file:', './test_data/')[0]
+        if pathlib.Path(path).is_file():
+            self._data.append(Forc.PMCForc(path=path,
+                                           step=None if self.f_step_auto.isChecked() else self.f_step_manual.value(),
+                                           method=self.f_dataset_interpolation_type.currentText(),
+                                           drift=self.f_drift.isChecked(),
+                                           radius=self.f_drift_radius.value(),
+                                           density=self.f_drift_density.value()))
+            self.append_job(text='Imported: {}'.format(path))
+        else:
+            self.statusBar().showMessage('No file found: {}'.format(path))
         return
 
     def slope(self):
@@ -91,6 +117,12 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         return
 
     def plot_paths(self):
+        _, ax = plt.subplots(1, 1)
+        plotting.h_vs_m(ax=ax,
+                        forc=self._data[-1],
+                        mask=self.f_paths_mask.currentText(),
+                        points=self.f_paths_points.currentText(),
+                        cmap=self.f_paths_cmap.text())
         return
 
     def plot_major_loop(self):
@@ -115,6 +147,11 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         return
 
     def plot_heat_moment(self):
+        _, ax = plt.subplots(1, 1)
+        plotting.m_hhr(ax=ax,
+                       forc=self._data[-1],
+                       mask=self.f_2d_mask.currentText(),
+                       cmap=self.f_2d_cmap.text())
         return
 
     def plot_heat_rho(self):
@@ -157,8 +194,13 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
         """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
 
         """
+        result = self.finished_jobs.get()
+        return
 
-        1 == 1
-        # print("Updating!")
-
+    def append_job(self, text, icon=None):
+        item = QtWidgets.QListWidgetItem(text)
+        item.setToolTip(text)
+        if icon is not None:
+            item.setIcon(icon)
+        self.d_jobs.addItem(item)
         return

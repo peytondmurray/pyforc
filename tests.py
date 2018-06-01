@@ -45,7 +45,7 @@ def PMCForc_import_and_plot():
     _, axes = plt.subplots(nrows=1, ncols=2)
     plotting.m_hhr(axes[0], data)
     plotting.hhr_line(axes[0], data)
-    plotting.h_vs_m(axes[1], data, mask='outline', points='reversal')
+    plotting.h_vs_m(axes[1], data, mask='h>hr', points='reversal')
     plotting.hhr_space_h_vs_m(axes[0], data)
 
     plt.show()

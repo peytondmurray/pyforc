@@ -4,40 +4,48 @@ import matplotlib.collections as mc
 import numpy as np
 
 
-def h_vs_m(ax, forc, mask='outline', points='none', cmap='viridis'):
+def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
 
-    colors = [cm.get_cmap('viridis')(x) for x in np.linspace(0, 0.4, forc.shape[0])]
+    cmap = cm.get_cmap(cmap)
+    colors = [cmap(x) for x in np.linspace(0, 0.4, forc.shape[0])]
 
-    if mask is True:
-        for i in range(forc.shape[0]):
-            h = forc.h[i]
-            m = forc.m[i]
-            ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]],
-                                  ydata=m[h >= forc.hr[i, 0]],
-                                  color=colors[i]))
+    if points in ['none', 'reversal']:
+
+        if mask.lower() == 'h>hr':
+            for i in range(forc.shape[0]):
+                h = forc.h[i]
+                m = forc.m[i]
+                ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]],
+                                      ydata=m[h >= forc.hr[i, 0]],
+                                      color=colors[i]))
+        elif mask in ['outline', 'none']:
+            for i in range(forc.shape[0]):
+                h = forc.h[i]
+                m = forc.m[i]
+                ax.add_line(ml.Line2D(xdata=h,
+                                      ydata=m,
+                                      color=colors[i]))
+
+            if mask == 'outline':
+                h, hr, m = forc.major_loop()
+                ax.plot(h, m, ':', color='r', linewidth=2, alpha=1.0)
+        else:
+            raise ValueError('Invalid mask argument: {}'.format(mask))
+
+        if points == 'reversal':
+            hr = forc.hr[:, 0]
+            m = np.zeros_like(forc.hr[:, 0])
+            for i in range(forc.shape[0]):
+                m[i] = forc.m[i, forc.h[i] >= forc.hr[i, 0]][0]
+
+            ax.plot(hr, m, marker='o', linestyle='', color='grey', markersize=4)
+
+        elif points == 'all':
+            ax.plot(forc.h, forc.m, marker='o', linestyle='', color='grey', markersize=4)
+
+        ax.autoscale_view()
     else:
-        for i in range(forc.shape[0]):
-            h = forc.h[i]
-            m = forc.m[i]
-            ax.add_line(ml.Line2D(xdata=h,
-                                  ydata=m,
-                                  color=colors[i]))
-
-        if mask == 'outline':
-            h, hr, m = forc.major_loop()
-            ax.plot(h, m, ':', color='r', linewidth=2, alpha=1.0)
-
-    if points == 'reversal':
-        hr = forc.hr[:, 0]
-        m = np.zeros_like(forc.hr[:, 0])
-        for i in range(forc.shape[0]):
-            m[i] = forc.m[i, forc.h[i] >= forc.hr[i, 0]][0]
-
-        ax.plot(hr, m, marker='o', linestyle='', color='grey', markersize=4)
-
-    ax.autoscale_view()
-    ax.set(xlabel=r"$H$",
-           ylabel=r"$H_r$")
+        raise ValueError('Invalid points argument: {}'.format(points))
 
     return
 
@@ -88,3 +96,31 @@ def m_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
 
 def hhr_line(ax, forc):
     ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')
+    return
+
+
+def decorate_hm(ax, xlabel=r'$H$', ylabel=r'$M$', xlim=None, ylim=None, legend=False, legend_args=None):
+    ax.set(xlabel=xlabel,
+           ylabel=ylabel,
+           xlim=xlim,
+           ylim=ylim)
+
+    if legend is not False:
+        ax.legend(legend_args or None)
+    return
+
+
+def decorate_hhr(ax, xlabel=r'$H$', ylabel=r'$H_r$', xlim=None, ylim=None):
+    ax.set(xlabel=xlabel,
+           ylabel=ylabel,
+           xlim=xlim,
+           ylim=ylim)
+    return
+
+
+def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
+    ax.set(xlabel=xlabel,
+           ylabel=ylabel,
+           xlim=xlim,
+           ylim=ylim)
+    return
