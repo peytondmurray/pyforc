@@ -493,7 +493,7 @@
     <item row="0" column="1" colspan="2">
      <widget class="QTabWidget" name="t_tabs">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>true</bool>
