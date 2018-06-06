@@ -68,7 +68,7 @@ def run():
 def start_gui():
     print("Starting GUI")
     app = PyQt5.QtWidgets.QApplication(sys.argv)
-    win = PyFORCGUI.PyFORCGUI()
+    win = PyFORCGUI.PyFORCGUI(app)
     win.setWindowTitle("PyFORC")
     win.show()
     sys.exit(app.exec_())

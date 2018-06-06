@@ -511,6 +511,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.d_jobs.sizePolicy().hasHeightForWidth())
         self.d_jobs.setSizePolicy(sizePolicy)
+        self.d_jobs.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.d_jobs.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
         self.d_jobs.setObjectName("d_jobs")
         self.verticalLayout.addWidget(self.d_jobs)
         self.d_progress = QtWidgets.QProgressBar(self.centralwidget)
@@ -546,7 +548,7 @@ class Ui_MainWindow(object):
         self.label_4.setBuddy(self.f_slope_fraction_of_curve)
 
         self.retranslateUi(MainWindow)
-        self.t_tabs.setCurrentIndex(0)
+        self.t_tabs.setCurrentIndex(1)
         self.f_auto_slope.clicked['bool'].connect(self.f_linear_subtraction_slope.setDisabled)
         self.f_step_auto.clicked['bool'].connect(self.f_step_manual.setDisabled)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)

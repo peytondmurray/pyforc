@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import PyFORCGUIBase
 import multiprocessing as mp
 import worker
@@ -13,25 +13,38 @@ matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 #
 
+# Icons:
+# https://icons8.com/icon/11849/checkmark
+# https://icons8.com/icon/set/hourglass/windows
+
 log = logging.getLogger(__name__)
 
 
-class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
+# Example of aboutToQuit siganl for stopping QThread: https://gist.github.com/metalman/10721983
 
-    def __init__(self):
+class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
+
+    def __init__(self, app):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
-
         self._setup_buttons()
 
         self._data = []
+        self.current_job = 0
 
         log.info("Starting worker thread.")
         self.queued_jobs = mp.Queue()
         self.finished_jobs = mp.Queue()
         self.worker = worker.WorkerThread(input_queue=self.queued_jobs, output_queue=self.finished_jobs, parent=self)
+        app.aboutToQuit.connect(self.worker.stop)
         self.worker.finished.connect(self.update_status)
         self.worker.start()
+
+        return
+
+    def closeEvent(self, event):
+        self.worker.stop()
+        event.accept()
         return
 
     def _setup_buttons(self):
@@ -197,12 +210,15 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow, object):
 
         """
         result = self.finished_jobs.get()
+        if isinstance(result, Forc.ForcBase):
+            self._data.append(result)
+        self.d_jobs.itemAt(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
+        self.current_job += 1
         return
 
-    def append_job(self, text, icon=None):
+    def append_job(self, text):
         item = QtWidgets.QListWidgetItem(text)
         item.setToolTip(text)
-        if icon is not None:
-            item.setIcon(icon)
+        item.setIcon(QtGui.QIcon('./hourglass.png'))
         self.d_jobs.addItem(item)
         return
