@@ -117,6 +117,15 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def slope(self):
+
+        # h_sat = self.f_slope_h_sat.text()
+        # value = self.f_slope.value()
+        # self.append_job(job=[self._data[-1].slope_correction,
+        #                      list(),
+        #                      {'h_sat': None if self.f_slope_h_sat.text() float(self.f_slope_h_sat.text())}])
+
+        if
+
         return
 
     def normalize(self):

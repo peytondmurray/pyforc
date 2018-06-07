@@ -14,3 +14,9 @@ def fast_symmetric_convolve(input, kernel):
                     result[i, j] += input[i+m, j+n]*kernel[m+sf_y, n+sf_x]
 
     return result
+
+
+# @nb.jit(nb.float64(nb.float64, nb.float64, nb.float64), nopython=True, nogil=True)
+@nb.jit(nopython=True, nogil=True)
+def line(x, a, b):
+    return a*x+b

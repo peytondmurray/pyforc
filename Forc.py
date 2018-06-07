@@ -60,16 +60,10 @@ class PMCForc(ForcBase):
         Path to PMC formatted data file.
     """
 
-    def __init__(self, path, step=None, method='nearest', drift=False, radius=4, density=3):
+    def __init__(self, path=None, step=None, method='nearest', drift=False, radius=4, density=3,
+                 h=None, hr=None, m=None, T=None, rho=None):
 
         super(PMCForc, self).__init__(None)
-
-        self.h = []               # Field
-        self.hr = []              # Reversal field
-        self.m = []               # Moment
-        self.T = None             # Temperature (if any)
-        self.rho = None           # FORC distribution.
-        self.drift_points = []    # Drift points
 
         self._h_min = np.nan
         self._h_max = np.nan
@@ -80,24 +74,62 @@ class PMCForc(ForcBase):
         self._T_min = np.nan
         self._T_max = np.nan
 
-        self._from_file(path)
-        self._update_data_range()
+        if all([item is not None for item in (h, hr, m)]):
+            self.h = None             # Field
+            self.hr = None            # Reversal field
+            self.m = None             # Moment
+            self.T = None             # Temperature (if any)
+            self.rho = None           # FORC distribution.
+            self._from_input_arrays(h, hr, m, T, rho)
 
-        if drift:
-            self._drift_correction(radius=radius, density=density)
+        elif path is not None:
+            self.h = []               # Field
+            self.hr = []              # Reversal field
+            self.m = []               # Moment
+            self.T = None             # Temperature (if any)
+            self.rho = None           # FORC distribution.
+            self.drift_points = []    # Drift points
 
-        if step is None:
-            self.step = self._determine_step()
+            self._from_file(path)
+            self._update_data_range()
+
+            if drift:
+                self._drift_correction(radius=radius, density=density)
+
+            if step is None:
+                self.step = self._determine_step()
+            else:
+                self.step = step
+
+            self._interpolate(method=method)
+
         else:
-            self.step = step
-
-        self._interpolate(method=method)
+            raise IOError('PMCForc can only be specified from valid path or from numpy arrays!')
 
         return
 
-    @classmethod
-    def from_file(cls, path, step, method='nearest', drift=False, radius=4, density=3):
-        return cls(path, step, method, drift, radius, density)
+    def _from_input_arrays(self, h, hr, m, T, rho):
+        if all([isinstance(item, np.ndarray) for item in (h, hr, m)]):
+            self.h = h
+            self.hr = hr
+            self.m = m
+
+            if isinstance(T, np.ndarray):
+                self.T = T
+            elif T is not None:
+                raise IOError('Invalid input type for T: {}'.format(type(T)))
+
+            if isinstance(rho, np.ndarray):
+                self.rho = rho
+            elif rho is not None:
+                raise IOError('Invalid input type for rho: {}'.format(type(rho)))
+
+            self._update_data_range()
+
+        else:
+            raise IOError('Invalid input type for h, hr, or m arrays.')
+
+        return
 
     def _from_file(self, path):
         """Read a PMC-formatted file from path.
@@ -480,14 +512,11 @@ class PMCForc(ForcBase):
     def _extend_slope(cls, h, m, n_fit_points=10):
         print('fitting')
 
-        def line(x, a, b):
-            return a*x + b
-
         for i in range(m.shape[0]):
 
             j = cls._arg_first_not_nan(m[i])
-            popt, _ = so.curve_fit(line, h[i, j:j+n_fit_points], m[i, j:j+n_fit_points])
-            m[i, 0:j] = line(h[i, 0:j], *popt)
+            popt, _ = so.curve_fit(util.line, h[i, j:j+n_fit_points], m[i, j:j+n_fit_points])
+            m[i, 0:j] = util.line(h[i, 0:j], *popt)
 
         return
 
@@ -525,6 +554,23 @@ class PMCForc(ForcBase):
         m[self.shape[0]+upper_curve_length-2:] = self.m[0, self.h[0] >= self.hr[0, 0]]
 
         return h, hr, m
+
+    def slope_correction(self, h_sat=None, value=None):
+
+        if value is None:
+            if h_sat is None:
+                popt, _ = so.curve_fit(util.line, self.h[self.shape[0]-1], self.m[self.shape[0]-1])
+                value = popt[0]
+
+            else:
+                index_h_sat = np.argwhere(self.h[0] > h_sat)[0][0]
+                h_gt_h_sat = self.h[0, index_h_sat:]
+                m_gt_h_sat = self.m[:, index_h_sat:]
+                average_m = np.nansum(m_gt_h_sat, axis=0)/np.nansum(np.logical_not(np.isnan(m_gt_h_sat)), axis=0)
+                popt, _ = so.curve_fit(util.line, h_gt_h_sat, average_m)
+                value = popt[0]
+
+        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h))
 
 
 class ForcError(Exception):
