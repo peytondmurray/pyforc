@@ -11,11 +11,15 @@ class WorkerThread(QtCore.QThread):
         self.output_queue = output_queue
         return
 
-    def get_tasks(self):
+    def compute(self):
+        function, args, kwargs = self.input_queue.get()
+        self.output_queue.put(function(*args, **kwargs))
+        return
+
+    def run(self):
         self.running = True
         while self.running:
-            function, args, kwargs = self.input_queue.get()
-            self.output_queue.put(function(*args, **kwargs))
+            self.compute()
             self.finished.emit()
         return
 

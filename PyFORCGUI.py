@@ -103,13 +103,15 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
     def import_file(self):
         path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a data file:', './test_data/')[0]
         if pathlib.Path(path).is_file():
-            self._data.append(Forc.PMCForc(path=path,
-                                           step=None if self.f_step_auto.isChecked() else self.f_step_manual.value(),
-                                           method=self.f_dataset_interpolation_type.currentText(),
-                                           drift=self.f_drift.isChecked(),
-                                           radius=self.f_drift_radius.value(),
-                                           density=self.f_drift_density.value()))
-            self.append_job(text='Imported: {}'.format(path))
+            self.append_job(job=[Forc.PMCForc,
+                                 list(),
+                                 {'path': path,
+                                  'step': None if self.f_step_auto.isChecked() else self.f_step_manual.value(),
+                                  'method': self.f_dataset_interpolation_type.currentText(),
+                                  'drift': self.f_drift.isChecked(),
+                                  'radius': self.f_drift_radius.value(),
+                                  'density': self.f_drift_density.value()}],
+                            text='Imported: {}'.format(path))
         else:
             self.statusBar().showMessage('No file found: {}'.format(path))
         return
@@ -212,11 +214,12 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         result = self.finished_jobs.get()
         if isinstance(result, Forc.ForcBase):
             self._data.append(result)
-        self.d_jobs.itemAt(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
+        self.d_jobs.item(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
         self.current_job += 1
         return
 
-    def append_job(self, text):
+    def append_job(self, job, text):
+        self.queued_jobs.put(job)
         item = QtWidgets.QListWidgetItem(text)
         item.setToolTip(text)
         item.setIcon(QtGui.QIcon('./hourglass.png'))
