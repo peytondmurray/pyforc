@@ -118,13 +118,41 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
 
     def slope(self):
 
-        # h_sat = self.f_slope_h_sat.text()
-        # value = self.f_slope.value()
-        # self.append_job(job=[self._data[-1].slope_correction,
-        #                      list(),
-        #                      {'h_sat': None if self.f_slope_h_sat.text() float(self.f_slope_h_sat.text())}])
+        # TODO: Fix QMessageBox calls. They expect icons, I think.
 
-        if
+        if not self.f_auto_slope.isChecked():
+            try:
+                value = float(self.f_slope.text())
+            except ValueError:
+                QtWidgets.QMessageBox.Critical(self,
+                                               'Warning',
+                                               'Manual slope correction value must be a float!')
+                return
+
+            job = [self._data[-1].slope_correction, list(), {'value': value}]
+            text = 'Slope correction: manual'
+
+        else:
+            if self.f_slope_h_sat.text() == '':
+                job = [self._data[-1].slope_correction, list(), dict()]
+                text = 'Slope correction: auto'
+
+            else:
+                try:
+                    h_sat = float(self.f_slope_h_sat.text())
+                except ValueError:
+                    QtWidgets.QMessageBox.Critical(self,
+                                                   'Warning',
+                                                   'h_sat must be blank or float: {}'.format(self.f_slope_h_sat.text()))
+                    return
+
+                h_sat = self.f_slope_h_sat.text()
+                job = [self._data[-1].slope_correction,
+                       list(),
+                       {'h_sat': None if self.f_slope_h_sat.text() else float(self.f_slope_h_sat.text())}]
+                text = 'Slope correction: h_sat = {}'.format(h_sat)
+
+        self.append_job(job=job, text=text)
 
         return
 

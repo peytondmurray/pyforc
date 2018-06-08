@@ -496,17 +496,9 @@ class PMCForc(ForcBase):
     @classmethod
     def _extend_flat(cls, h, m):
         for i in range(m.shape[0]):
-            first_data_index = cls._arg_first_not_nan(m[i])
+            first_data_index = util.arg_first_not_nan(m[i])
             m[i, 0:first_data_index] = m[i, first_data_index]
         return
-
-    @staticmethod
-    def _arg_first_not_nan(arr):
-        i = np.argwhere(np.logical_not(np.isnan(arr)))
-        if i.shape[0] == 0:
-            raise ValueError("Array is only filled with nan values")
-        else:
-            return i[0][0]
 
     @classmethod
     def _extend_slope(cls, h, m, n_fit_points=10):
@@ -514,7 +506,7 @@ class PMCForc(ForcBase):
 
         for i in range(m.shape[0]):
 
-            j = cls._arg_first_not_nan(m[i])
+            j = util.arg_first_not_nan(m[i])
             popt, _ = so.curve_fit(util.line, h[i, j:j+n_fit_points], m[i, j:j+n_fit_points])
             m[i, 0:j] = util.line(h[i, 0:j], *popt)
 
@@ -559,7 +551,13 @@ class PMCForc(ForcBase):
 
         if value is None:
             if h_sat is None:
-                popt, _ = so.curve_fit(util.line, self.h[self.shape[0]-1], self.m[self.shape[0]-1])
+
+                first_non_nan = util.arg_first_not_nan(self.m[self.shape[0]-1])
+                last_non_nan = util.arg_last_non_nan(self.m[self.shape[0]-1])
+
+                popt, _ = so.curve_fit(util.line,
+                                       self.h[self.shape[0]-1, first_non_nan:last_non_nan],
+                                       self.m[self.shape[0]-1, first_non_nan:last_non_nan])
                 value = popt[0]
 
             else:
