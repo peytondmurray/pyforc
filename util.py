@@ -28,7 +28,6 @@ def line(x, a, b):
 # @nb.jit(nopython=True, nogil=True)
 def arg_first_not_nan(arr):
     i = np.argwhere(np.logical_not(np.isnan(arr)))
-    print(type(i))
     if i.shape[0] == 0:
         raise ValueError("Array is only filled with nan values")
     else:

@@ -614,6 +614,7 @@ class Ui_MainWindow(object):
         self.f_2d_mask.setItemText(1, _translate("MainWindow", "none"))
         self.f_2d_mask.setItemText(2, _translate("MainWindow", "outline"))
         self.label_16.setText(_translate("MainWindow", "Colormap:"))
+        self.f_2d_cmap.setText(_translate("MainWindow", "RdBu_r"))
         self.groupBox_10.setTitle(_translate("MainWindow", "FORC Paths"))
         self.label_15.setText(_translate("MainWindow", "Mask:"))
         self.f_paths_mask.setItemText(0, _translate("MainWindow", "H<Hr"))

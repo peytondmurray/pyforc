@@ -175,7 +175,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                         mask=self.f_paths_mask.currentText(),
                         points=self.f_paths_points.currentText(),
                         cmap=self.f_paths_cmap.currentText())
-        plt.show()
+        plt.show(block=False)
         return
 
     def plot_major_loop(self):
@@ -205,7 +205,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                        forc=self._data[-1],
                        mask=self.f_2d_mask.currentText(),
                        cmap=self.f_2d_cmap.text())
-        plt.show()
+        plt.show(block=False)
         return
 
     def plot_heat_rho(self):
