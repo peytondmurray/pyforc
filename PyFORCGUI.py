@@ -33,6 +33,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self._data = []
         self.current_job = 0
 
+        # Set up thread which does work for the GUI behind the scenes
         log.info("Starting worker thread.")
         self.queued_jobs = mp.Queue()
         self.finished_jobs = mp.Queue()
@@ -41,6 +42,22 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.worker.finished.connect(self.update_status)
         self.worker.start()
 
+        # Set up plots
+        self.p_paths = MplWidget.MplWidget(self, toolbar_loc='bottom')
+        self.l_paths.addWidget(self.p_paths)
+        self.p_map = MplWidget.MplWidget(self, toolbar_loc='bottom')
+        self.l_map.addWidget(self.p_map)
+        self.p_map_in_paths = MplWidget.MplWidget(self, toolbar_loc='bottom')
+        self.l_map_in_paths.addWidget(self.p_map_in_paths)
+
+        self._initialize_plots()
+
+        return
+
+    def _initialize_plots(self):
+        self.p_paths.axes.plot(list(), list(), '')
+        self.p_map.axes.plot(list(), list(), '')
+        self.p_map_in_paths.axes.plot(list(), list(), '')
         return
 
     def closeEvent(self, event):
@@ -118,9 +135,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def slope(self):
-
-        # TODO: Fix QMessageBox calls. They expect icons, I think.
-
         if not self.f_auto_slope.isChecked():
             try:
                 value = float(self.f_slope.text())
@@ -170,16 +184,17 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_paths(self):
-        _, ax = plt.subplots(1, 1)
-        plotting.h_vs_m(ax=ax,
+        plotting.h_vs_m(ax=self.p_paths.axes,
                         forc=self._data[-1],
                         mask=self.f_paths_mask.currentText(),
                         points=self.f_paths_points.currentText(),
                         cmap=self.f_paths_cmap.currentText())
-        plt.show(block=False)
         return
 
     def plot_major_loop(self):
+        plotting.major_loop(ax=self.p_paths.axes,
+                            forc=self._data[-1],
+                            color='k')
         return
 
     def plot_data_points(self):
@@ -201,12 +216,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_moment(self):
-        _, ax = plt.subplots(1, 1)
-        plotting.m_hhr(ax=ax,
+        plotting.m_hhr(ax=self.p_map.axes,
                        forc=self._data[-1],
                        mask=self.f_2d_mask.currentText(),
                        cmap=self.f_2d_cmap.text())
-        plt.show(block=False)
         return
 
     def plot_heat_rho(self):

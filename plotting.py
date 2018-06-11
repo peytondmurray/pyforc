@@ -50,18 +50,27 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
         ax.autoscale_view()
     else:
         raise ValueError('Invalid points argument: {}'.format(points))
+    ax.figure.canvas.draw()
+    return
 
+
+def major_loop(ax, forc, color='k'):
+    h, _, m = forc.major_loop()
+    ax.plot(h, m, linestyle='-', color=color, marker='o')
+    ax.figure.canvas.draw()
     return
 
 
 def hhr_space_h_vs_m(ax, forc):
     h, hr, _ = forc.major_loop()
     ax.plot(h, hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3)
+    ax.figure.canvas.draw()
     return
 
 
 def h_hr_points(ax, forc):
     ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
+    ax.figure.canvas.draw()
     return
 
 
@@ -78,7 +87,7 @@ def rho_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
               cmap=cmap,
               origin='lower',
               interpolation=interpolation)
-
+    ax.figure.canvas.draw()
     return
 
 
@@ -95,11 +104,14 @@ def m_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
               cmap=cmap,
               origin='lower',
               interpolation=interpolation)
+
+    ax.figure.canvas.draw()
     return
 
 
 def hhr_line(ax, forc):
     ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')
+    ax.draw(ax.get_figure().canvas.renderer)
     return
 
 
@@ -111,6 +123,8 @@ def decorate_hm(ax, xlabel=r'$H$', ylabel=r'$M$', xlim=None, ylim=None, legend=F
 
     if legend is not False:
         ax.legend(legend_args or None)
+
+    ax.figure.canvas.draw()
     return
 
 
@@ -119,6 +133,7 @@ def decorate_hhr(ax, xlabel=r'$H$', ylabel=r'$H_r$', xlim=None, ylim=None):
            ylabel=ylabel,
            xlim=xlim,
            ylim=ylim)
+    ax.figure.canvas.draw()
     return
 
 
@@ -127,4 +142,5 @@ def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
            ylabel=ylabel,
            xlim=xlim,
            ylim=ylim)
+    ax.figure.canvas.draw()
     return
