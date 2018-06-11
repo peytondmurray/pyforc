@@ -4,13 +4,14 @@ import multiprocessing as mp
 import worker
 import plotting
 import Forc
+import MplWidget
 import logging
 import pathlib
 
 # REMOVE LATER
-import matplotlib
-matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
+# import matplotlib
+# matplotlib.use('Qt5Agg')
+# import matplotlib.pyplot as plt
 #
 
 # Icons:
