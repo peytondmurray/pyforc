@@ -68,9 +68,26 @@ def hhr_space_h_vs_m(ax, forc):
     return
 
 
-def h_hr_points(ax, forc):
+def hhr_points(ax, forc):
     ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
     ax.figure.canvas.draw()
+    return
+
+
+def hchb_points(ax, forc):
+    ax.plot(forc.hc, forc.hb, marker='.', linestyle='', color='k', alpha=0.3)
+    ax.figure.canvas.draw()
+    return
+
+
+def map_points(ax, forc, coordinates='hhr'):
+    if coordinates == 'hhr':
+        hhr_points(ax, forc)
+    elif coordinates == 'hchb':
+        hchb_points(ax, forc)
+    else:
+        raise ValueError('Invalid coordinates argument: {}'.format(coordinates))
+
     return
 
 

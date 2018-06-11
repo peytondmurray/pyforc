@@ -570,6 +570,15 @@ class PMCForc(ForcBase):
 
         return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h))
 
+    # Turn on caching for this function
+    @property
+    def hc(self):
+        return (self.h-self.hr)/2
+
+    @property
+    def hb(self):
+        return (self.h+self.hr)/2
+
 
 class ForcError(Exception):
     pass

@@ -198,6 +198,14 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_data_points(self):
+        if self.f_hhr.isChecked():
+            plotting.hhr_points(ax=self.p_map.axes,
+                                forc=self._data[-1],
+                                mask=self.f_2d_mask.currentText())
+        else:
+            plotting.hchb_points(ax=self.p_map.axes,
+                                 forc=self._data[-1],
+                                 mask=self.f_2d_mask.currentText())
         return
 
     def plot_contours(self):
