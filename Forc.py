@@ -69,6 +69,10 @@ class PMCForc(ForcBase):
         self._h_max = np.nan
         self._hr_min = np.nan
         self._hr_max = np.nan
+        self._hc_min = np.nan
+        self._hc_max = np.nan
+        self._hb_min = np.nan
+        self._hb_max = np.nan
         self._m_min = np.nan
         self._m_max = np.nan
         self._T_min = np.nan
@@ -91,7 +95,6 @@ class PMCForc(ForcBase):
             self.drift_points = []    # Drift points
 
             self._from_file(path)
-            self._update_data_range()
 
             if drift:
                 self._drift_correction(radius=radius, density=density)
@@ -102,6 +105,7 @@ class PMCForc(ForcBase):
                 self.step = step
 
             self._interpolate(method=method)
+            self._update_data_range()
 
         else:
             raise IOError('PMCForc can only be specified from valid path or from numpy arrays!')
@@ -325,8 +329,18 @@ class PMCForc(ForcBase):
         return np.mean(step_sizes)
 
     def _interpolate(self, method='nearest'):
-        _h, _hr = np.meshgrid(np.arange(self._h_min, self._h_max, self.step),
-                              np.arange(self._hr_min, self._hr_max, self.step))
+
+        # Determine min and max values of h, hr from raw input lists for interpolation.
+        h_min = h[0][0]
+        h_max = h[0][0]
+        hr_min = hr[0][0]
+        h_max = hr[-1][0]
+        for i in range(len(self.h)):
+            h_min = np.nanmin(self.h[i]) if np.nanmin(self.h[i]) < h_min else h_min
+            h_max = np.nanmax(self.h[i]) if np.nanmax(self.h[i]) > h_max else h_max
+
+        _h, _hr = np.meshgrid(np.arange(h_min, h_max, self.step),
+                              np.arange(hr_min, hr_max, self.step))
 
         data_hhr = [[self.h[i][j], self.hr[i][j]] for i in range(len(self.h)) for j in range(len(self.h[i]))]
         data_m = [self.m[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
@@ -374,49 +388,26 @@ class PMCForc(ForcBase):
         return
 
     def _update_data_range(self):
-        if isinstance(self.h, list):
-            # numpy.ravel doesn't work properly on ragged lists. Need to manually flatten the lists.
-            _h = []
-            _hr = []
-            _m = []
 
-            for i in range(len(self.h)):
-                _h.extend(self.h[i])
-                _hr.extend(self.hr[i])
-                _m.extend(self.m[i])
+        _hc, _hb = util.hhr_to_hchb(self.h, self.hr)
 
-            _h = np.array(_h)
-            _hr = np.array(_hr)
-            _m = np.array(_m)
-
-            if self.T is not None:
-                _T = []
-                for i in range(len(self.h)):
-                    _T.extend(self.T[i])
-                _T = np.array(_T)
-
-        elif isinstance(self.h, np.ndarray):
-            _h = self.h
-            _hr = self.hr
-            _m = self.m
-            _T = self.T
-
-        else:
-            raise ValueError("Data is an unintended type: {}".format(type(self.h)))
-
-        self._h_min = np.nanmin(_h)
-        self._h_max = np.nanmax(_h)
-        self._hr_min = np.nanmin(_hr)
-        self._hr_max = np.nanmax(_hr)
-        self._m_min = np.nanmin(_m)
-        self._m_max = np.nanmax(_m)
+        self._h_min = np.nanmin(self.h)
+        self._h_max = np.nanmax(self.h)
+        self._hr_min = np.nanmin(self.hr)
+        self._hr_max = np.nanmax(self.hr)
+        self._hc_min = np.nanmin(self.hc)
+        self._hc_max = np.nanmax(self.hc)
+        self._hb_min = np.nanmin(self.hb)
+        self._hb_max = np.nanmax(self.hb)
+        self._m_min = np.nanmin(self.m)
+        self._m_max = np.nanmax(self.m)
 
         if self.T is None or np.all(np.isnan(self.T)):
             self._T_min = np.nan
             self._T_max = np.nan
         else:
-            self._T_min = np.nanmin(_T)
-            self._T_max = np.nanmax(_T)
+            self._T_min = np.nanmin(self.T)
+            self._T_max = np.nanmax(self.T)
 
         return
 
@@ -426,12 +417,22 @@ class PMCForc(ForcBase):
     def hr_range(self):
         return (self._hr_min, self._hr_max)
 
+    def hc_range(self):
+        return (self._hc_min, self._hc_max)
+
+    def hb_range(self):
+        return (self._hb_min, self._hb_max)
+
     def m_range(self):
         return (self._m_min, self._m_max)
 
     @property
-    def extent(self):
+    def extent_hhr(self):
         return (self._h_min, self._h_max, self._hr_min, self._hr_max)
+
+    @property
+    def extent_hchb(self):
+        return (self._hc_min, self._hc_max, self._hb_min, self._hb_max)
 
     def _extend_dataset(self, sf, method):
 

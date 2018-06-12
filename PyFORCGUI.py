@@ -200,12 +200,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
     def plot_data_points(self):
         if self.f_hhr.isChecked():
             plotting.hhr_points(ax=self.p_map.axes,
-                                forc=self._data[-1],
-                                mask=self.f_2d_mask.currentText())
+                                forc=self._data[-1])
         else:
             plotting.hchb_points(ax=self.p_map.axes,
-                                 forc=self._data[-1],
-                                 mask=self.f_2d_mask.currentText())
+                                 forc=self._data[-1])
         return
 
     def plot_contours(self):
@@ -231,6 +229,16 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_rho(self):
+        if self.f_hhr.isChecked():
+            plotting.rho_hhr(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             mask=self.f_2d_mask.currentText(),
+                             cmap=self.f_2d_cmap.text())
+        else:
+            plotting.rho_hchb(ax=self.p_map.axes,
+                              forc=self._data[-1],
+                              mask=self.f_2d_mask.currentText(),
+                              cmap=self.f_2d_cmap.text())
         return
 
     def plot_heat_rho_uncertainty(self):

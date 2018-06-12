@@ -68,7 +68,7 @@ def hhr_space_h_vs_m(ax, forc):
     return
 
 
-def hhr_points(ax, forc):
+def hhr_points(ax, forc, mask):
     ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
     ax.figure.canvas.draw()
     return
@@ -80,27 +80,28 @@ def hchb_points(ax, forc):
     return
 
 
-def map_points(ax, forc, coordinates='hhr'):
+def map_heat_rho(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest', coordinates='hhr'):\
+
+    mask = mask or mask == 'h<hr'
+
     if coordinates == 'hhr':
-        hhr_points(ax, forc)
+        extent = forc.extent_hhr
+        if mask:
+            rho = forc.rho.copy()
+            rho[forc.h < forc.hr] = np.nan
+        else:
+            rho = forc.rho
     elif coordinates == 'hchb':
-        hchb_points(ax, forc)
+        extent = forc.extent_hchb
+        rho = forc.rho_hchb.copy()
+        if mask:
+            rho[forc.hc < 0] = np.nan
+            extent[0] = 0
     else:
-        raise ValueError('Invalid coordinates argument: {}'.format(coordinates))
-
-    return
-
-
-def rho_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
-
-    if mask:
-        rho = forc.rho.copy()
-        rho[forc.h <= forc.hr] = np.nan
-    else:
-        rho = forc.rho
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
 
     ax.imshow(rho,
-              extent=forc.extent,
+              extent=extent,
               cmap=cmap,
               origin='lower',
               interpolation=interpolation)
@@ -108,16 +109,28 @@ def rho_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
     return
 
 
-def m_hhr(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest'):
+def map_heat_m(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest', coordinates='hhr'):
 
-    if mask:
-        m = forc.m.copy()
-        m[forc.h <= forc.hr] = np.nan
+    mask = mask or mask == 'h<hr'
+
+    if coordinates == 'hhr':
+        extent = forc.extent_hhr
+        if mask:
+            m = forc.m.copy()
+            m[forc.h < forc.hr] = np.nan
+        else:
+            m = forc.m
+    elif coordinates == 'hchb':
+        extent = forc.extent_hchb
+        m = forc.m_hchb.copy()
+        if mask:
+            m[forc.hc < 0] = np.nan
+            extent[0] = 0
     else:
-        m = forc.m
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
 
     ax.imshow(m,
-              extent=forc.extent,
+              extent=extent,
               cmap=cmap,
               origin='lower',
               interpolation=interpolation)

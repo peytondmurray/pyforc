@@ -1,8 +1,6 @@
 import numpy as np
 import numba as nb
 
-import hypothesis
-
 
 @nb.jit(nb.float64[:, :](nb.float64[:, :], nb.float64[:, :]), nopython=True, nogil=True)
 def fast_symmetric_convolve(input, kernel):
@@ -60,3 +58,7 @@ def nb_where(arr):
     for i in range(arr.shape[0]):
         ret[i] = True if arr[i] != 0 else False
     return ret
+
+
+def hhr_to_hchb(h, hr):
+    return 0.5*(h+hr), 0.5*(h-hr)
