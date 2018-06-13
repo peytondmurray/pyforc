@@ -84,6 +84,12 @@ class PMCForc(ForcBase):
             self.m = None             # Moment
             self.T = None             # Temperature (if any)
             self.rho = None           # FORC distribution.
+
+            self.hc = None
+            self.hb = None
+            self.m_hchb = None
+            self.T_hchb = None
+            self.rho_hchb = None
             self._from_input_arrays(h, hr, m, T, rho)
 
         elif path is not None:
@@ -94,8 +100,13 @@ class PMCForc(ForcBase):
             self.rho = None           # FORC distribution.
             self.drift_points = []    # Drift points
 
-            self._from_file(path)
+            self.hc = None
+            self.hb = None
+            self.m_hchb = None
+            self.T_hchb = None
+            self.rho_hchb = None
 
+            self._from_file(path)
             if drift:
                 self._drift_correction(radius=radius, density=density)
 
@@ -105,10 +116,12 @@ class PMCForc(ForcBase):
                 self.step = step
 
             self._interpolate(method=method)
-            self._update_data_range()
 
         else:
             raise IOError('PMCForc can only be specified from valid path or from numpy arrays!')
+
+        self._interpolate_hchb()
+        self._update_data_range()
 
         return
 
@@ -127,8 +140,6 @@ class PMCForc(ForcBase):
                 self.rho = rho
             elif rho is not None:
                 raise IOError('Invalid input type for rho: {}'.format(type(rho)))
-
-            self._update_data_range()
 
         else:
             raise IOError('Invalid input type for h, hr, or m arrays.')
@@ -330,14 +341,16 @@ class PMCForc(ForcBase):
 
     def _interpolate(self, method='nearest'):
 
-        # Determine min and max values of h, hr from raw input lists for interpolation.
-        h_min = h[0][0]
-        h_max = h[0][0]
-        hr_min = hr[0][0]
-        h_max = hr[-1][0]
+        # Determine min and max values of (h, hr) from raw input lists for interpolation.
+        h_min = self.h[0][0]
+        h_max = self.h[0][0]
+        hr_min = self.hr[0][0]
+        hr_max = self.hr[0][0]
         for i in range(len(self.h)):
-            h_min = np.nanmin(self.h[i]) if np.nanmin(self.h[i]) < h_min else h_min
-            h_max = np.nanmax(self.h[i]) if np.nanmax(self.h[i]) > h_max else h_max
+            h_min = np.min(self.h[i]) if np.min(self.h[i]) < h_min else h_min
+            h_max = np.max(self.h[i]) if np.max(self.h[i]) > h_max else h_max
+            hr_min = np.min(self.hr[i]) if np.min(self.hr[i]) < hr_min else hr_min
+            hr_max = np.max(self.hr[i]) if np.max(self.hr[i]) > hr_max else hr_max
 
         _h, _hr = np.meshgrid(np.arange(h_min, h_max, self.step),
                               np.arange(hr_min, hr_max, self.step))
@@ -355,6 +368,33 @@ class PMCForc(ForcBase):
         self.h = _h
         self.hr = _hr
         self.m = _m
+
+        return
+
+    def _interpolate_hchb(self, method='nearest'):
+
+        hc, hb = util.hhr_to_hchb(self.h, self.hr)
+
+        hc_min = np.min(hc)
+        hc_max = np.max(hc)
+        hb_min = np.min(hb)
+        hb_max = np.max(hb)
+
+        hchb_step = self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
+        self.hc, self.hb = np.meshgrid(np.arange(hc_min, hc_max, hchb_step),
+                                       np.arange(hb_min, hb_max, hchb_step))
+
+        data_hchb = list(zip(np.ravel(hc), np.ravel(hb)))
+        data_m = np.ravel(self.m)
+
+        self.m_hchb = si.griddata(np.array(data_hchb), np.array(data_m), (self.hc, self.hb), method=method)
+        if self.T is not None:
+            data_T = np.ravel(self.T)
+            self.T = si.griddata(np.array(data_hchb), data_T, (self.hc, self.hb), method=method)
+
+        if self.rho is not None:
+            data_rho = np.ravel(self.rho)
+            self.rho_hchb = si.griddata(np.array(data_hchb), data_rho, (self.hc, self.hb), method=method)
 
         return
 
@@ -378,7 +418,6 @@ class PMCForc(ForcBase):
                                                         np.array(moving_average[-1]))),
                                              kind='cubic')
 
-
         for i in interpolated_drift_indices:
             drift = (interpolated_drift(i) - average_drift)
             self.drift_points[i] -= drift
@@ -388,6 +427,9 @@ class PMCForc(ForcBase):
         return
 
     def _update_data_range(self):
+        """Cache the limits of the data in hhr and hchb space to make plotting faster.
+
+        """
 
         _hc, _hb = util.hhr_to_hchb(self.h, self.hr)
 
@@ -428,11 +470,11 @@ class PMCForc(ForcBase):
 
     @property
     def extent_hhr(self):
-        return (self._h_min, self._h_max, self._hr_min, self._hr_max)
+        return [self._h_min, self._h_max, self._hr_min, self._hr_max]
 
     @property
     def extent_hchb(self):
-        return (self._hc_min, self._hc_max, self._hb_min, self._hb_max)
+        return [self._hc_min, self._hc_max, self._hb_min, self._hb_max]
 
     def _extend_dataset(self, sf, method):
 
@@ -488,11 +530,11 @@ class PMCForc(ForcBase):
         self._extend_dataset(sf=3, method=extension)
 
         if method == 'savitzky-golay':
-            self.rho = self._compute_forc_sg(self.m, sf=3, step_x=self.step, step_y=self.step)
+            rho = self._compute_forc_sg(self.m, sf=3, step_x=self.step, step_y=self.step)
         else:
             raise NotImplementedError("method {} not implemented for FORC distribution calculation".format(method))
 
-        return
+        return PMCForc(h=self.h, hr=self.hr, m=self.m, rho=rho, T=self.T)
 
     @classmethod
     def _extend_flat(cls, h, m):
@@ -569,16 +611,7 @@ class PMCForc(ForcBase):
                 popt, _ = so.curve_fit(util.line, h_gt_h_sat, average_m)
                 value = popt[0]
 
-        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h))
-
-    # Turn on caching for this function
-    @property
-    def hc(self):
-        return (self.h-self.hr)/2
-
-    @property
-    def hb(self):
-        return (self.h+self.hr)/2
+        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.T)
 
 
 class ForcError(Exception):

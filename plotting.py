@@ -2,6 +2,7 @@ import matplotlib.cm as cm
 import matplotlib.lines as ml
 import matplotlib.collections as mc
 import numpy as np
+import util
 
 
 def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
@@ -68,14 +69,38 @@ def hhr_space_h_vs_m(ax, forc):
     return
 
 
-def hhr_points(ax, forc, mask):
+def hhr_points(ax, forc):
+    """Plot the location of the data points in the FORC object in (H, Hr) space.
+
+    Parameters
+    ----------
+    ax : axes object
+        Axes to plot the points on
+    forc : Forc
+        Dataset to plot
+    """
+
     ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
     ax.figure.canvas.draw()
     return
 
 
 def hchb_points(ax, forc):
-    ax.plot(forc.hc, forc.hb, marker='.', linestyle='', color='k', alpha=0.3)
+    """Plots the location of the actual data points in the FORC object in (Hc, Hb) space. Forc.hc and Forc.hb are
+    interpolated from Forc.h and Forc.hr and are inteded to be used only for plotting data in (Hc, Hb) space - they
+    don't actually represent the location of actual data points. As a result, they aren't used here because this
+    function is intended to show the locations of the data points on the 2D plane.
+
+    Parameters
+    ----------
+    ax : axes object
+        Axes to plot the points on
+    forc : Forc
+        Dataset to plot
+    """
+
+    hc, hb = util.hhr_to_hchb(forc.h, forc.hr)
+    ax.plot(hc, hb, marker='.', linestyle='', color='k', alpha=0.3)
     ax.figure.canvas.draw()
     return
 

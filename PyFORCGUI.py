@@ -222,23 +222,19 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_moment(self):
-        plotting.m_hhr(ax=self.p_map.axes,
-                       forc=self._data[-1],
-                       mask=self.f_2d_mask.currentText(),
-                       cmap=self.f_2d_cmap.text())
+        plotting.map_heat_m(ax=self.p_map.axes,
+                            forc=self._data[-1],
+                            mask=self.f_2d_mask.currentText(),
+                            cmap=self.f_2d_cmap.text(),
+                            coordinates=self.coordinates())
         return
 
     def plot_heat_rho(self):
-        if self.f_hhr.isChecked():
-            plotting.rho_hhr(ax=self.p_map.axes,
-                             forc=self._data[-1],
-                             mask=self.f_2d_mask.currentText(),
-                             cmap=self.f_2d_cmap.text())
-        else:
-            plotting.rho_hchb(ax=self.p_map.axes,
+        plotting.map_heat_rho(ax=self.p_map.axes,
                               forc=self._data[-1],
                               mask=self.f_2d_mask.currentText(),
-                              cmap=self.f_2d_cmap.text())
+                              cmap=self.f_2d_cmap.text(),
+                              coordinates=self.coordinates())
         return
 
     def plot_heat_rho_uncertainty(self):
@@ -292,3 +288,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         item.setIcon(QtGui.QIcon('./hourglass.png'))
         self.d_jobs.addItem(item)
         return
+
+    def coordinates(self):
+        if self.f_hhr.isChecked():
+            return 'hhr'
+        else:
+            return 'hchb'
