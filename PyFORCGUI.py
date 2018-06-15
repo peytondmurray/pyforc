@@ -204,6 +204,12 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contours(self):
+        plotting.contour_map(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             data_str='m',
+                             mask=self.f_2d_mask.currentText(),
+                             coordinates=self.coordinates(),
+                             cmap=self.f_2d_cmap.text())
         return
 
     def plot_hc_axis(self):

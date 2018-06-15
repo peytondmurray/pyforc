@@ -473,11 +473,31 @@ class PMCForc(ForcBase):
 
     @property
     def extent_hhr(self):
-        return [self._h_min, self._h_max, self._hr_min, self._hr_max]
+        """Get extent of dataset in (H, Hr) space for plotting maps. Values returned are offset from actual data so
+        that each data point corresponds to the center of a pixel on the map, rather than the corner.
+
+        Returns
+        -------
+        list of floats
+            h_min, h_max, hr_min, hr_max
+        """
+
+        return [self._h_min-0.5*self.step, self._h_max+0.5*self.step,
+                self._hr_min-0.5*self.step, self._hr_max+0.5*self.step]
 
     @property
     def extent_hchb(self):
-        return [self._hc_min, self._hc_max, self._hb_min, self._hb_max]
+        """Get extent of dataset in (Hc, Hb) space for plotting maps. Values returned are offset from actual data so
+        that each data point corresponds to the center of a pixel on the map, rather than the corner.
+
+        Returns
+        -------
+        list of floats
+            hc_min, hc_max, hb_min, hb_max
+        """
+
+        return [self._hc_min-0.5*self.step_hchb, self._hc_max+0.5*self.step_hchb,
+                self._hb_min-0.5*self.step_hchb, self._hb_max+0.5*self.step_hchb]
 
     def _extend_dataset(self, sf, method):
 

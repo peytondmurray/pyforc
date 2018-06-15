@@ -126,6 +126,14 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
     return
 
 
+def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
+    ax.clear()
+    ax.contourf(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+                extent=forc.get_extent(coordinates),
+                cmap=cmap,
+                origin='lower')
+
+
 def hhr_line(ax, forc):
     ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')
     ax.draw(ax.get_figure().canvas.renderer)
