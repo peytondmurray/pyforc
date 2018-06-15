@@ -93,10 +93,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_contour_rho_uncertainty.clicked.connect(self.plot_contour_rho_uncertainty)
         self.b_contour_temperature.clicked.connect(self.plot_contour_temperature)
 
-        self.b_level_moment.clicked.connect(self.plot_level_moment)
-        self.b_level_rho.clicked.connect(self.plot_level_rho)
-        self.b_level_rho_uncertainty.clicked.connect(self.plot_level_rho_uncertainty)
-        self.b_level_temperature.clicked.connect(self.plot_level_temperature)
+        self.b_level_moment.clicked.connect(self.plot_levels_moment)
+        self.b_level_rho.clicked.connect(self.plot_levels_rho)
+        self.b_level_rho_uncertainty.clicked.connect(self.plot_levels_rho_uncertainty)
+        self.b_level_temperature.clicked.connect(self.plot_levels_temperature)
 
         self.b_map_curves_moment.clicked.connect(self.plot_curves_moment)
         self.b_map_curves_rho.clicked.connect(self.plot_curves_rho)
@@ -299,6 +299,38 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        return
+
+    def plot_levels_moment(self):
+        plotting.contour_levels(ax=self.p_map.axes,
+                                forc=self._data[-1],
+                                data_str='m',
+                                mask=self.f_2d_mask.currentText(),
+                                coordinates=self.coordinates())
+        return
+
+    def plot_levels_rho(self):
+        plotting.contour_levels(ax=self.p_map.axes,
+                                forc=self._data[-1],
+                                data_str='rho',
+                                mask=self.f_2d_mask.currentText(),
+                                coordinates=self.coordinates())
+        return
+
+    def plot_levels_rho_uncertainty(self):
+        plotting.contour_levels(ax=self.p_map.axes,
+                                forc=self._data[-1],
+                                data_str='rho_uncertainty',
+                                mask=self.f_2d_mask.currentText(),
+                                coordinates=self.coordinates())
+        return
+
+    def plot_levels_temperature(self):
+        plotting.contour_levels(ax=self.p_map.axes,
+                                forc=self._data[-1],
+                                data_str='t',
+                                mask=self.f_2d_mask.currentText(),
+                                coordinates=self.coordinates())
         return
 
     def plot_curves_moment(self):
