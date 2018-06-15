@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1228</width>
-    <height>885</height>
+    <width>1211</width>
+    <height>771</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,8 +37,14 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>200</width>
+          <width>100</width>
           <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="editTriggers">
@@ -728,14 +734,20 @@
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_13">
+      <item>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>220</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="font">
          <font>
@@ -834,13 +846,19 @@
         </layout>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item>
        <widget class="QGroupBox" name="groupBox_4">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>220</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="font">
          <font>
@@ -872,46 +890,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="b_major_loop">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Major Loop</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="b_contours">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Contour Lines</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="b_hc_axis">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Hc Axis</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
+         <item row="2" column="1" colspan="2">
           <widget class="QPushButton" name="b_hb_axis">
            <property name="font">
             <font>
@@ -924,20 +903,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="b_h_axis">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>H Axis</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
+         <item row="3" column="1" colspan="2">
           <widget class="QPushButton" name="b_hr_axis">
            <property name="font">
             <font>
@@ -950,88 +916,14 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="b_data_points">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Data Points</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QGroupBox" name="groupBox_6">
-           <property name="title">
-            <string>Contour Diagram</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <widget class="QPushButton" name="b_contour_moment">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Moment</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="b_contour_rho">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>FORC Distribution</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="b_contour_rho_uncertainty">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>FORC Uncertainty</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="b_contour_temperature">
-              <property name="font">
-               <font>
-                <weight>50</weight>
-                <bold>false</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Temperature</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
          <item row="4" column="0">
           <widget class="QGroupBox" name="groupBox_5">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title">
             <string>Heat Map</string>
            </property>
@@ -1051,7 +943,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Moment</string>
+               <string>M</string>
               </property>
              </widget>
             </item>
@@ -1064,7 +956,7 @@
                </font>
               </property>
               <property name="text">
-               <string>FORC Distribution</string>
+               <string>ρ</string>
               </property>
              </widget>
             </item>
@@ -1077,7 +969,7 @@
                </font>
               </property>
               <property name="text">
-               <string>FORC Uncertainty</string>
+               <string>Δρ</string>
               </property>
              </widget>
             </item>
@@ -1090,17 +982,163 @@
                </font>
               </property>
               <property name="text">
-               <string>Temperature</string>
+               <string>T</string>
               </property>
              </widget>
             </item>
            </layout>
           </widget>
          </item>
-         <item row="5" column="0" colspan="2">
+         <item row="4" column="1">
+          <widget class="QGroupBox" name="groupBox_6">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="title">
+            <string>Contours</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QPushButton" name="b_contour_moment">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>M</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_contour_rho">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>ρ</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_contour_rho_uncertainty">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Δρ</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_contour_temperature">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>T</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QGroupBox" name="groupBox_12">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="title">
+            <string>Levels</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <widget class="QPushButton" name="b_level_moment">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>M</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_level_rho">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>ρ</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_level_rho_uncertainty">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Δρ</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="b_level_temperature">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>T</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="3">
           <widget class="QGroupBox" name="groupBox_7">
            <property name="title">
-            <string>Map into Reversal Curves</string>
+            <string>Map into Curves</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -1118,7 +1156,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Moment</string>
+               <string>M</string>
               </property>
              </widget>
             </item>
@@ -1131,7 +1169,7 @@
                </font>
               </property>
               <property name="text">
-               <string>FORC Distribution</string>
+               <string>ρ</string>
               </property>
              </widget>
             </item>
@@ -1144,7 +1182,7 @@
                </font>
               </property>
               <property name="text">
-               <string>FORC Uncertainty</string>
+               <string>Δρ</string>
               </property>
              </widget>
             </item>
@@ -1157,17 +1195,69 @@
                </font>
               </property>
               <property name="text">
-               <string>Temperature</string>
+               <string>T</string>
               </property>
              </widget>
             </item>
            </layout>
           </widget>
          </item>
+         <item row="1" column="1" colspan="2">
+          <widget class="QPushButton" name="b_hc_axis">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Hc Axis</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" colspan="2">
+          <widget class="QPushButton" name="b_h_axis">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>H Axis</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="b_major_loop">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Major Loop</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="b_data_points">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Points</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -1232,7 +1322,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1228</width>
+     <width>1211</width>
      <height>21</height>
     </rect>
    </property>

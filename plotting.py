@@ -126,17 +126,29 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
     return
 
 
-def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
+def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r', levels=None):
     ax.clear()
     ax.contourf(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
                 extent=forc.get_extent(coordinates),
                 cmap=cmap,
-                origin='lower')
+                origin='lower',
+                levels=levels)
+    ax.figure.canvas.draw()
+    return
+
+
+def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
+    ax.contour(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+               extent=forc.get_extent(coordinates),
+               origin='lower',
+               levels=levels)
+    ax.figure.canvas.draw()
+    return
 
 
 def hhr_line(ax, forc):
     ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')
-    ax.draw(ax.get_figure().canvas.renderer)
+    ax.figure.canvas.draw()
     return
 
 

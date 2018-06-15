@@ -76,7 +76,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_paths.clicked.connect(self.plot_paths)
         self.b_major_loop.clicked.connect(self.plot_major_loop)
         self.b_data_points.clicked.connect(self.plot_data_points)
-        self.b_contours.clicked.connect(self.plot_contours)
+
 
         self.b_hc_axis.clicked.connect(self.plot_hc_axis)
         self.b_hb_axis.clicked.connect(self.plot_hb_axis)
@@ -92,6 +92,11 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_contour_rho.clicked.connect(self.plot_contour_rho)
         self.b_contour_rho_uncertainty.clicked.connect(self.plot_contour_rho_uncertainty)
         self.b_contour_temperature.clicked.connect(self.plot_contour_temperature)
+
+        self.b_level_moment.clicked.connect(self.plot_level_moment)
+        self.b_level_rho.clicked.connect(self.plot_level_rho)
+        self.b_level_rho_uncertainty.clicked.connect(self.plot_level_rho_uncertainty)
+        self.b_level_temperature.clicked.connect(self.plot_level_temperature)
 
         self.b_map_curves_moment.clicked.connect(self.plot_curves_moment)
         self.b_map_curves_rho.clicked.connect(self.plot_curves_rho)
@@ -261,15 +266,39 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_moment(self):
+        plotting.contour_map(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             data_str='m',
+                             mask=self.f_2d_mask.currentText(),
+                             coordinates=self.coordinates(),
+                             cmap=self.f_2d_cmap.text())
         return
 
     def plot_contour_rho(self):
+        plotting.contour_map(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             data_str='rho',
+                             mask=self.f_2d_mask.currentText(),
+                             coordinates=self.coordinates(),
+                             cmap=self.f_2d_cmap.text())
         return
 
     def plot_contour_rho_uncertainty(self):
+        plotting.contour_map(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             data_str='rho_uncertainty',
+                             mask=self.f_2d_mask.currentText(),
+                             coordinates=self.coordinates(),
+                             cmap=self.f_2d_cmap.text())
         return
 
     def plot_contour_temperature(self):
+        plotting.contour_map(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             data_str='t',
+                             mask=self.f_2d_mask.currentText(),
+                             coordinates=self.coordinates(),
+                             cmap=self.f_2d_cmap.text())
         return
 
     def plot_curves_moment(self):
