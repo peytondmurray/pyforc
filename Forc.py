@@ -60,7 +60,7 @@ class PMCForc(ForcBase):
         Path to PMC formatted data file.
     """
 
-    def __init__(self, path=None, step=None, method='nearest', drift=False, radius=4, density=3,
+    def __init__(self, path=None, step=None, method='cubic', drift=False, radius=4, density=3,
                  h=None, hr=None, m=None, T=None, rho=None):
 
         super(PMCForc, self).__init__(None)
@@ -91,6 +91,7 @@ class PMCForc(ForcBase):
             self.T_hchb = None
             self.rho_hchb = None
             self._from_input_arrays(h, hr, m, T, rho)
+            self.step = self._determine_step()
 
         elif path is not None:
             self.h = []               # Field
@@ -120,7 +121,7 @@ class PMCForc(ForcBase):
         else:
             raise IOError('PMCForc can only be specified from valid path or from numpy arrays!')
 
-        self._interpolate_hchb()
+        self._interpolate_hchb(method=method)
         self._update_data_range()
 
         return
@@ -332,14 +333,17 @@ class PMCForc(ForcBase):
             Field step size.
         """
 
-        step_sizes = np.empty(len(self.h))
+        if isinstance(self.h, np.ndarray):
+            step_sizes = np.diff(self.h[0])
+        else:
+            step_sizes = np.empty(len(self.h))
 
-        for i in range(step_sizes.shape[0]):
-            step_sizes[i] = np.mean(np.diff(self.h[i], n=1))
+            for i in range(step_sizes.shape[0]):
+                step_sizes[i] = np.mean(np.diff(self.h[i], n=1))
 
-        return np.mean(step_sizes)
+            return np.mean(step_sizes)
 
-    def _interpolate(self, method='nearest'):
+    def _interpolate(self, method='cubic'):
 
         # Determine min and max values of (h, hr) from raw input lists for interpolation.
         h_min = self.h[0][0]
@@ -371,7 +375,7 @@ class PMCForc(ForcBase):
 
         return
 
-    def _interpolate_hchb(self, method='nearest'):
+    def _interpolate_hchb(self, method='cubic'):
 
         hc, hb = util.hhr_to_hchb(self.h, self.hr)
 
@@ -380,9 +384,8 @@ class PMCForc(ForcBase):
         hb_min = np.min(hb)
         hb_max = np.max(hb)
 
-        hchb_step = self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
-        self.hc, self.hb = np.meshgrid(np.arange(hc_min, hc_max, hchb_step),
-                                       np.arange(hb_min, hb_max, hchb_step))
+        self.hc, self.hb = np.meshgrid(np.arange(hc_min, hc_max, self.step_hchb),
+                                       np.arange(hb_min, hb_max, self.step_hchb))
 
         data_hchb = list(zip(np.ravel(hc), np.ravel(hb)))
         data_m = np.ravel(self.m)
@@ -612,6 +615,45 @@ class PMCForc(ForcBase):
                 value = popt[0]
 
         return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.T)
+
+    def get_masked(self, data, mask, coordinates):
+        mask = mask is True or mask == 'h<hr'
+
+        if mask:
+            masked_data = data.copy()
+            if coordinates == 'hhr':
+                masked_data[self.h < self.hr-self.step] = np.nan
+            elif coordinates == 'hchb':
+                masked_data[self.hc < 0] = np.nan
+            else:
+                raise ValueError('Invalid coordinates: {}'.format(coordinates))
+            return masked_data
+        else:
+            return data
+
+    def get_extent(self, coordinates):
+        if coordinates == 'hhr':
+            return self.extent_hhr
+        elif coordinates == 'hchb':
+            return self.extent_hchb
+        else:
+            raise ValueError('Invalid coordinates: {}'.format(coordinates))
+
+    def get_data(self, data_str, coordinates):
+        data_str = data_str.lower()
+        if data_str in ['m', 'rho', 'rho_uncertainty', 't']:
+            if coordinates == 'hhr':
+                return getattr(self, data_str)
+            elif coordinates == 'hchb':
+                return getattr(self, '{}_hchb'.format(data_str))
+            else:
+                raise ValueError('Invalid coordinates: {}'.format(coordinates))
+        else:
+            raise ValueError('Invalid data field: {}'.format(data_str))
+
+    @property
+    def step_hchb(self):
+        return self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
 
 
 class ForcError(Exception):

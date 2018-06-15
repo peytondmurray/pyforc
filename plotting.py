@@ -69,6 +69,15 @@ def hhr_space_h_vs_m(ax, forc):
     return
 
 
+def plot_points(ax, forc, coordinates):
+    if coordinates == 'hhr':
+        hhr_points(ax, forc)
+    elif coordinates == 'hchb':
+        hchb_points(ax, forc)
+    else:
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
+
+
 def hhr_points(ax, forc):
     """Plot the location of the data points in the FORC object in (H, Hr) space.
 
@@ -105,57 +114,10 @@ def hchb_points(ax, forc):
     return
 
 
-def map_heat_rho(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest', coordinates='hhr'):\
-
-    mask = mask or mask == 'h<hr'
-
-    if coordinates == 'hhr':
-        extent = forc.extent_hhr
-        if mask:
-            rho = forc.rho.copy()
-            rho[forc.h < forc.hr] = np.nan
-        else:
-            rho = forc.rho
-    elif coordinates == 'hchb':
-        extent = forc.extent_hchb
-        rho = forc.rho_hchb.copy()
-        if mask:
-            rho[forc.hc < 0] = np.nan
-            extent[0] = 0
-    else:
-        raise ValueError('Invalid coordinates: {}'.format(coordinates))
-
-    ax.imshow(rho,
-              extent=extent,
-              cmap=cmap,
-              origin='lower',
-              interpolation=interpolation)
-    ax.figure.canvas.draw()
-    return
-
-
-def map_heat_m(ax, forc, mask=True, cmap='RdBu_r', interpolation='nearest', coordinates='hhr'):
-
-    mask = mask or mask == 'h<hr'
-
-    if coordinates == 'hhr':
-        extent = forc.extent_hhr
-        if mask:
-            m = forc.m.copy()
-            m[forc.h < forc.hr] = np.nan
-        else:
-            m = forc.m
-    elif coordinates == 'hchb':
-        extent = forc.extent_hchb
-        m = forc.m_hchb.copy()
-        if mask:
-            m[forc.hc < 0] = np.nan
-            extent[0] = 0
-    else:
-        raise ValueError('Invalid coordinates: {}'.format(coordinates))
-
-    ax.imshow(m,
-              extent=extent,
+def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
+    ax.clear()
+    ax.imshow(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+              extent=forc.get_extent(coordinates),
               cmap=cmap,
               origin='lower',
               interpolation=interpolation)

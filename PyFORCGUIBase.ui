@@ -233,17 +233,17 @@
             <widget class="QComboBox" name="f_dataset_interpolation_type">
              <item>
               <property name="text">
-               <string>nearest</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>cubic</string>
               </property>
              </item>
              <item>
               <property name="text">
                <string>linear</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>nearest</string>
               </property>
              </item>
             </widget>
@@ -418,11 +418,6 @@
              <item>
               <property name="text">
                <string>none</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>outline</string>
               </property>
              </item>
             </widget>

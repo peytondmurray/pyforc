@@ -198,12 +198,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_data_points(self):
-        if self.f_hhr.isChecked():
-            plotting.hhr_points(ax=self.p_map.axes,
-                                forc=self._data[-1])
-        else:
-            plotting.hchb_points(ax=self.p_map.axes,
-                                 forc=self._data[-1])
+        plotting.plot_points(ax=self.p_map.axes,
+                             forc=self._data[-1],
+                             coordinates=self.coordinates())
         return
 
     def plot_contours(self):
@@ -222,25 +219,39 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_moment(self):
-        plotting.map_heat_m(ax=self.p_map.axes,
-                            forc=self._data[-1],
-                            mask=self.f_2d_mask.currentText(),
-                            cmap=self.f_2d_cmap.text(),
-                            coordinates=self.coordinates())
+        plotting.heat_map(ax=self.p_map.axes,
+                          forc=self._data[-1],
+                          data_str='m',
+                          mask=self.f_2d_mask.currentText(),
+                          coordinates=self.coordinates(),
+                          cmap=self.f_2d_cmap.text())
         return
 
     def plot_heat_rho(self):
-        plotting.map_heat_rho(ax=self.p_map.axes,
-                              forc=self._data[-1],
-                              mask=self.f_2d_mask.currentText(),
-                              cmap=self.f_2d_cmap.text(),
-                              coordinates=self.coordinates())
+        plotting.heat_map(ax=self.p_map.axes,
+                          forc=self._data[-1],
+                          data_str='rho',
+                          mask=self.f_2d_mask.currentText(),
+                          coordinates=self.coordinates(),
+                          cmap=self.f_2d_cmap.text())
         return
 
     def plot_heat_rho_uncertainty(self):
+        plotting.heat_map(ax=self.p_map.axes,
+                          forc=self._data[-1],
+                          data_str='rho_uncertainty',
+                          mask=self.f_2d_mask.currentText(),
+                          coordinates=self.coordinates(),
+                          cmap=self.f_2d_cmap.text())
         return
 
     def plot_heat_temperature(self):
+        plotting.heat_map(ax=self.p_map.axes,
+                          forc=self._data[-1],
+                          data_str='t',
+                          mask=self.f_2d_mask.currentText(),
+                          coordinates=self.coordinates(),
+                          cmap=self.f_2d_cmap.text())
         return
 
     def plot_contour_moment(self):

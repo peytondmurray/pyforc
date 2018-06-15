@@ -62,4 +62,4 @@ def nb_where(arr):
 
 @nb.jit(nopython=True, nogil=True)
 def hhr_to_hchb(h, hr):
-    return 0.5*(h+hr), 0.5*(h-hr)
+    return 0.5*(h-hr), 0.5*(h+hr)
