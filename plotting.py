@@ -70,46 +70,29 @@ def hhr_space_h_vs_m(ax, forc):
 
 
 def plot_points(ax, forc, coordinates):
+    """Plots the location of the actual data points in the FORC object in (H, Hr) or (Hc, Hb) space. Forc.hc and
+    Forc.hb are interpolated from Forc.h and Forc.hr and are inteded to be used only for plotting data in (Hc, Hb)
+    space - they don't actually represent the location of actual data points. As a result, they aren't used here
+    because this function is intended to show the locations of the data points on the 2D plane.
+
+    Parameters
+    ----------
+    ax : axes object
+        Axes to plot the points on
+    forc : Forc
+        Dataset to plot
+    """
+
+
     if coordinates == 'hhr':
-        hhr_points(ax, forc)
+        x = forc.h
+        y = forc.hr
     elif coordinates == 'hchb':
-        hchb_points(ax, forc)
+        x, y = util.hhr_to_hchb(forc.h, forc.hr)
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
 
-
-def hhr_points(ax, forc):
-    """Plot the location of the data points in the FORC object in (H, Hr) space.
-
-    Parameters
-    ----------
-    ax : axes object
-        Axes to plot the points on
-    forc : Forc
-        Dataset to plot
-    """
-
-    ax.plot(forc.h, forc.hr, marker='.', linestyle='', color='k', alpha=0.3)
-    ax.figure.canvas.draw()
-    return
-
-
-def hchb_points(ax, forc):
-    """Plots the location of the actual data points in the FORC object in (Hc, Hb) space. Forc.hc and Forc.hb are
-    interpolated from Forc.h and Forc.hr and are inteded to be used only for plotting data in (Hc, Hb) space - they
-    don't actually represent the location of actual data points. As a result, they aren't used here because this
-    function is intended to show the locations of the data points on the 2D plane.
-
-    Parameters
-    ----------
-    ax : axes object
-        Axes to plot the points on
-    forc : Forc
-        Dataset to plot
-    """
-
-    hc, hb = util.hhr_to_hchb(forc.h, forc.hr)
-    ax.plot(hc, hb, marker='.', linestyle='', color='k', alpha=0.3)
+    ax.plot(x, y, marker='.', linestyle='', color='k', alpha=0.3)
     ax.figure.canvas.draw()
     return
 
@@ -141,7 +124,8 @@ def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
     ax.contour(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
                extent=forc.get_extent(coordinates),
                origin='lower',
-               levels=levels)
+               levels=levels,
+               colors='k')
     ax.figure.canvas.draw()
     return
 
