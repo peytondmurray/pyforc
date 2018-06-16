@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 class WorkerThread(QtCore.QThread):
 
-    stopping = QtCore.pyqtSignal()
+    job_done = QtCore.pyqtSignal()
 
     def __init__(self, input_queue, output_queue, parent=None):
         super().__init__(parent=parent)
@@ -22,11 +22,5 @@ class WorkerThread(QtCore.QThread):
         self.running = True
         while self.running:
             self.compute()
-            self.finished.emit()
-        self.stopping.emit()
-        print("run finishing")
-        return
-
-    def stop(self):
-        self.running = False
+            self.job_done.emit()
         return

@@ -83,7 +83,6 @@ def plot_points(ax, forc, coordinates):
         Dataset to plot
     """
 
-
     if coordinates == 'hhr':
         x = forc.h
         y = forc.hr
@@ -163,5 +162,53 @@ def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
            ylabel=ylabel,
            xlim=xlim,
            ylim=ylim)
+    ax.figure.canvas.draw()
+    return
+
+
+def h_axis(ax, coordinates, color='k', alpha=0.3):
+
+    if coordinates == 'hhr':
+        ax.plot(ax.get_xlim(), (0, 0), color=color, alpha=alpha)
+    elif coordinates == 'hchb':
+        ax.plot(ax.get_xlim(), -1*np.array(ax.get_xlim()), color=color, alpha=alpha)
+    else:
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
+    ax.figure.canvas.draw()
+    return
+
+
+def hr_axis(ax, coordinates, color='k', alpha=0.3):
+
+    if coordinates == 'hhr':
+        ax.plot((0, 0), ax.get_ylim(), color=color, alpha=alpha)
+    elif coordinates == 'hchb':
+        ax.plot(ax.get_ylim(), ax.get_ylim(), color=color, alpha=alpha)
+    else:
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
+    ax.figure.canvas.draw()
+    return
+
+
+def hc_axis(ax, coordinates, color='k', alpha=0.3):
+
+    if coordinates == 'hhr':
+        ax.plot(ax.get_xlim(), -1**np.array(ax.get_xlim()), color=color, alpha=alpha)
+    elif coordinates == 'hchb':
+        ax.plot(ax.get_xlim(), (0, 0), color=color, alpha=alpha)
+    else:
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
+    ax.figure.canvas.draw()
+    return
+
+
+def hb_axis(ax, coordinates, color='k', alpha=0.3):
+
+    if coordinates == 'hhr':
+        ax.plot(ax.get_xlim(), ax.get_xlim(), color=color, alpha=alpha)
+    elif coordinates == 'hchb':
+        ax.plot((0, 0), ax.get_xlim(), color=color, alpha=alpha)
+    else:
+        raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
     return

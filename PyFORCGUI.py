@@ -21,8 +21,6 @@ import pathlib
 log = logging.getLogger(__name__)
 
 
-# Example of aboutToQuit siganl for stopping QThread: https://gist.github.com/metalman/10721983
-
 class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
 
     def __init__(self, app):
@@ -38,8 +36,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.queued_jobs = mp.Queue()
         self.finished_jobs = mp.Queue()
         self.worker = worker.WorkerThread(input_queue=self.queued_jobs, output_queue=self.finished_jobs, parent=self)
-        app.aboutToQuit.connect(self.worker.stop)
-        self.worker.finished.connect(self.update_status)
+        app.aboutToQuit.connect(self.worker.quit)
+        self.worker.job_done.connect(self.update_status)
         self.worker.start()
 
         # Set up plots
@@ -61,7 +59,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def closeEvent(self, event):
-        self.worker.stop()
+        self.worker.quit()
         event.accept()
         return
 
@@ -76,7 +74,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_paths.clicked.connect(self.plot_paths)
         self.b_major_loop.clicked.connect(self.plot_major_loop)
         self.b_data_points.clicked.connect(self.plot_data_points)
-
 
         self.b_hc_axis.clicked.connect(self.plot_hc_axis)
         self.b_hb_axis.clicked.connect(self.plot_hb_axis)
@@ -218,15 +215,23 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_hc_axis(self):
+        plotting.hc_axis(ax=self.p_map.axes,
+                         coordinates=self.coordinates())
         return
 
     def plot_hb_axis(self):
+        plotting.hb_axis(ax=self.p_map.axes,
+                         coordinates=self.coordinates())
         return
 
     def plot_h_axis(self):
+        plotting.h_axis(ax=self.p_map.axes,
+                        coordinates=self.coordinates())
         return
 
     def plot_hr_axis(self):
+        plotting.hr_axis(ax=self.p_map.axes,
+                         coordinates=self.coordinates())
         return
 
     def plot_heat_moment(self):

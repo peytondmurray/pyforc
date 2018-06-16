@@ -499,6 +499,10 @@ class PMCForc(ForcBase):
         return [self._hc_min-0.5*self.step_hchb, self._hc_max+0.5*self.step_hchb,
                 self._hb_min-0.5*self.step_hchb, self._hb_max+0.5*self.step_hchb]
 
+    @property
+    def step_hchb(self):
+        return self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
+
     def _extend_dataset(self, sf, method):
 
         if method == 'truncate':
@@ -634,7 +638,7 @@ class PMCForc(ForcBase):
                 popt, _ = so.curve_fit(util.line, h_gt_h_sat, average_m)
                 value = popt[0]
 
-        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.T)
+        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.T, rho=self.rho)
 
     def get_masked(self, data, mask, coordinates):
         mask = mask is True or mask == 'h<hr'
@@ -671,9 +675,15 @@ class PMCForc(ForcBase):
         else:
             raise ValueError('Invalid data field: {}'.format(data_str))
 
-    @property
-    def step_hchb(self):
-        return self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
+    def normalize(self, method='minmax'):
+        if method == 'minmax':
+            return PMCForc(h=self.h,
+                           hr=self.hr,
+                           m=2*(np.nanmax(self.m)-self.m)/(np.nanmax(self.m)-np.nanmin(self.m)),
+                           rho=self.rho,
+                           T=self.T)
+        else:
+            raise NotImplementedError
 
 
 class ForcError(Exception):
