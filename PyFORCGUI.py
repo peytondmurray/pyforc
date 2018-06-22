@@ -102,6 +102,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
 
         self.b_undo.clicked.connect(self.undo)
 
+        self._enable_plotting_buttons(False)
+
         return
 
     def _update_extension_widgets(self, current_text):
@@ -360,6 +362,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         result = self.finished_jobs.get()
         if isinstance(result, Forc.ForcBase):
             self._data.append(result)
+            if len(self._data) > 0:
+                self._enable_plotting_buttons(True)
         self.d_jobs.item(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
         self.current_job += 1
         return
@@ -377,3 +381,35 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
             return 'hhr'
         else:
             return 'hchb'
+
+    def _enable_plotting_buttons(self, b=True):
+        self.b_paths.setEnabled(b)
+        self.b_major_loop.setEnabled(b)
+        self.b_data_points.setEnabled(b)
+
+        self.b_hc_axis.setEnabled(b)
+        self.b_hb_axis.setEnabled(b)
+        self.b_h_axis.setEnabled(b)
+        self.b_hr_axis.setEnabled(b)
+
+        self.b_heat_moment.setEnabled(b)
+        self.b_heat_rho.setEnabled(b)
+        self.b_heat_rho_uncertainty.setEnabled(b)
+        self.b_heat_temperature.setEnabled(b)
+
+        self.b_contour_moment.setEnabled(b)
+        self.b_contour_rho.setEnabled(b)
+        self.b_contour_rho_uncertainty.setEnabled(b)
+        self.b_contour_temperature.setEnabled(b)
+
+        self.b_level_moment.setEnabled(b)
+        self.b_level_rho.setEnabled(b)
+        self.b_level_rho_uncertainty.setEnabled(b)
+        self.b_level_temperature.setEnabled(b)
+
+        self.b_map_curves_moment.setEnabled(b)
+        self.b_map_curves_rho.setEnabled(b)
+        self.b_map_curves_rho_uncertainty.setEnabled(b)
+        self.b_map_curves_temperature.setEnabled(b)
+
+        return
