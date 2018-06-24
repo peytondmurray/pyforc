@@ -159,13 +159,6 @@ class PMCForc(ForcBase):
         file = pathlib.Path(path)
         log.info("Extracting data from file: {}".format(file))
 
-        # try:
-        #     with open(file, 'r') as f:
-        #         lines = f.readlines()
-        # except ...:
-        #     print("Error opening specified data file: {}".format(file))
-        #     raise
-
         with open(file, 'r') as f:
             lines = f.readlines()
 
@@ -333,15 +326,12 @@ class PMCForc(ForcBase):
             Field step size.
         """
 
-        if isinstance(self.h, np.ndarray):
-            step_sizes = np.diff(self.h[0])
-        else:
-            step_sizes = np.empty(len(self.h))
+        step_sizes = np.empty(len(self.h))
 
-            for i in range(step_sizes.shape[0]):
-                step_sizes[i] = np.mean(np.diff(self.h[i], n=1))
+        for i in range(step_sizes.shape[0]):
+            step_sizes[i] = np.mean(np.diff(self.h[i], n=1))
 
-            return np.mean(step_sizes)
+        return np.mean(step_sizes)
 
     def _interpolate(self, method='cubic'):
 
@@ -503,7 +493,7 @@ class PMCForc(ForcBase):
     def step_hchb(self):
         return self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
 
-    def _extend_dataset(self, sf, method):
+    def _extend_dataset(self, sf, method, n_fit_points=10):
 
         if method == 'truncate':
             return
@@ -518,7 +508,7 @@ class PMCForc(ForcBase):
         if method == 'flat':
             self._extend_flat(self.h, self.m)
         elif method == 'slope':
-            self._extend_slope(self.h, self.m)
+            self._extend_slope(self.h, self.m, n_fit_points)
         else:
             raise NotImplementedError
 
@@ -550,11 +540,13 @@ class PMCForc(ForcBase):
 
         return kernel
 
-    def compute_forc_distribution(self, sf=3, method='savitzky-golay', extension='flat'):
+    def compute_forc_distribution(self, sf=3, method='savitzky-golay', extension='flat', n_fit_points=10):
 
         log.debug("Computing FORC distribution: sf={}, method={}, extension={}".format(sf, method, extension))
 
-        self._extend_dataset(sf=3, method=extension)
+        # Only extend the dataset if rho has not been computed yet. Don't want to extend more than once.
+        if self.rho is None:
+            self._extend_dataset(sf=3, method=extension, n_fit_points=n_fit_points)
 
         if method == 'savitzky-golay':
             rho = self._compute_forc_sg(self.m, sf=3, step_x=self.step, step_y=self.step)
@@ -572,8 +564,6 @@ class PMCForc(ForcBase):
 
     @classmethod
     def _extend_slope(cls, h, m, n_fit_points=10):
-        print('fitting')
-
         for i in range(m.shape[0]):
 
             j = util.arg_first_not_nan(m[i])
@@ -679,7 +669,7 @@ class PMCForc(ForcBase):
         if method == 'minmax':
             return PMCForc(h=self.h,
                            hr=self.hr,
-                           m=2*(np.nanmax(self.m)-self.m)/(np.nanmax(self.m)-np.nanmin(self.m)),
+                           m=1-2*(np.nanmax(self.m)-self.m)/(np.nanmax(self.m)-np.nanmin(self.m)),
                            rho=self.rho,
                            T=self.T)
         else:

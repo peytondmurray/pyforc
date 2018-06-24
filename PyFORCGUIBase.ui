@@ -805,20 +805,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="b_offset">
-           <property name="font">
-            <font>
-             <weight>50</weight>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Offset Correction</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="b_gauss">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="font">
             <font>
              <weight>50</weight>

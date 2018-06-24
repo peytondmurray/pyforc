@@ -67,9 +67,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_import.clicked.connect(self.import_file)
         self.b_slope.clicked.connect(self.slope)
         self.b_normalize.clicked.connect(self.normalize)
-        self.b_offset.clicked.connect(self.offset)
         self.b_gauss.clicked.connect(self.gauss)
-        self.b_forc.clicked.connect(self.forc)
+        self.b_forc.clicked.connect(self.compute_forc_distribution)
 
         self.b_paths.clicked.connect(self.plot_paths)
         self.b_major_loop.clicked.connect(self.plot_major_loop)
@@ -176,15 +175,24 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def normalize(self):
-        return
-
-    def offset(self):
+        self.append_job(job=[self._data[-1].normalize,
+                             list(),
+                             {'method': 'minmax'}],
+                        text='Normalize moment')
         return
 
     def gauss(self):
+        raise NotImplementedError('Gaussian filtering not implemented')
         return
 
-    def forc(self):
+    def compute_forc_distribution(self):
+        self.append_job(job=[self._data[-1].compute_forc_distribution,
+                             list(),
+                             {'sf': self.f_smoothing_factor.value(),
+                              'method': 'savitzky-golay',
+                              'extension': self.f_extension_type,
+                              'n_fit_points': self.f_extension_n_fit_points.value()}],
+                        text='Compute FORC distribution')
         return
 
     def plot_paths(self):
@@ -377,6 +385,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.d_jobs.takeItem(self.current_job)
         self.current_job -= 1
         return
+
+    def is_job_running(self):
+        return not self.queued_jobs.empty()
 
     def update_status(self):
         """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
