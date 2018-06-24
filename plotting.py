@@ -1,6 +1,8 @@
 import matplotlib.cm as cm
 import matplotlib.lines as ml
 import matplotlib.collections as mc
+import matplotlib.ticker as mt
+import mpl_toolkits.axes_grid1 as mpltkag1
 import numpy as np
 import util
 
@@ -98,23 +100,24 @@ def plot_points(ax, forc, coordinates):
 
 def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
     ax.clear()
-    ax.imshow(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
-              extent=forc.get_extent(coordinates),
-              cmap=cmap,
-              origin='lower',
-              interpolation=interpolation)
-
+    im = ax.imshow(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+                   extent=forc.get_extent(coordinates),
+                   cmap=cmap,
+                   origin='lower',
+                   interpolation=interpolation)
+    colorbar(ax, im)
     ax.figure.canvas.draw()
     return
 
 
 def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r', levels=None):
     ax.clear()
-    ax.contourf(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
-                extent=forc.get_extent(coordinates),
-                cmap=cmap,
-                origin='lower',
-                levels=levels)
+    im = ax.contourf(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+                     extent=forc.get_extent(coordinates),
+                     cmap=cmap,
+                     origin='lower',
+                     levels=levels)
+    colorbar(ax, im)
     ax.figure.canvas.draw()
     return
 
@@ -167,7 +170,6 @@ def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
 
 
 def h_axis(ax, coordinates, color='k', alpha=0.3):
-
     if coordinates == 'hhr':
         ax.plot(ax.get_xlim(), (0, 0), color=color, alpha=alpha)
     elif coordinates == 'hchb':
@@ -179,7 +181,6 @@ def h_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hr_axis(ax, coordinates, color='k', alpha=0.3):
-
     if coordinates == 'hhr':
         ax.plot((0, 0), ax.get_ylim(), color=color, alpha=alpha)
     elif coordinates == 'hchb':
@@ -191,7 +192,6 @@ def hr_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hc_axis(ax, coordinates, color='k', alpha=0.3):
-
     if coordinates == 'hhr':
         ax.plot(ax.get_xlim(), -1**np.array(ax.get_xlim()), color=color, alpha=alpha)
     elif coordinates == 'hchb':
@@ -203,7 +203,6 @@ def hc_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hb_axis(ax, coordinates, color='k', alpha=0.3):
-
     if coordinates == 'hhr':
         ax.plot(ax.get_xlim(), ax.get_xlim(), color=color, alpha=alpha)
     elif coordinates == 'hchb':
@@ -211,4 +210,24 @@ def hb_axis(ax, coordinates, color='k', alpha=0.3):
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
+    return
+
+
+def colorbar(ax, im):
+    """Generate a sensible looking colorbar for an image.
+
+    Parameters
+    ----------
+    ax : axes
+        Axes instance to draw the colorbar on. The colorbar is placed to the right of the axes, and is vertically
+        oriented.
+    im : mappable
+        Image, ContourSet, etc to generate the colorbar for.
+    """
+
+    cax = mpltkag1.make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+    cbar = ax.get_figure().colorbar(im, cax=cax)
+    cbar.locator = mt.MaxNLocator(nbins=6)
+    cbar.formatter.set_powerlimits((0, 0))
+    cbar.update_ticks()
     return

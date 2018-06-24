@@ -193,18 +193,21 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                         mask=self.f_paths_mask.currentText(),
                         points=self.f_paths_points.currentText(),
                         cmap=self.f_paths_cmap.currentText())
+        self.tabWidget.setCurrentIndex(0)
         return
 
     def plot_major_loop(self):
         plotting.major_loop(ax=self.p_paths.axes,
                             forc=self._data[-1],
                             color='k')
+        self.tabWidget.setCurrentIndex(0)
         return
 
     def plot_data_points(self):
         plotting.plot_points(ax=self.p_map.axes,
                              forc=self._data[-1],
                              coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contours(self):
@@ -214,26 +217,31 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_hc_axis(self):
         plotting.hc_axis(ax=self.p_map.axes,
                          coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_hb_axis(self):
         plotting.hb_axis(ax=self.p_map.axes,
                          coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_h_axis(self):
         plotting.h_axis(ax=self.p_map.axes,
                         coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_hr_axis(self):
         plotting.hr_axis(ax=self.p_map.axes,
                          coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_heat_moment(self):
@@ -243,6 +251,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
                           cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_heat_rho(self):
@@ -252,6 +261,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
                           cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_heat_rho_uncertainty(self):
@@ -261,6 +271,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
                           cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_heat_temperature(self):
@@ -270,6 +281,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
                           cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contour_moment(self):
@@ -279,6 +291,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contour_rho(self):
@@ -288,6 +301,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contour_rho_uncertainty(self):
@@ -297,6 +311,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contour_temperature(self):
@@ -306,6 +321,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_levels_moment(self):
@@ -314,6 +330,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                                 data_str='m',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_levels_rho(self):
@@ -322,6 +339,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                                 data_str='rho',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_levels_rho_uncertainty(self):
@@ -330,6 +348,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                                 data_str='rho_uncertainty',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_levels_temperature(self):
@@ -338,6 +357,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                                 data_str='t',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
+        self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_curves_moment(self):
@@ -353,6 +373,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def undo(self):
+        del self._data[-1]
+        self.d_jobs.takeItem(self.current_job)
+        self.current_job -= 1
         return
 
     def update_status(self):
