@@ -501,7 +501,7 @@ class PMCForc(ForcBase):
             return
 
         h_extend, hr_extend = np.meshgrid(np.arange(self._h_min - 2*sf*self.step, self._h_min, self.step),
-                                          np.arange(self._hr_min, self._hr_max, self.step))
+                                          np.arange(self._hr_min, self._hr_max+self.step, self.step))
 
         self.h = np.concatenate((h_extend, self.h), axis=1)
         self.hr = np.concatenate((hr_extend, self.hr), axis=1)

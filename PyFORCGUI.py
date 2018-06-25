@@ -189,7 +189,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                              list(),
                              {'sf': self.f_smoothing_factor.value(),
                               'method': 'savitzky-golay',
-                              'extension': self.f_extension_type,
+                              'extension': self.f_extension_type.currentText(),
                               'n_fit_points': self.f_extension_n_fit_points.value()}],
                         text='Compute FORC distribution')
         return
