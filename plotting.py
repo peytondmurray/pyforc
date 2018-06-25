@@ -22,20 +22,14 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
             for i in range(forc.shape[0]):
                 h = forc.h[i]
                 m = forc.m[i]
-                ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]],
-                                      ydata=m[h >= forc.hr[i, 0]],
-                                      color=colors[i]))
+                ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]], ydata=m[h >= forc.hr[i, 0]], color=colors[i]))
         elif mask in ['outline', 'none']:
             for i in range(forc.shape[0]):
-                h = forc.h[i]
-                m = forc.m[i]
-                ax.add_line(ml.Line2D(xdata=h,
-                                      ydata=m,
-                                      color=colors[i]))
+                ax.add_line(ml.Line2D(xdata=forc.h[i], ydata=forc.m[i], color=colors[i]))
 
             if mask == 'outline':
                 h, hr, m = forc.major_loop()
-                ax.plot(h, m, ':', color='r', linewidth=2, alpha=1.0)
+                ax.add_line(ml.Line2D(xdata=h, ydata=m, linestyle=':', color='r', linewidth=2, alpha=1.0))
         else:
             raise ValueError('Invalid mask argument: {}'.format(mask))
 
@@ -45,10 +39,10 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
             for i in range(forc.shape[0]):
                 m[i] = forc.m[i, forc.h[i] >= forc.hr[i, 0]][0]
 
-            ax.plot(hr, m, marker='o', linestyle='', color='grey', markersize=4)
+            ax.add_line(ml.Line2D(xdata=hr, ydata=m, marker='o', linestyle='', color='grey', markersize=4))
 
         elif points == 'all':
-            ax.plot(forc.h, forc.m, marker='o', linestyle='', color='grey', markersize=4)
+            ax.add_line(ml.Line2D(xdata=forc.h, ydata=forc.m, marker='o', linestyle='', color='grey', markersize=4))
 
         ax.autoscale_view()
     else:
@@ -59,14 +53,14 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
 
 def major_loop(ax, forc, color='k'):
     h, _, m = forc.major_loop()
-    ax.plot(h, m, linestyle='-', color=color, marker='o')
+    ax.add_line(ml.Line2D(xdata=h, ydata=m, linestyle='-', color=color, marker='o'))
     ax.figure.canvas.draw()
     return
 
 
-def hhr_space_h_vs_m(ax, forc):
+def hhr_space_major_loop(ax, forc):
     h, hr, _ = forc.major_loop()
-    ax.plot(h, hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3)
+    ax.add_line(ml.Line2D(xdata=h, ydata=hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3))
     ax.figure.canvas.draw()
     return
 
@@ -132,12 +126,6 @@ def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
     return
 
 
-def hhr_line(ax, forc):
-    ax.plot(forc.hr_range(), forc.hr_range(), linestyle='-', color='k')
-    ax.figure.canvas.draw()
-    return
-
-
 def decorate_hm(ax, xlabel=r'$H$', ylabel=r'$M$', xlim=None, ylim=None, legend=False, legend_args=None):
     ax.set(xlabel=xlabel,
            ylabel=ylabel,
@@ -171,9 +159,9 @@ def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
 
 def h_axis(ax, coordinates, color='k', alpha=0.3):
     if coordinates == 'hhr':
-        ax.plot(ax.get_xlim(), (0, 0), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=(0, 0), color=color, alpha=alpha))
     elif coordinates == 'hchb':
-        ax.plot(ax.get_xlim(), -1*np.array(ax.get_xlim()), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=-1*np.array(ax.get_xlim()), color=color, alpha=alpha))
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
@@ -182,9 +170,9 @@ def h_axis(ax, coordinates, color='k', alpha=0.3):
 
 def hr_axis(ax, coordinates, color='k', alpha=0.3):
     if coordinates == 'hhr':
-        ax.plot((0, 0), ax.get_ylim(), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=(0, 0), ydata=ax.get_ylim(), color=color, alpha=alpha))
     elif coordinates == 'hchb':
-        ax.plot(ax.get_ylim(), ax.get_ylim(), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=ax.get_xlim(), color=color, alpha=alpha))
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
@@ -193,9 +181,9 @@ def hr_axis(ax, coordinates, color='k', alpha=0.3):
 
 def hc_axis(ax, coordinates, color='k', alpha=0.3):
     if coordinates == 'hhr':
-        ax.plot(ax.get_xlim(), -1**np.array(ax.get_xlim()), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=-1*np.array(ax.get_xlim()), color=color, alpha=alpha))
     elif coordinates == 'hchb':
-        ax.plot(ax.get_xlim(), (0, 0), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=(0, 0), color=color, alpha=alpha))
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
@@ -204,9 +192,9 @@ def hc_axis(ax, coordinates, color='k', alpha=0.3):
 
 def hb_axis(ax, coordinates, color='k', alpha=0.3):
     if coordinates == 'hhr':
-        ax.plot(ax.get_xlim(), ax.get_xlim(), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=ax.get_xlim(), color=color, alpha=alpha))
     elif coordinates == 'hchb':
-        ax.plot((0, 0), ax.get_xlim(), color=color, alpha=alpha)
+        ax.add_line(ml.Line2D(xdata=(0, 0), ydata=ax.get_ylim(), color=color, alpha=alpha))
     else:
         raise ValueError('Invalid coordinates: {}'.format(coordinates))
     ax.figure.canvas.draw()
@@ -214,7 +202,8 @@ def hb_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def colorbar(ax, im):
-    """Generate a sensible looking colorbar for an image.
+    """Generate a sensible looking colorbar for an image. Removes any colorbars currently drawn by removing
+    all but one axes instance from the figure containing ax.
 
     Parameters
     ----------
@@ -224,6 +213,9 @@ def colorbar(ax, im):
     im : mappable
         Image, ContourSet, etc to generate the colorbar for.
     """
+
+    while len(ax.figure.axes) > 1:
+        ax.figure.delaxes(ax.figure.axes[-1])
 
     cax = mpltkag1.make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cbar = ax.get_figure().colorbar(im, cax=cax)
