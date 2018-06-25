@@ -183,7 +183,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
 
     def gauss(self):
         raise NotImplementedError('Gaussian filtering not implemented')
-        return
 
     def compute_forc_distribution(self):
         self.append_job(job=[self._data[-1].compute_forc_distribution,

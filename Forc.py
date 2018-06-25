@@ -379,8 +379,8 @@ class PMCForc(ForcBase):
                                np.ravel(hb[indices_nonnan]))).T
         data_m = np.ravel(self.m[indices_nonnan])
 
-        self.hc, self.hb = np.meshgrid(np.arange(np.min(hc), np.max(hc), self.step_hchb),
-                                       np.arange(np.min(hb), np.max(hb), self.step_hchb))
+        self.hc, self.hb = np.meshgrid(np.arange(np.min(data_hchb[:, 0]), np.max(data_hchb[:, 0]), self.step_hchb),
+                                       np.arange(np.min(data_hchb[:, 1]), np.max(data_hchb[:, 1]), self.step_hchb))
 
         self.m_hchb = si.griddata(np.array(data_hchb), np.array(data_m), (self.hc, self.hb), method=method)
         if self.T is not None:
@@ -428,14 +428,14 @@ class PMCForc(ForcBase):
 
         _hc, _hb = util.hhr_to_hchb(self.h, self.hr)
 
-        self._h_min = np.nanmin(self.h)
-        self._h_max = np.nanmax(self.h)
-        self._hr_min = np.nanmin(self.hr)
-        self._hr_max = np.nanmax(self.hr)
-        self._hc_min = np.nanmin(self.hc)
-        self._hc_max = np.nanmax(self.hc)
-        self._hb_min = np.nanmin(self.hb)
-        self._hb_max = np.nanmax(self.hb)
+        self._h_min = np.min(self.h)
+        self._h_max = np.max(self.h)
+        self._hr_min = np.min(self.hr)
+        self._hr_max = np.max(self.hr)
+        self._hc_min = np.min(self.hc)
+        self._hc_max = np.max(self.hc)
+        self._hb_min = np.min(self.hb)
+        self._hb_max = np.max(self.hb)
         self._m_min = np.nanmin(self.m)
         self._m_max = np.nanmax(self.m)
 
@@ -517,7 +517,9 @@ class PMCForc(ForcBase):
         if self.T is not None:
             self.T = np.concatenate((h_extend*np.nan, self.T), axis=1)
 
-        self._update_data_range()
+        # Not necessary, as this function should never be called outside compute_forc_distribution,
+        # which returns a new PMCForc instance which does this anyway
+        # self._update_data_range()
 
         return
 
