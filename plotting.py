@@ -100,6 +100,7 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
                    origin='lower',
                    interpolation=interpolation)
     colorbar(ax, im)
+    set_limits(ax, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -112,6 +113,7 @@ def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', 
                      origin='lower',
                      levels=levels)
     colorbar(ax, im)
+    set_limits(ax, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -222,4 +224,23 @@ def colorbar(ax, im):
     cbar.locator = mt.MaxNLocator(nbins=6)
     cbar.formatter.set_powerlimits((0, 0))
     cbar.update_ticks()
+    return
+
+
+def set_limits(ax, mask, coordinates):
+    """Set axis limits appropriately for maps. If mask == 'h<hr' and coordinates == 'hchb', the minimum xlimit is set
+    to 0.
+
+    Parameters
+    ----------
+    ax : axes
+        Axes to adjust.
+    mask : str
+        h<hr or none
+    coordinates : str
+        hhr or hchb
+    """
+
+    if mask == 'h<hr' and coordinates == 'hchb':
+        ax.set_xlim(0, ax.get_xlim()[1])
     return

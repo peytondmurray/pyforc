@@ -366,19 +366,21 @@ class PMCForc(ForcBase):
         return
 
     def _interpolate_hchb(self, method='cubic'):
+        """Interpolate the data (m (and if applicable) T and rho)
+
+        method : str, optional
+            Interpolation method. (the default is 'cubic', but if the interpolated dataset looks messed up, use
+            'linear'.)
+        """
 
         hc, hb = util.hhr_to_hchb(self.h, self.hr)
+        indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.m)))
+        data_hchb = np.vstack((np.ravel(hc[indices_nonnan]),
+                               np.ravel(hb[indices_nonnan]))).T
+        data_m = np.ravel(self.m[indices_nonnan])
 
-        hc_min = np.min(hc)
-        hc_max = np.max(hc)
-        hb_min = np.min(hb)
-        hb_max = np.max(hb)
-
-        self.hc, self.hb = np.meshgrid(np.arange(hc_min, hc_max, self.step_hchb),
-                                       np.arange(hb_min, hb_max, self.step_hchb))
-
-        data_hchb = list(zip(np.ravel(hc), np.ravel(hb)))
-        data_m = np.ravel(self.m)
+        self.hc, self.hb = np.meshgrid(np.arange(np.min(hc), np.max(hc), self.step_hchb),
+                                       np.arange(np.min(hb), np.max(hb), self.step_hchb))
 
         self.m_hchb = si.griddata(np.array(data_hchb), np.array(data_m), (self.hc, self.hb), method=method)
         if self.T is not None:
