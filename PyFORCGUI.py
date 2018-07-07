@@ -35,7 +35,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         log.info("Starting worker thread.")
         self.queued_jobs = mp.Queue()
         self.finished_jobs = mp.Queue()
-        self.worker = worker.WorkerThread(input_queue=self.queued_jobs, output_queue=self.finished_jobs, parent=self)
+        self.worker = worker.WorkerThread(input_queue=self.queued_jobs,
+                                          output_queue=self.finished_jobs,
+                                          parent=self)
         app.aboutToQuit.connect(self.worker.quit)
         self.worker.job_done.connect(self.update_status)
         self.worker.start()
@@ -113,14 +115,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.f_extension_type.currentTextChanged.connect(self._update_extension_widgets)
         return
 
-    def _add_queue_item(self, job, label):
-        """Puts a job into the jobs queue, and adds a corresponding item with loading icon to the jobs display widget.
-        """
-        self.d_jobs.addItem(QtWidgets.QListWidgetItem(icon=QtWidgets.QIcon('plz_wait.png'),
-                                                      text=label))
-        self.jobs.put(job)
-        return
-
     def import_file(self):
         path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a data file:', './test_data/')[0]
         if pathlib.Path(path).is_file():
@@ -147,12 +141,12 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                                                'Manual slope correction value must be a float!')
                 return
 
-            job = [self._data[-1].slope_correction, list(), {'value': value}]
+            job = [Forc.PMCForc.slope_correction, None, {'value': value}]
             text = 'Slope correction: manual'
 
         else:
             if self.f_slope_h_sat.text() == '':
-                job = [self._data[-1].slope_correction, list(), dict()]
+                job = [Forc.PMCForc.slope_correction, None, dict()]
                 text = 'Slope correction: auto'
 
             else:
@@ -165,8 +159,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
                     return
 
                 h_sat = self.f_slope_h_sat.text()
-                job = [self._data[-1].slope_correction,
-                       list(),
+                job = [Forc.PMCForc.slope_correction,
+                       None,
                        {'h_sat': None if self.f_slope_h_sat.text() else float(self.f_slope_h_sat.text())}]
                 text = 'Slope correction: h_sat = {}'.format(h_sat)
 
@@ -175,8 +169,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def normalize(self):
-        self.append_job(job=[self._data[-1].normalize,
-                             list(),
+        self.append_job(job=[Forc.PMCForc.normalize,
+                             None,
                              {'method': 'minmax'}],
                         text='Normalize moment')
         return
@@ -185,8 +179,8 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         raise NotImplementedError('Gaussian filtering not implemented')
 
     def compute_forc_distribution(self):
-        self.append_job(job=[self._data[-1].compute_forc_distribution,
-                             list(),
+        self.append_job(job=[Forc.PMCForc.compute_forc_distribution,
+                             None,
                              {'sf': self.f_smoothing_factor.value(),
                               'method': 'savitzky-golay',
                               'extension': self.f_extension_type.currentText(),
@@ -446,3 +440,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_map_curves_temperature.setEnabled(b)
 
         return
+
+    def get_latest_data(self):
+        return self._data[-1]

@@ -8,7 +8,6 @@ import scipy.ndimage.filters as snf
 import scipy.optimize as so
 import util
 import numba as nb
-import pickle
 
 log = logging.getLogger(__name__)
 
@@ -42,12 +41,38 @@ class ForcBase(abc.ABC):
         self.h = None
         self.hr = None
         self.m = None
-        self.T = None
+        self.temperature = None
         self.drift_points = None
 
         return
 
 
+spec = [('_h_min ', nb.float32),
+        ('_h_max ', nb.float32),
+        ('_hr_min', nb.float32),
+        ('_hr_max', nb.float32),
+        ('_hc_min', nb.float32),
+        ('_hc_max', nb.float32),
+        ('_hb_min', nb.float32),
+        ('_hb_max', nb.float32),
+        ('_m_min ', nb.float32),
+        ('_m_max ', nb.float32),
+        ('_T_min ', nb.float32),
+        ('_T_max ', nb.float32),
+        ('h', nb.float32[:]),
+        ('hr', nb.float32[:]),
+        ('hc', nb.float32[:]),
+        ('hb', nb.float32[:]),
+        ('m', nb.float32[:]),
+        ('m_hchb', nb.float32[:]),
+        ('rho', nb.float32[:]),
+        ('rho_hchb', nb.float32[:]),
+        ('temperature', nb.float32[:]),
+        ('temperature_hchb', nb.float32[:]),
+        ('rho_uncertainty', nb.float32[:]),
+        ('rho_uncertainty_hchb', nb.float32[:]),
+        ('step', nb.float32)]
+@nb.jitclass(spec)
 class PMCForc(ForcBase):
     """FORC class for PMC-formatted data. See the PMC format spec for more info. Magnetization (and, if present,
     temperature) data is optionally drift corrected upon instantiation before being interpolated on a
@@ -82,13 +107,13 @@ class PMCForc(ForcBase):
             self.h = None             # Field
             self.hr = None            # Reversal field
             self.m = None             # Moment
-            self.T = None             # Temperature (if any)
+            self.temperature = None             # Temperature (if any)
             self.rho = None           # FORC distribution.
 
             self.hc = None
             self.hb = None
             self.m_hchb = None
-            self.T_hchb = None
+            self.temperature_hchb = None
             self.rho_hchb = None
             self._from_input_arrays(h, hr, m, T, rho)
             self.step = self._determine_step()
@@ -97,14 +122,14 @@ class PMCForc(ForcBase):
             self.h = []               # Field
             self.hr = []              # Reversal field
             self.m = []               # Moment
-            self.T = None             # Temperature (if any)
+            self.temperature = None             # Temperature (if any)
             self.rho = None           # FORC distribution.
             self.drift_points = []    # Drift points
 
             self.hc = None
             self.hb = None
             self.m_hchb = None
-            self.T_hchb = None
+            self.temperature_hchb = None
             self.rho_hchb = None
 
             self._from_file(path)
@@ -133,7 +158,7 @@ class PMCForc(ForcBase):
             self.m = m
 
             if isinstance(T, np.ndarray):
-                self.T = T
+                self.temperature = T
             elif T is not None:
                 raise IOError('Invalid input type for T: {}'.format(type(T)))
 
@@ -280,15 +305,15 @@ class PMCForc(ForcBase):
             _h.append(float(split_line[0]))
             _hr.append(_h[0])
             _m.append(float(split_line[1]))
-            if self.T is not None:
+            if self.temperature is not None:
                 _T.append(float(split_line[2]))
             i += 1
 
         self.h.append(_h)
         self.hr.append(_hr)
         self.m.append(_m)
-        if self.T is not None:
-            self.T.append(_T)
+        if self.temperature is not None:
+            self.temperature.append(_T)
 
         return len(_h)
 
@@ -353,9 +378,9 @@ class PMCForc(ForcBase):
         data_m = [self.m[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
 
         _m = si.griddata(np.array(data_hhr), np.array(data_m), (_h, _hr), method=method)
-        if self.T is not None:
-            data_T = [self.T[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
-            self.T = si.griddata(np.array(data_hhr), np.array(data_T), (_h, _hr), method=method)
+        if self.temperature is not None:
+            data_T = [self.temperature[i][j] for i in range(len(self.h)) for j in range(len(self.h[i]))]
+            self.temperature = si.griddata(np.array(data_hhr), np.array(data_T), (_h, _hr), method=method)
 
         _m[_h < _hr] = np.nan
 
@@ -375,21 +400,24 @@ class PMCForc(ForcBase):
 
         hc, hb = util.hhr_to_hchb(self.h, self.hr)
         indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.m)))
-        data_hchb = np.vstack((np.ravel(hc[indices_nonnan]),
-                               np.ravel(hb[indices_nonnan]))).T
+        data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
         data_m = np.ravel(self.m[indices_nonnan])
 
         self.hc, self.hb = np.meshgrid(np.arange(np.min(data_hchb[:, 0]), np.max(data_hchb[:, 0]), self.step_hchb),
                                        np.arange(np.min(data_hchb[:, 1]), np.max(data_hchb[:, 1]), self.step_hchb))
 
-        self.m_hchb = si.griddata(np.array(data_hchb), np.array(data_m), (self.hc, self.hb), method=method)
-        if self.T is not None:
-            data_T = np.ravel(self.T)
-            self.T = si.griddata(np.array(data_hchb), data_T, (self.hc, self.hb), method=method)
+        self.m_hchb = si.griddata(data_hchb, data_m, (self.hc, self.hb), method=method)
+        if self.temperature is not None:
+            indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.temperature)))
+            data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
+            data_T = np.ravel(self.temperature[indices_nonnan])
+            self.temperature = si.griddata(data_hchb, data_T, (self.hc, self.hb), method=method)
 
         if self.rho is not None:
-            data_rho = np.ravel(self.rho)
-            self.rho_hchb = si.griddata(np.array(data_hchb), data_rho, (self.hc, self.hb), method=method)
+            indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.rho)))
+            data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
+            data_rho = np.ravel(self.rho[indices_nonnan])
+            self.rho_hchb = si.griddata(data_hchb, data_rho, (self.hc, self.hb), method=method)
 
         return
 
@@ -439,12 +467,12 @@ class PMCForc(ForcBase):
         self._m_min = np.nanmin(self.m)
         self._m_max = np.nanmax(self.m)
 
-        if self.T is None or np.all(np.isnan(self.T)):
+        if self.temperature is None or np.all(np.isnan(self.temperature)):
             self._T_min = np.nan
             self._T_max = np.nan
         else:
-            self._T_min = np.nanmin(self.T)
-            self._T_max = np.nanmax(self.T)
+            self._T_min = np.nanmin(self.temperature)
+            self._T_max = np.nanmax(self.temperature)
 
         return
 
@@ -514,8 +542,8 @@ class PMCForc(ForcBase):
         else:
             raise NotImplementedError
 
-        if self.T is not None:
-            self.T = np.concatenate((h_extend*np.nan, self.T), axis=1)
+        if self.temperature is not None:
+            self.temperature = np.concatenate((h_extend*np.nan, self.temperature), axis=1)
 
         # Not necessary, as this function should never be called outside compute_forc_distribution,
         # which returns a new PMCForc instance which does this anyway
@@ -557,7 +585,7 @@ class PMCForc(ForcBase):
         else:
             raise NotImplementedError("method {} not implemented for FORC distribution calculation".format(method))
 
-        return PMCForc(h=self.h, hr=self.hr, m=self.m, rho=rho, T=self.T)
+        return PMCForc(h=self.h, hr=self.hr, m=self.m, rho=rho, T=self.temperature)
 
     @classmethod
     def _extend_flat(cls, h, m):
@@ -632,7 +660,7 @@ class PMCForc(ForcBase):
                 popt, _ = so.curve_fit(util.line, h_gt_h_sat, average_m)
                 value = popt[0]
 
-        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.T, rho=self.rho)
+        return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.temperature, rho=self.rho)
 
     def get_masked(self, data, mask, coordinates):
         mask = mask is True or mask == 'h<hr'
@@ -675,7 +703,7 @@ class PMCForc(ForcBase):
                            hr=self.hr,
                            m=1-2*(np.nanmax(self.m)-self.m)/(np.nanmax(self.m)-np.nanmin(self.m)),
                            rho=self.rho,
-                           T=self.T)
+                           T=self.temperature)
         else:
             raise NotImplementedError
 
