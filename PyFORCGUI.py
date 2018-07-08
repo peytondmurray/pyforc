@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 import PyFORCGUIBase
 import multiprocessing as mp
 import worker
@@ -23,21 +23,20 @@ log = logging.getLogger(__name__)
 
 class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
 
+    send_latest_data = QtCore.pyqtSignal()
+
     def __init__(self, app):
         QtWidgets.QMainWindow.__init__(self)
         self.setupUi(self)
         self._setup_buttons()
 
-        self._data = []
         self.current_job = 0
 
         # Set up thread which does work for the GUI behind the scenes
         log.info("Starting worker thread.")
         self.queued_jobs = mp.Queue()
-        self.finished_jobs = mp.Queue()
-        self.worker = worker.WorkerThread(input_queue=self.queued_jobs,
-                                          output_queue=self.finished_jobs,
-                                          parent=self)
+        self.data_queue = mp.Queue()
+        self.worker = worker.WorkerThread(input_queue=self.queued_jobs, data_queue=self.data_queue, parent=self)
         app.aboutToQuit.connect(self.worker.quit)
         self.worker.job_done.connect(self.update_status)
         self.worker.start()
@@ -189,8 +188,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_paths(self):
+        self.send_latest_data.emit()
         plotting.h_vs_m(ax=self.p_paths.axes,
-                        forc=self._data[-1],
+                        forc=self.data_queue.get(),
                         mask=self.f_paths_mask.currentText(),
                         points=self.f_paths_points.currentText(),
                         cmap=self.f_paths_cmap.currentText())
@@ -198,22 +198,25 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_major_loop(self):
+        self.send_latest_data.emit()
         plotting.major_loop(ax=self.p_paths.axes,
-                            forc=self._data[-1],
+                            forc=self.data_queue.get(),
                             color='k')
         self.tabWidget.setCurrentIndex(0)
         return
 
     def plot_data_points(self):
+        self.send_latest_data.emit()
         plotting.plot_points(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_contours(self):
+        self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              data_str='m',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
@@ -246,8 +249,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_moment(self):
+        self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
-                          forc=self._data[-1],
+                          forc=self.data_queue.get(),
                           data_str='m',
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
@@ -256,8 +260,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_rho(self):
+        self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
-                          forc=self._data[-1],
+                          forc=self.data_queue.get(),
                           data_str='rho',
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
@@ -266,8 +271,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_rho_uncertainty(self):
+        self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
-                          forc=self._data[-1],
+                          forc=self.data_queue.get(),
                           data_str='rho_uncertainty',
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
@@ -276,8 +282,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_temperature(self):
+        self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
-                          forc=self._data[-1],
+                          forc=self.data_queue.get(),
                           data_str='t',
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
@@ -286,8 +293,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_moment(self):
+        self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              data_str='m',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
@@ -296,8 +304,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_rho(self):
+        self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              data_str='rho',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
@@ -306,8 +315,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_rho_uncertainty(self):
+        self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              data_str='rho_uncertainty',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
@@ -316,8 +326,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_temperature(self):
+        self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
-                             forc=self._data[-1],
+                             forc=self.data_queue.get(),
                              data_str='t',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
@@ -326,8 +337,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_moment(self):
+        self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
-                                forc=self._data[-1],
+                                forc=self.data_queue.get(),
                                 data_str='m',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
@@ -335,8 +347,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_rho(self):
+        self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
-                                forc=self._data[-1],
+                                forc=self.data_queue.get(),
                                 data_str='rho',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
@@ -344,8 +357,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_rho_uncertainty(self):
+        self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
-                                forc=self._data[-1],
+                                forc=self.data_queue.get(),
                                 data_str='rho_uncertainty',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
@@ -353,8 +367,9 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_temperature(self):
+        self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
-                                forc=self._data[-1],
+                                forc=self.data_queue.get(),
                                 data_str='t',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
@@ -374,9 +389,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def undo(self):
-        del self._data[-1]
-        self.d_jobs.takeItem(self.current_job)
-        self.current_job -= 1
+        raise NotImplementedError
+        # del self._data[-1]
+        # self.d_jobs.takeItem(self.current_job)
+        # self.current_job -= 1
         return
 
     def is_job_running(self):
@@ -386,11 +402,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
 
         """
-        result = self.finished_jobs.get()
-        if isinstance(result, Forc.ForcBase):
-            self._data.append(result)
-            if len(self._data) > 0:
-                self._enable_plotting_buttons(True)
+        self._enable_plotting_buttons(self.worker.get_n_data() > 0)
         self.d_jobs.item(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
         self.current_job += 1
         return
@@ -440,6 +452,3 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_map_curves_temperature.setEnabled(b)
 
         return
-
-    def get_latest_data(self):
-        return self._data[-1]
