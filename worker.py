@@ -11,7 +11,6 @@ class WorkerThread(QtCore.QThread):
         self.input_queue = input_queue
         self.data_queue = data_queue
         self._data = []
-
         self.parent().send_latest_data.connect(self.queue_latest_data)
         return
 
@@ -28,6 +27,7 @@ class WorkerThread(QtCore.QThread):
         self.running = True
         while self.running:
             self.compute()
+        self.running = False
         return
 
     def queue_latest_data(self):
@@ -36,3 +36,7 @@ class WorkerThread(QtCore.QThread):
 
     def get_n_data(self):
         return len(self._data)
+
+    def undo(self):
+        del self._data[-1]
+        return

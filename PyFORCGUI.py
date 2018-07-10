@@ -285,7 +285,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
                           forc=self.data_queue.get(),
-                          data_str='t',
+                          data_str='temperature',
                           mask=self.f_2d_mask.currentText(),
                           coordinates=self.coordinates(),
                           cmap=self.f_2d_cmap.text())
@@ -329,7 +329,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
-                             data_str='t',
+                             data_str='temperature',
                              mask=self.f_2d_mask.currentText(),
                              coordinates=self.coordinates(),
                              cmap=self.f_2d_cmap.text())
@@ -370,29 +370,55 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
                                 forc=self.data_queue.get(),
-                                data_str='t',
+                                data_str='temperature',
                                 mask=self.f_2d_mask.currentText(),
                                 coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_curves_moment(self):
+        self.send_latest_data.emit()
+        plotting.map_into_curves(ax=self.p_map_in_paths.axes,
+                                 forc=self.data_queue.get(),
+                                 data_str='m',
+                                 mask=self.f_2d_mask.currentText(),
+                                 interpolation=None)
+        self.tabWidget.setCurrentIndex(2)
         return
 
     def plot_curves_rho(self):
+        self.send_latest_data.emit()
+        plotting.map_into_curves(ax=self.p_map_in_paths.axes,
+                                 forc=self.data_queue.get(),
+                                 data_str='rho',
+                                 mask=self.f_2d_mask.currentText(),
+                                 interpolation=None)
+        self.tabWidget.setCurrentIndex(2)
         return
 
     def plot_curves_rho_uncertainty(self):
+        self.send_latest_data.emit()
+        plotting.map_into_curves(ax=self.p_map_in_paths.axes,
+                                 forc=self.data_queue.get(),
+                                 data_str='rho_uncertainty',
+                                 mask=self.f_2d_mask.currentText(),
+                                 interpolation=None)
+        self.tabWidget.setCurrentIndex(2)
         return
 
     def plot_curves_temperature(self):
+        self.send_latest_data.emit()
+        plotting.map_into_curves(ax=self.p_map_in_paths.axes,
+                                 forc=self.data_queue.get(),
+                                 data_str='temperature',
+                                 mask=self.f_2d_mask.currentText(),
+                                 interpolation=None)
+        self.tabWidget.setCurrentIndex(2)
         return
 
     def undo(self):
-        raise NotImplementedError
-        # del self._data[-1]
-        # self.d_jobs.takeItem(self.current_job)
-        # self.current_job -= 1
+        self.worker.undo()
+        self.d_jobs.takeItem(self.d_jobs.count()-1)
         return
 
     def is_job_running(self):

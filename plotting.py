@@ -3,6 +3,8 @@ import matplotlib.lines as ml
 import matplotlib.collections as mc
 import matplotlib.ticker as mt
 import mpl_toolkits.axes_grid1 as mpltkag1
+import matplotlib.tri as mtri
+import matplotlib.pyplot as plt
 import numpy as np
 import util
 
@@ -223,3 +225,71 @@ def colorbar(ax, im):
     cbar.formatter.set_powerlimits((0, 0))
     cbar.update_ticks()
     return
+
+
+def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r'):
+
+    # _h = forc.get_masked(forc.h, mask=mask, coordinates='hhr').ravel()
+    # _hr = forc.get_masked(forc.hr, mask=mask, coordinates='hhr').ravel()
+    _h = forc.h.ravel()
+    _m = forc.get_masked(forc.m, mask=mask, coordinates='hhr').ravel()
+    _z = forc.get_masked(forc.get_data(data_str, coordinates='hhr'), mask=mask, coordinates='hhr').ravel()
+
+    # The sum of a nan and anything is a nan. This masks all nan elements across all three arrays.
+    indices_non_nan = np.logical_not(np.isnan(_h+_m+_z))
+
+    _h = _h[indices_non_nan]
+    _m = _m[indices_non_nan]
+    _z = _z[indices_non_nan]
+
+    triang = mtri.Triangulation(_h, _m)
+    tri_mask = triangulation_mask(_h, triang.triangles, max_edge_length=1.5*forc.step)
+    triang.set_mask(tri_mask)
+
+    if interpolation is None:
+        pass
+    elif interpolation == 'linear':
+        raise NotImplementedError
+        # TODO generate H-M meshgrid, remove anything outside the concave hull of the loop. Then feed into a
+        # mtri.LinearTriInterpolator?
+    elif interpolation in ['cubic', 'geom', 'min_E']:
+        raise NotImplementedError
+
+    im = ax.tripcolor(triang, _z, shading="gouraud", cmap=cmap)
+    colorbar(ax, im)
+
+    return
+
+
+def triangulation_mask(h, triangles, max_edge_length):
+    """Create a mask to apply to a triangulation. Without this, 2D delaunay triangulation on a (H, M) space Forc
+    dataset results in a convex hull, filling in points outside the hysteresis loop (that weren't measured). This
+    mask ensures that no triangles created by the delaunay triangulator have an edge length longer than the field
+    step in (H, Hr) space, so only points next to each other in the H-direction can be connected.
+
+    Parameters
+    ----------
+    h : ndarray
+        1D array of H-values used to create the triangulation
+    triangles : ndarray of 3-tuples
+        Array of triangles. Each triangle is a 3-tuple of indices of points in the array used to create the
+        triangulation. See matplotlib.tri.Triangulation.triangles
+    max_edge_length : float
+        This is the max edge length of any triangle in the H-direction. fieldstep < max_edge_length < 2*fieldstep
+        for this to work.
+    Returns
+    -------
+    ndarray
+        Array of booleans corresponding to the triangles to mask.
+    """
+
+
+    mask = np.zeros(triangles.shape[0])
+
+    for i, (a, b, c) in enumerate(triangles):
+        d0 = h[a] - h[b]
+        d1 = h[b] - h[c]
+        d2 = h[c] - h[a]
+        mask[i] = np.max(np.abs([d0, d1, d2])) > max_edge_length
+
+    return mask

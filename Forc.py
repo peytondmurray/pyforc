@@ -687,7 +687,7 @@ class PMCForc(ForcBase):
 
     def get_data(self, data_str, coordinates):
         data_str = data_str.lower()
-        if data_str in ['m', 'rho', 'rho_uncertainty', 't']:
+        if data_str in ['m', 'rho', 'rho_uncertainty', 'temperature']:
             if coordinates == 'hhr':
                 return getattr(self, data_str)
             elif coordinates == 'hchb':
