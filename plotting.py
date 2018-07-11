@@ -9,14 +9,17 @@ import numpy as np
 import util
 
 
-def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
+def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis', alpha=1.0):
 
     mask = mask.lower()
     points = points.lower()
     cmap = cmap.lower()
 
-    cmap = cm.get_cmap(cmap)
-    colors = [cmap(x) for x in np.linspace(0, 0.4, forc.shape[0])]
+    if cmap == 'none':
+        colors = ['k' for _ in range(forc.shape[0])]
+    else:
+        cmap = cm.get_cmap(cmap)
+        colors = [cmap(x) for x in np.linspace(0, 0.4, forc.shape[0])]
 
     if points in ['none', 'reversal']:
 
@@ -24,14 +27,25 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
             for i in range(forc.shape[0]):
                 h = forc.h[i]
                 m = forc.m[i]
-                ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]], ydata=m[h >= forc.hr[i, 0]], color=colors[i]))
+                ax.add_line(ml.Line2D(xdata=h[h >= forc.hr[i, 0]],
+                                      ydata=m[h >= forc.hr[i, 0]],
+                                      color=colors[i],
+                                      alpha=alpha))
         elif mask in ['outline', 'none']:
             for i in range(forc.shape[0]):
-                ax.add_line(ml.Line2D(xdata=forc.h[i], ydata=forc.m[i], color=colors[i]))
+                ax.add_line(ml.Line2D(xdata=forc.h[i],
+                                      ydata=forc.m[i],
+                                      color=colors[i],
+                                      alpha=alpha))
 
             if mask == 'outline':
                 h, hr, m = forc.major_loop()
-                ax.add_line(ml.Line2D(xdata=h, ydata=m, linestyle=':', color='r', linewidth=2, alpha=1.0))
+                ax.add_line(ml.Line2D(xdata=h,
+                                      ydata=m,
+                                      linestyle=':',
+                                      color='r',
+                                      linewidth=2,
+                                      alpha=alpha))
         else:
             raise ValueError('Invalid mask argument: {}'.format(mask))
 
@@ -41,10 +55,22 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis'):
             for i in range(forc.shape[0]):
                 m[i] = forc.m[i, forc.h[i] >= forc.hr[i, 0]][0]
 
-            ax.add_line(ml.Line2D(xdata=hr, ydata=m, marker='o', linestyle='', color='grey', markersize=4))
+            ax.add_line(ml.Line2D(xdata=hr,
+                                  ydata=m,
+                                  marker='o',
+                                  linestyle='',
+                                  color='grey',
+                                  markersize=4,
+                                  alpha=alpha))
 
         elif points == 'all':
-            ax.add_line(ml.Line2D(xdata=forc.h, ydata=forc.m, marker='o', linestyle='', color='grey', markersize=4))
+            ax.add_line(ml.Line2D(xdata=forc.h,
+                                  ydata=forc.m,
+                                  marker='o',
+                                  linestyle='',
+                                  color='grey',
+                                  markersize=4,
+                                  alpha=alpha))
 
         ax.autoscale_view()
     else:
@@ -96,11 +122,15 @@ def plot_points(ax, forc, coordinates):
 
 def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
     ax.clear()
-    im = ax.imshow(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+    data = forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates)
+    vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
+    im = ax.imshow(data,
                    extent=forc.get_extent(coordinates),
                    cmap=cmap,
                    origin='lower',
-                   interpolation=interpolation)
+                   interpolation=interpolation,
+                   vmin=vmin,
+                   vmax=vmax)
     colorbar(ax, im)
     ax.figure.canvas.draw()
     return
@@ -108,11 +138,15 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
 
 def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r', levels=None):
     ax.clear()
-    im = ax.contourf(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
+    data = forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates)
+    vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
+    im = ax.contourf(data,
                      extent=forc.get_extent(coordinates),
                      cmap=cmap,
                      origin='lower',
-                     levels=levels)
+                     levels=levels,
+                     vmin=vmin,
+                     vmax=vmax)
     colorbar(ax, im)
     ax.figure.canvas.draw()
     return
@@ -228,6 +262,30 @@ def colorbar(ax, im):
 
 
 def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r'):
+    """Plots a quantity into the reversal curves in (H, M) space.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes to plot the map on
+    forc : Forc
+        Forc instance containing relevant data
+    data_str : str
+        One of ['m', 'rho', 'rho_uncertainty', 'temperature']
+    mask : str or bool
+        True or 'H<Hr' will mask any values for which H<Hr. False shows all data, including dataset extension.
+    interpolation : str, optional
+        Interpolates the map in the paths to make the map smooth. Not currently implemented.
+        (the default is None, which doesn't interpolate.)
+    cmap : str, optional
+        Colormap to use. Choose from anything in matplotlib or colorcet.
+        (the default is 'RdBu_r', which is a perceptually uniform diverging colormap good for M and rho values.)
+
+    Raises
+    ------
+    NotImplementedError
+        If interpolation is anything but the default None.
+    """
 
     ax.clear()
     _h = forc.h.ravel()
@@ -248,15 +306,19 @@ def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r')
     if interpolation is None:
         pass
     elif interpolation == 'linear':
+        # triang = mtri.LinearTriInterpolator(triang, z)
         raise NotImplementedError
         # TODO generate H-M meshgrid, remove anything outside the concave hull of the loop. Then feed into a
         # mtri.LinearTriInterpolator?
     elif interpolation in ['cubic', 'geom', 'min_E']:
         raise NotImplementedError
 
-    im = ax.tripcolor(triang, _z, shading="gouraud", cmap=cmap)
+    vmin, vmax = symmetrize_bounds(np.nanmin(_z), np.nanmax(_z))
+    im = ax.tripcolor(triang, _z, shading="gouraud", cmap=cmap, vmin=vmin, vmax=vmax)
     colorbar(ax, im)
     ax.figure.canvas.draw()
+
+    h_vs_m(ax, forc, mask=mask, points='none', cmap='none', alpha=0.3)
 
     return
 
@@ -283,7 +345,6 @@ def triangulation_mask(h, triangles, max_edge_length):
         Array of booleans corresponding to the triangles to mask.
     """
 
-
     mask = np.zeros(triangles.shape[0])
 
     for i, (a, b, c) in enumerate(triangles):
@@ -293,3 +354,26 @@ def triangulation_mask(h, triangles, max_edge_length):
         mask[i] = np.max(np.abs([d0, d1, d2])) > max_edge_length
 
     return mask
+
+
+def symmetrize_bounds(vmin, vmax):
+    """Takes a pair of floats, the min and max z-values of a 2D map. Returns a pair of floats centered about 0.
+    If vmin is not negative and vmax is not positive, then no symmetrization is done.
+
+    Parameters
+    ----------
+    vmin : float
+        Min z value
+    vmax : float
+        Max z value
+    Returns
+    -------
+    2-tuple of floats
+        New (vmin, vmax) values for plotting.
+    """
+
+    if vmin < 0 and vmax > 0:
+        largest_bound = np.nanmax(np.abs([vmin, vmax]))
+        return (-largest_bound, largest_bound)
+    else:
+        return (vmin, vmax)

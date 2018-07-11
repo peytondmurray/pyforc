@@ -555,7 +555,7 @@ class PMCForc(ForcBase):
     def _compute_forc_sg(cls, m, sf, step_x, step_y):
         kernel = cls._sg_kernel(sf, step_x, step_y)
         # return snf.convolve(m, kernel, mode='constant', cval=np.nan)
-        return util.fast_symmetric_convolve(m, kernel)
+        return -0.5*util.fast_symmetric_convolve(m, kernel)
 
     @staticmethod
     def _sg_kernel(sf, step_x, step_y):
