@@ -417,8 +417,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def undo(self):
-        self.worker.undo()
-        self.d_jobs.takeItem(self.d_jobs.count()-1)
+        if self.d_jobs.count() > 0:
+            self.worker.undo()
+            self.d_jobs.takeItem(self.d_jobs.count()-1)
+            self.current_job -= 1
         return
 
     def is_job_running(self):

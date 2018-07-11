@@ -229,8 +229,7 @@ def colorbar(ax, im):
 
 def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r'):
 
-    # _h = forc.get_masked(forc.h, mask=mask, coordinates='hhr').ravel()
-    # _hr = forc.get_masked(forc.hr, mask=mask, coordinates='hhr').ravel()
+    ax.clear()
     _h = forc.h.ravel()
     _m = forc.get_masked(forc.m, mask=mask, coordinates='hhr').ravel()
     _z = forc.get_masked(forc.get_data(data_str, coordinates='hhr'), mask=mask, coordinates='hhr').ravel()
@@ -257,6 +256,7 @@ def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r')
 
     im = ax.tripcolor(triang, _z, shading="gouraud", cmap=cmap)
     colorbar(ax, im)
+    ax.figure.canvas.draw()
 
     return
 

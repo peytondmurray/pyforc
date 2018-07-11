@@ -663,12 +663,12 @@ class PMCForc(ForcBase):
         return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.temperature, rho=self.rho)
 
     def get_masked(self, data, mask, coordinates):
-        mask = mask is True or mask == 'h<hr'
+        mask = mask is True or mask.lower() == 'h<hr'
 
         if mask:
             masked_data = data.copy()
             if coordinates == 'hhr':
-                masked_data[self.h < self.hr-self.step] = np.nan
+                masked_data[self.h < self.hr-0.5*self.step] = np.nan
             elif coordinates == 'hchb':
                 masked_data[self.hc < 0] = np.nan
             else:
