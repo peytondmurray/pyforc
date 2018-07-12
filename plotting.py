@@ -1,10 +1,11 @@
 import matplotlib.cm as cm
 import matplotlib.lines as ml
 import matplotlib.collections as mc
-import matplotlib.ticker as mt
+import matplotlib.ticker as mti
 import mpl_toolkits.axes_grid1 as mpltkag1
 import matplotlib.tri as mtri
 import matplotlib.pyplot as plt
+import matplotlib.transforms as mtra
 import numpy as np
 import util
 
@@ -122,42 +123,60 @@ def plot_points(ax, forc, coordinates):
 
 def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
     ax.clear()
-    data = forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates)
+    data = forc.get_masked(forc.get_data(data_str), mask)
     vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
     im = ax.imshow(data,
-                   extent=forc.get_extent(coordinates),
+                   extent=forc.get_extent('hhr'),
                    cmap=cmap,
                    origin='lower',
                    interpolation=interpolation,
                    vmin=vmin,
                    vmax=vmax)
+    if coordinates == 'hchb':
+        im.set_transform(hhr_to_hchb_transform() + ax.transData)
     colorbar(ax, im)
+    set_map_limits(ax, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
 
 def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r', levels=None):
     ax.clear()
-    data = forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates)
+    data = forc.get_masked(forc.get_data(data_str), mask)
     vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
     im = ax.contourf(data,
-                     extent=forc.get_extent(coordinates),
+                     extent=forc.get_extent('hhr'),
                      cmap=cmap,
                      origin='lower',
                      levels=levels,
                      vmin=vmin,
                      vmax=vmax)
+    if coordinates == 'hchb':
+        im.set_transform(hhr_to_hchb_transform() + ax.transData)
     colorbar(ax, im)
+    set_map_limits(ax, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
 
 def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
-    ax.contour(forc.get_masked(forc.get_data(data_str, coordinates), mask, coordinates),
-               extent=forc.get_extent(coordinates),
+
+    # TODO this might not work with 'transform' keyword
+
+    if coordinates == 'hhr':
+        transform = ax.transData
+    elif coordinates == 'hchb':
+        transform = hhr_to_hchb_transform() + ax.transData
+    else:
+        raise ValueError('Invalid coordinates type.')
+
+    ax.contour(forc.get_masked(forc.get_data(data_str), mask),
+               extent=forc.get_extent('hhr'),
                origin='lower',
                levels=levels,
-               colors='k')
+               colors='k',
+               transform=transform)
+    set_map_limits(ax, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -255,7 +274,7 @@ def colorbar(ax, im):
 
     cax = mpltkag1.make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cbar = ax.get_figure().colorbar(im, cax=cax)
-    cbar.locator = mt.MaxNLocator(nbins=6)
+    cbar.locator = mti.MaxNLocator(nbins=6)
     cbar.formatter.set_powerlimits((0, 0))
     cbar.update_ticks()
     return
@@ -289,8 +308,8 @@ def map_into_curves(ax, forc, data_str, mask, interpolation=None, cmap='RdBu_r')
 
     ax.clear()
     _h = forc.h.ravel()
-    _m = forc.get_masked(forc.m, mask=mask, coordinates='hhr').ravel()
-    _z = forc.get_masked(forc.get_data(data_str, coordinates='hhr'), mask=mask, coordinates='hhr').ravel()
+    _m = forc.get_masked(forc.m, mask=mask).ravel()
+    _z = forc.get_masked(forc.get_data(data_str), mask=mask).ravel()
 
     # The sum of a nan and anything is a nan. This masks all nan elements across all three arrays.
     indices_non_nan = np.logical_not(np.isnan(_h+_m+_z))
@@ -377,3 +396,18 @@ def symmetrize_bounds(vmin, vmax):
         return (-largest_bound, largest_bound)
     else:
         return (vmin, vmax)
+
+
+def hhr_to_hchb_transform():
+    return mtra.Affine2D(matrix=np.array([[0.5, -0.5, 0], [0.5, 0.5, 0], [0, 0, 1]]))
+
+
+def set_map_limits(ax, mask, coordinates):
+
+    if mask is True or mask.lower() == 'h<hr':
+        if coordinates == 'hhr':
+            return
+        if coordinates == 'hchb':
+            ax.set_xlim([0, ax.get_xlim()[1]])
+
+    return

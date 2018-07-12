@@ -51,26 +51,16 @@ class ForcBase(abc.ABC):
 #         ('_h_max ', nb.float32),
 #         ('_hr_min', nb.float32),
 #         ('_hr_max', nb.float32),
-#         ('_hc_min', nb.float32),
-#         ('_hc_max', nb.float32),
-#         ('_hb_min', nb.float32),
-#         ('_hb_max', nb.float32),
 #         ('_m_min ', nb.float32),
 #         ('_m_max ', nb.float32),
 #         ('_T_min ', nb.float32),
 #         ('_T_max ', nb.float32),
 #         ('h', nb.float32[:]),
 #         ('hr', nb.float32[:]),
-#         ('hc', nb.float32[:]),
-#         ('hb', nb.float32[:]),
 #         ('m', nb.float32[:]),
-#         ('m_hchb', nb.float32[:]),
 #         ('rho', nb.float32[:]),
-#         ('rho_hchb', nb.float32[:]),
 #         ('temperature', nb.float32[:]),
-#         ('temperature_hchb', nb.float32[:]),
 #         ('rho_uncertainty', nb.float32[:]),
-#         ('rho_uncertainty_hchb', nb.float32[:]),
 #         ('step', nb.float32)]
 # @nb.jitclass(spec)
 class PMCForc(ForcBase):
@@ -94,10 +84,6 @@ class PMCForc(ForcBase):
         self._h_max = np.nan
         self._hr_min = np.nan
         self._hr_max = np.nan
-        self._hc_min = np.nan
-        self._hc_max = np.nan
-        self._hb_min = np.nan
-        self._hb_max = np.nan
         self._m_min = np.nan
         self._m_max = np.nan
         self._T_min = np.nan
@@ -110,11 +96,6 @@ class PMCForc(ForcBase):
             self.temperature = None             # Temperature (if any)
             self.rho = None           # FORC distribution.
 
-            self.hc = None
-            self.hb = None
-            self.m_hchb = None
-            self.temperature_hchb = None
-            self.rho_hchb = None
             self._from_input_arrays(h, hr, m, T, rho)
             self.step = self._determine_step()
 
@@ -125,12 +106,6 @@ class PMCForc(ForcBase):
             self.temperature = None             # Temperature (if any)
             self.rho = None           # FORC distribution.
             self.drift_points = []    # Drift points
-
-            self.hc = None
-            self.hb = None
-            self.m_hchb = None
-            self.temperature_hchb = None
-            self.rho_hchb = None
 
             self._from_file(path)
             if drift:
@@ -146,7 +121,6 @@ class PMCForc(ForcBase):
         else:
             raise IOError('PMCForc can only be specified from valid path or from numpy arrays!')
 
-        self._interpolate_hchb(method=method)
         self._update_data_range()
 
         return
@@ -390,38 +364,8 @@ class PMCForc(ForcBase):
 
         return
 
-    def _interpolate_hchb(self, method='cubic'):
-        """Interpolate the data (m (and if applicable) T and rho)
-
-        method : str, optional
-            Interpolation method. (the default is 'cubic', but if the interpolated dataset looks messed up, use
-            'linear'.)
-        """
-
-        hc, hb = util.hhr_to_hchb(self.h, self.hr)
-        indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.m)))
-        data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
-        data_m = np.ravel(self.m[indices_nonnan])
-
-        self.hc, self.hb = np.meshgrid(np.arange(np.min(data_hchb[:, 0]), np.max(data_hchb[:, 0]), self.step_hchb),
-                                       np.arange(np.min(data_hchb[:, 1]), np.max(data_hchb[:, 1]), self.step_hchb))
-
-        self.m_hchb = si.griddata(data_hchb, data_m, (self.hc, self.hb), method=method)
-        if self.temperature is not None:
-            indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.temperature)))
-            data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
-            data_T = np.ravel(self.temperature[indices_nonnan])
-            self.temperature = si.griddata(data_hchb, data_T, (self.hc, self.hb), method=method)
-
-        if self.rho is not None:
-            indices_nonnan = np.nonzero(np.logical_not(np.isnan(self.rho)))
-            data_hchb = np.vstack((np.ravel(hc[indices_nonnan]), np.ravel(hb[indices_nonnan]))).T
-            data_rho = np.ravel(self.rho[indices_nonnan])
-            self.rho_hchb = si.griddata(data_hchb, data_rho, (self.hc, self.hb), method=method)
-
-        return
-
     def _drift_correction(self, radius=4, density=3):
+        # TODO: make this python-free
 
         kernel_size = 2*radius+1
         kernel = np.ones(kernel_size)/kernel_size
@@ -450,20 +394,13 @@ class PMCForc(ForcBase):
         return
 
     def _update_data_range(self):
-        """Cache the limits of the data in hhr and hchb space to make plotting faster.
+        """Cache the limits of the data in hhr space to make plotting faster.
 
         """
-
-        _hc, _hb = util.hhr_to_hchb(self.h, self.hr)
-
         self._h_min = np.min(self.h)
         self._h_max = np.max(self.h)
         self._hr_min = np.min(self.hr)
         self._hr_max = np.max(self.hr)
-        self._hc_min = np.min(self.hc)
-        self._hc_max = np.max(self.hc)
-        self._hb_min = np.min(self.hb)
-        self._hb_max = np.max(self.hb)
         self._m_min = np.nanmin(self.m)
         self._m_max = np.nanmax(self.m)
 
@@ -482,12 +419,6 @@ class PMCForc(ForcBase):
     def hr_range(self):
         return (self._hr_min, self._hr_max)
 
-    def hc_range(self):
-        return (self._hc_min, self._hc_max)
-
-    def hb_range(self):
-        return (self._hb_min, self._hb_max)
-
     def m_range(self):
         return (self._m_min, self._m_max)
 
@@ -504,24 +435,6 @@ class PMCForc(ForcBase):
 
         return [self._h_min-0.5*self.step, self._h_max+0.5*self.step,
                 self._hr_min-0.5*self.step, self._hr_max+0.5*self.step]
-
-    @property
-    def extent_hchb(self):
-        """Get extent of dataset in (Hc, Hb) space for plotting maps. Values returned are offset from actual data so
-        that each data point corresponds to the center of a pixel on the map, rather than the corner.
-
-        Returns
-        -------
-        list of floats
-            hc_min, hc_max, hb_min, hb_max
-        """
-
-        return [self._hc_min-0.5*self.step_hchb, self._hc_max+0.5*self.step_hchb,
-                self._hb_min-0.5*self.step_hchb, self._hb_max+0.5*self.step_hchb]
-
-    @property
-    def step_hchb(self):
-        return self.step/(2**0.5)  # Space is distorted from (H, Hr) -> (Hc, Hb) transformation
 
     def _extend_dataset(self, sf, method, n_fit_points=10):
 
@@ -662,17 +575,12 @@ class PMCForc(ForcBase):
 
         return PMCForc(h=self.h, hr=self.hr, m=self.m - (value*self.h), T=self.temperature, rho=self.rho)
 
-    def get_masked(self, data, mask, coordinates):
+    def get_masked(self, data, mask):
         mask = mask is True or mask.lower() == 'h<hr'
 
         if mask:
             masked_data = data.copy()
-            if coordinates == 'hhr':
-                masked_data[self.h < self.hr-0.5*self.step] = np.nan
-            elif coordinates == 'hchb':
-                masked_data[self.hc < 0] = np.nan
-            else:
-                raise ValueError('Invalid coordinates: {}'.format(coordinates))
+            masked_data[self.h < self.hr-0.5*self.step] = np.nan
             return masked_data
         else:
             return data
@@ -681,19 +589,15 @@ class PMCForc(ForcBase):
         if coordinates == 'hhr':
             return self.extent_hhr
         elif coordinates == 'hchb':
-            return self.extent_hchb
+            raise NotImplementedError
+            # return self.extent_hchb
         else:
             raise ValueError('Invalid coordinates: {}'.format(coordinates))
 
-    def get_data(self, data_str, coordinates):
+    def get_data(self, data_str):
         data_str = data_str.lower()
         if data_str in ['m', 'rho', 'rho_uncertainty', 'temperature']:
-            if coordinates == 'hhr':
-                return getattr(self, data_str)
-            elif coordinates == 'hchb':
-                return getattr(self, '{}_hchb'.format(data_str))
-            else:
-                raise ValueError('Invalid coordinates: {}'.format(coordinates))
+            return getattr(self, data_str)
         else:
             raise ValueError('Invalid data field: {}'.format(data_str))
 
@@ -706,6 +610,10 @@ class PMCForc(ForcBase):
                            T=self.temperature)
         else:
             raise NotImplementedError
+
+    # @property
+    # def extent_hchb(self):
+        # return [util.hhr_to_hchb(self.h[-1, 0], self.hr[-1, 0]), util.hhr_to_hchb(self.h[0, -1], self.hr[0, -1])]
 
 
 class ForcError(Exception):
