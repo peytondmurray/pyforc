@@ -77,7 +77,16 @@ def pickle_test():
     return
 
 
+def full_test():
+    data = Forc.PMCForc('./test_data/test_forc', drift=False)
+    data = data.slope_correction(h_sat=None, value=None)
+    data = data.normalize()
+    data = data.compute_forc_distribution(sf=3, method='savitzky-golay', extension='flat')
+    return
+
+
 if __name__ == '__main__':
     # test_gui()
     # test_PMCForc_import()
-    PMCForc_calculate_sg_FORC()
+    # PMCForc_calculate_sg_FORC()
+    full_test()
