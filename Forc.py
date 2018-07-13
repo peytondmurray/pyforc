@@ -419,6 +419,16 @@ class PMCForc(ForcBase):
     def hr_range(self):
         return (self._hr_min, self._hr_max)
 
+    def hc_range(self):
+        hc_min, _ = util.hhr_to_hchb(self.h[-1, 0], self.hr[-1, 0])
+        hc_max, _ = util.hhr_to_hchb(self.h[0, -1], self.hr[0, -1])
+        return (hc_min, hc_max)
+
+    def hb_range(self):
+        hb_min, _ = util.hhr_to_hchb(self.h[0, 0], self.hr[0, 0])
+        hb_max, _ = util.hhr_to_hchb(self.h[-1, -1], self.hr[-1, -1])
+        return (hb_min, hb_max)
+
     def m_range(self):
         return (self._m_min, self._m_max)
 

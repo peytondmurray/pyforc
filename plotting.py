@@ -135,7 +135,7 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
     if coordinates == 'hchb':
         im.set_transform(hhr_to_hchb_transform() + ax.transData)
     colorbar(ax, im)
-    set_map_limits(ax, mask, coordinates)
+    set_map_limits(ax, forc, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -154,7 +154,7 @@ def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', 
     if coordinates == 'hchb':
         im.set_transform(hhr_to_hchb_transform() + ax.transData)
     colorbar(ax, im)
-    set_map_limits(ax, mask, coordinates)
+    set_map_limits(ax, forc, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -176,7 +176,7 @@ def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
                levels=levels,
                colors='k',
                transform=transform)
-    set_map_limits(ax, mask, coordinates)
+    set_map_limits(ax, forc, mask, coordinates)
     ax.figure.canvas.draw()
     return
 
@@ -402,12 +402,16 @@ def hhr_to_hchb_transform():
     return mtra.Affine2D(matrix=np.array([[0.5, -0.5, 0], [0.5, 0.5, 0], [0, 0, 1]]))
 
 
-def set_map_limits(ax, mask, coordinates):
+def set_map_limits(ax, forc, mask, coordinates):
 
     if mask is True or mask.lower() == 'h<hr':
         if coordinates == 'hhr':
             return
         if coordinates == 'hchb':
-            ax.set_xlim([0, ax.get_xlim()[1]])
+            ax.set_xlim([0, forc.hc_range()[1]])
+    else:
+        if coordinates == 'hchb':
+            ax.set_xlim(forc.hc_range())
+            ax.set_ylim(forc.hb_range())
 
     return
