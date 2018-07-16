@@ -419,15 +419,24 @@ class PMCForc(ForcBase):
     def hr_range(self):
         return (self._hr_min, self._hr_max)
 
-    def hc_range(self):
-        hc_min, _ = util.hhr_to_hchb(self.h[-1, 0], self.hr[-1, 0])
-        hc_max, _ = util.hhr_to_hchb(self.h[0, -1], self.hr[0, -1])
-        return (hc_min, hc_max)
+    def hc_range(self, mask=True):
+        hc, _ = self._hchb()
+        if mask is True or mask.lower() == 'h<hr':
+            return (np.min(hc[np.nonzero(1 - np.isnan(hc + self.m))]),
+                    np.max(hc[np.nonzero(1 - np.isnan(hc + self.m))]))
+        else:
+            return (np.min(hc), np.max(hc))
 
-    def hb_range(self):
-        hb_min, _ = util.hhr_to_hchb(self.h[0, 0], self.hr[0, 0])
-        hb_max, _ = util.hhr_to_hchb(self.h[-1, -1], self.hr[-1, -1])
-        return (hb_min, hb_max)
+    def hb_range(self, mask=True):
+        _, hb = self._hchb()
+        if mask is True or mask.lower() == 'h<hr':
+            return (np.min(hb[np.nonzero(1 - np.isnan(hb + self.m))]),
+                    np.max(hb[np.nonzero(1 - np.isnan(hb + self.m))]))
+        else:
+            return (np.min(hb), np.max(hb))
+
+    def _hchb(self):
+        return util.hhr_to_hchb(self.h, self.hr)
 
     def m_range(self):
         return (self._m_min, self._m_max)

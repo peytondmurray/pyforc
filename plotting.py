@@ -487,6 +487,14 @@ def symmetrize_bounds(vmin, vmax):
 
 
 def hhr_to_hchb_transform():
+    """Generate the affine transform for plotting (H, Hr) space data in (Hc, Hb). See the matplotlib page on transforms.
+
+    Returns
+    -------
+    Affine2D
+        Matplotlib Affine2D transform object for taking 2D (H, Hr) data to (Hc, Hb) space.
+    """
+
     return mtra.Affine2D(matrix=np.array([[0.5, -0.5, 0], [0.5, 0.5, 0], [0, 0, 1]]))
 
 
@@ -497,9 +505,9 @@ def set_map_limits(ax, forc, mask, coordinates):
             return
         if coordinates == 'hchb':
             ax.set_xlim([0, forc.hc_range()[1]])
+            ax.set_ylim(forc.hb_range())
     else:
         if coordinates == 'hchb':
             ax.set_xlim(forc.hc_range())
             ax.set_ylim(forc.hb_range())
-
     return
