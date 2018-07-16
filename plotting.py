@@ -81,6 +81,19 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis', alpha=1.0):
 
 
 def major_loop(ax, forc, color='k'):
+    """Plot the major loop.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes instance on which to plot the major loop from a FORC dataset
+    forc : Forc
+        Dataset to be used for plotting
+    color : str, optional
+        Color of the line the loop is drawn with (the default is 'k', which is black)
+
+    """
+
     h, _, m = forc.major_loop()
     ax.add_line(ml.Line2D(xdata=h, ydata=m, linestyle='-', color=color, marker='o'))
     ax.figure.canvas.draw()
@@ -88,6 +101,16 @@ def major_loop(ax, forc, color='k'):
 
 
 def hhr_space_major_loop(ax, forc):
+    """Plot the major loop in hhr space.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes instance on which to plot the major loop
+    forc : Forc
+        Dataset to be used for plotting
+    """
+
     h, hr, _ = forc.major_loop()
     ax.add_line(ml.Line2D(xdata=h, ydata=hr, marker='.', linestyle='', color='k', markersize=12, alpha=0.3))
     ax.figure.canvas.draw()
@@ -122,6 +145,29 @@ def plot_points(ax, forc, coordinates):
 
 
 def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r'):
+    """Plot a 2D heat map of a dataset in (H, Hr) or (Hc, Hb) space.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which the data is to be plotted
+    forc : Forc
+        Dataset to be used for plotting
+    data_str : str
+        Specify the type of data to be plotted along the 'z' direction.
+        One of ['m', 'rho', 'rho_uncertainty', 'temperature']
+    mask : str or bool
+        Mask the H<Hr region. To mask, both [True, 'H<Hr'] will do the same thing. False leaves the data unmasked
+    coordinates : str
+        Set the coordinates to plot the data in: 'hhr' or 'hchb'
+    interpolation : str, optional
+        Interpolation to be used in matplotlib's imshow function. For more info, see the matplotlib documentation.
+        (the default is 'nearest', which interpolates each pixel by taking the value of the nearest point)
+    cmap : str, optional
+        Colormap to be used. (the default is 'RdBu_r', which is a diverging colormap good for both m and rho plots)
+
+    """
+
     ax.clear()
     data = forc.get_masked(forc.get_data(data_str), mask)
     vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
@@ -141,6 +187,30 @@ def heat_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cma
 
 
 def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', cmap='RdBu_r', levels=None):
+    """Plot a 2D contour map of a dataset in (H, Hr) or (Hc, Hb) space.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which the data is to be plotted
+    forc : Forc
+        Dataset to be used for plotting
+    data_str : str
+        Specify the type of data to be plotted along the 'z' direction.
+        One of ['m', 'rho', 'rho_uncertainty', 'temperature']
+    mask : str or bool
+        Mask the H<Hr region. To mask, both [True, 'H<Hr'] will do the same thing. False leaves the data unmasked
+    coordinates : str
+        Set the coordinates to plot the data in: 'hhr' or 'hchb'
+    interpolation : str, optional
+        Interpolation to be used in matplotlib's imshow function. For more info, see the matplotlib documentation.
+        (the default is 'nearest', which interpolates each pixel by taking the value of the nearest point)
+    cmap : str, optional
+        Colormap to be used. (the default is 'RdBu_r', which is a diverging colormap good for both m and rho plots)
+    levels : list
+        List of contour levels to draw. If this is None, levels are chosen automatically.
+    """
+
     ax.clear()
     data = forc.get_masked(forc.get_data(data_str), mask)
     vmin, vmax = symmetrize_bounds(np.nanmin(data), np.nanmax(data))
@@ -160,6 +230,24 @@ def contour_map(ax, forc, data_str, mask, coordinates, interpolation='nearest', 
 
 
 def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
+    """Plot a 2D set of contours of a dataset in (H, Hr) or (Hc, Hb) space.
+
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which the data is to be plotted
+    forc : Forc
+        Dataset to be used for plotting
+    data_str : str
+        Specify the type of data to be plotted along the 'z' direction.
+        One of ['m', 'rho', 'rho_uncertainty', 'temperature']
+    mask : str or bool
+        Mask the H<Hr region. To mask, both [True, 'H<Hr'] will do the same thing. False leaves the data unmasked
+    coordinates : str
+        Set the coordinates to plot the data in: 'hhr' or 'hchb'
+    levels : list
+        List of contour levels to draw. If this is None, levels are chosen automatically.
+    """
 
     # TODO this might not work with 'transform' keyword
 
