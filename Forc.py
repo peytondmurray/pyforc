@@ -93,7 +93,7 @@ class PMCForc(ForcBase):
             self.h = None             # Field
             self.hr = None            # Reversal field
             self.m = None             # Moment
-            self.temperature = None             # Temperature (if any)
+            self.temperature = None   # Temperature (if any)
             self.rho = None           # FORC distribution.
 
             self._from_input_arrays(h, hr, m, T, rho)
@@ -103,7 +103,7 @@ class PMCForc(ForcBase):
             self.h = []               # Field
             self.hr = []              # Reversal field
             self.m = []               # Moment
-            self.temperature = None             # Temperature (if any)
+            self.temperature = None   # Temperature (if any)
             self.rho = None           # FORC distribution.
             self.drift_points = []    # Drift points
 
@@ -187,7 +187,7 @@ class PMCForc(ForcBase):
                 return True
         return False
 
-    def _has_temperature(self, line):
+    def _lines_have_temperature(self, line):
         """Checks for temperature measurements in a file. If line has 3 data values, the third is considered
         a temperature measurement.
 
@@ -214,7 +214,7 @@ class PMCForc(ForcBase):
         """
 
         i = self._find_first_data_point(lines)
-        if self._has_temperature(lines[i]):
+        if self._lines_have_temperature(lines[i]):
             self._T = []
 
         if self._has_drift_points(lines):
@@ -630,9 +630,17 @@ class PMCForc(ForcBase):
         else:
             raise NotImplementedError
 
-    # @property
-    # def extent_hchb(self):
-        # return [util.hhr_to_hchb(self.h[-1, 0], self.hr[-1, 0]), util.hhr_to_hchb(self.h[0, -1], self.hr[0, -1])]
+    def has_m(self):
+        return np.any(1 - np.isnan(self.m))
+
+    def has_rho(self):
+        return np.any(1 - np.isnan(self.m))
+
+    def has_rho_uncertainty(self):
+        return np.any(1 - np.isnan(self.m))
+
+    def has_temperature(self):
+        return np.any(1 - np.isnan(self.m))
 
 
 class ForcError(Exception):
