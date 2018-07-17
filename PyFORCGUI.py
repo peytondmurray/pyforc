@@ -60,7 +60,17 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def closeEvent(self, event):
-        self.worker.quit()
+        """Stops the worker thread and quits the application. PyQt5 QThread documentation says to avoid using
+        terminate(), but I get a 'QThread destroyed' error if I don't terminate - and the application hangs
+        if I try to use QThread.quit() and QThread.wait(). This function should never be called directly by the user.
+
+        Parameters
+        ----------
+        event : QEvent
+            A QCloseEvent is passed in when the 'x' button is clicked to close PyFORC.
+        """
+
+        self.worker.terminate()
         event.accept()
         return
 
@@ -101,8 +111,6 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_map_curves_temperature.clicked.connect(self.plot_curves_temperature)
 
         self.b_undo.clicked.connect(self.undo)
-
-        self._enable_plotting_buttons(False)
 
         return
 
@@ -430,7 +438,7 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         """Update display and data. Called when worker subprocess completes a job and emits a job_done signal.
 
         """
-        self._enable_plotting_buttons(self.worker.get_n_data() > 0)
+        self._enable_plotting_buttons()
         self.d_jobs.item(self.current_job).setIcon(QtGui.QIcon('./checkmark.png'))
         self.current_job += 1
         return
@@ -449,34 +457,37 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         else:
             return 'hchb'
 
-    def _enable_plotting_buttons(self, b=True):
-        self.b_paths.setEnabled(b)
-        self.b_major_loop.setEnabled(b)
-        self.b_data_points.setEnabled(b)
+    def _enable_plotting_buttons(self):
+        self.send_latest_data.emit()
+        data = self.data_queue.get()
 
-        self.b_hc_axis.setEnabled(b)
-        self.b_hb_axis.setEnabled(b)
-        self.b_h_axis.setEnabled(b)
-        self.b_hr_axis.setEnabled(b)
+        self.b_paths.setEnabled(data.has_m())
+        self.b_major_loop.setEnabled(data.has_m())
+        self.b_data_points.setEnabled(data.has_m())
 
-        self.b_heat_moment.setEnabled(b)
-        self.b_heat_rho.setEnabled(b)
-        self.b_heat_rho_uncertainty.setEnabled(b)
-        self.b_heat_temperature.setEnabled(b)
+        self.b_hc_axis.setEnabled(data.has_m())
+        self.b_hb_axis.setEnabled(data.has_m())
+        self.b_h_axis.setEnabled(data.has_m())
+        self.b_hr_axis.setEnabled(data.has_m())
 
-        self.b_contour_moment.setEnabled(b)
-        self.b_contour_rho.setEnabled(b)
-        self.b_contour_rho_uncertainty.setEnabled(b)
-        self.b_contour_temperature.setEnabled(b)
+        self.b_heat_moment.setEnabled(data.has_m())
+        self.b_heat_rho.setEnabled(data.has_rho())
+        self.b_heat_rho_uncertainty.setEnabled(data.has_rho_uncertainty())
+        self.b_heat_temperature.setEnabled(data.has_temperature())
 
-        self.b_level_moment.setEnabled(b)
-        self.b_level_rho.setEnabled(b)
-        self.b_level_rho_uncertainty.setEnabled(b)
-        self.b_level_temperature.setEnabled(b)
+        self.b_contour_moment.setEnabled(data.has_m())
+        self.b_contour_rho.setEnabled(data.has_rho())
+        self.b_contour_rho_uncertainty.setEnabled(data.has_rho_uncertainty())
+        self.b_contour_temperature.setEnabled(data.has_temperature())
 
-        self.b_map_curves_moment.setEnabled(b)
-        self.b_map_curves_rho.setEnabled(b)
-        self.b_map_curves_rho_uncertainty.setEnabled(b)
-        self.b_map_curves_temperature.setEnabled(b)
+        self.b_level_moment.setEnabled(data.has_m())
+        self.b_level_rho.setEnabled(data.has_rho())
+        self.b_level_rho_uncertainty.setEnabled(data.has_rho_uncertainty())
+        self.b_level_temperature.setEnabled(data.has_temperature())
+
+        self.b_map_curves_moment.setEnabled(data.has_m())
+        self.b_map_curves_rho.setEnabled(data.has_rho() and data.has_m())
+        self.b_map_curves_rho_uncertainty.setEnabled(data.has_rho_uncertainty() and data.has_m())
+        self.b_map_curves_temperature.setEnabled(data.has_temperature() and data.has_m())
 
         return

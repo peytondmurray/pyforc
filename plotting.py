@@ -501,8 +501,6 @@ def hhr_to_hchb_transform():
 def set_map_limits(ax, forc, mask, coordinates):
 
     if mask is True or mask.lower() == 'h<hr':
-        if coordinates == 'hhr':
-            return
         if coordinates == 'hchb':
             ax.set_xlim([0, forc.hc_range()[1]])
             ax.set_ylim(forc.hb_range())
