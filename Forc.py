@@ -226,7 +226,7 @@ class PMCForc(ForcBase):
         else:
             while i < len(lines) and lines[i][0]in ['+', '-']:
                 i += self._extract_next_forc(lines[i:])
-                self._extract_drift_point(lines[i-1:])
+                self._extract_drift_point(lines[i-1])
                 i += 1
 
         return
@@ -302,7 +302,7 @@ class PMCForc(ForcBase):
             Line from data file which contains the drift point.
         """
 
-        self.drift_points.append(float(line.split(sep=',')[-1]))
+        self.drift_points.append(float(line.split(sep=',')[1]))
         return
 
     @property
@@ -374,16 +374,14 @@ class PMCForc(ForcBase):
         moving_average = snf.convolve(self.drift_points, kernel, mode='nearest')
         interpolated_drift_indices = np.arange(start=0, stop=len(self.drift_points), step=1)
 
-        if len(self.drift_points) % density == 0:
-            interpolated_drift = si.interp1d(np.arange(start=0, stop=len(self.drift_points), step=density),
-                                             moving_average[::density],
-                                             kind='cubic')
-        else:
-            interpolated_drift = si.interp1d(np.hstack((np.arange(start=0, stop=len(self.drift_points), step=density),
-                                                        len(self.drift_points)-1)),
-                                             np.hstack((moving_average[::density],
-                                                        np.array(moving_average[-1]))),
-                                             kind='cubic')
+        decimated_drift_indices = np.arange(start=0, stop=len(self.drift_points), step=density)
+        decimated_values = moving_average[::density]
+
+        if decimated_drift_indices[-1] != interpolated_drift_indices[-1]:
+            decimated_drift_indices = np.hstack((decimated_drift_indices, np.array(interpolated_drift_indices[-1:])))
+            decimated_values = np.hstack((decimated_values, np.array(moving_average[-1])))
+
+        interpolated_drift = si.interp1d(decimated_drift_indices, decimated_values, kind='cubic')
 
         for i in interpolated_drift_indices:
             drift = (interpolated_drift(i) - average_drift)
