@@ -12,6 +12,7 @@ import util
 
 def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis', alpha=1.0):
 
+    ax.clear()
     mask = mask.lower()
     points = points.lower()
     cmap = cmap.lower()
