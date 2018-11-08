@@ -8,7 +8,7 @@ python:
 
 os:
   - linux
-  - windows
+#  - windows For some reason python is not supported on Travis CI now?!
 
 install:
   - pip install -r requirements.txt
