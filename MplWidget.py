@@ -6,6 +6,19 @@ from matplotlib.figure import Figure
 
 
 class MplWidget(QtWidgets.QWidget):
+    """This class allows matplotlib figures to be embedded in PyQt5 GUIs. Instantiate this widget once when the GUI
+    is started.
+    
+    Parameters
+    ----------
+    parent : QtWidgets.QWidget
+        Parent widget where the MplWidget should be drawn.
+    
+    toolbar_loc : str
+        Location of toolbar. Can be 'top' or 'bottom'.
+    
+    """
+
     def __init__(self, parent=None, toolbar_loc='bottom'):
         super().__init__(parent=parent)
         self.sublayout = QtWidgets.QVBoxLayout(self)
