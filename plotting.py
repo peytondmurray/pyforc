@@ -11,6 +11,29 @@ import util
 
 
 def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis', alpha=1.0):
+    """Plot reversal curves in (H, M) space.
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes instance where plot is to be drawn
+    forc : Forc.FORC
+        FORC object containing reversal curve data
+    mask : str, optional
+        Mask the data. Can be one of 'h<hr', 'outline', or 'none'. 'h<hr' shows no data for H<Hr. 'outline' shows the
+        outline of the major loop. 'none' shows the full dataset.
+    points : str, optional
+        Show symbols at specified points. Can be one of 'none', 'reversal', or 'all'. 'none' shows no symbols for any
+        data point. 'reversal' shows symbols at the start of each reversal curve. 'all' shows symbols at each point.
+    cmap : str, optional
+        Choose a colormap to make the reversal curves easier to see. Can be set to 'none', which makes each curve
+        black, or can be any colormap from matplotlib.cm. I recommend one of the perceptually uniform sequential
+        colormaps provided by matplotlib. See https://matplotlib.org/users/colormaps.html for details.
+    alpha : float, optional
+        Alpha value of the reversal curves. If the cmap is 'none', I recommend setting this to 0.3 or so to make
+        the reversal curves easily distinguishable.
+    
+    """
 
     ax.clear()
     mask = mask.lower()
@@ -23,7 +46,7 @@ def h_vs_m(ax, forc, mask='h<hr', points='none', cmap='viridis', alpha=1.0):
         cmap = cm.get_cmap(cmap)
         colors = [cmap(x) for x in np.linspace(0, 0.4, forc.shape[0])]
 
-    if points in ['none', 'reversal']:
+    if points in ['none', 'reversal', 'all']:
 
         if mask.lower() == 'h<hr':
             for i in range(forc.shape[0]):
@@ -271,6 +294,27 @@ def contour_levels(ax, forc, data_str, mask, coordinates, levels=None):
 
 
 def decorate_hm(ax, xlabel=r'$H$', ylabel=r'$M$', xlim=None, ylim=None, legend=False, legend_args=None):
+    """Adds labels, rescales, and adds legends for the plots in (H, M) space.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes which are to be decorated
+    xlabel : str, optional
+        Label of x-axis
+    ylabel : str, optional
+        Label of y-axis
+    xlim : 2-tuple of floats, optional
+        X-limits
+    ylim : 2-tuple of floats, optional
+        Y-limits
+    legend : bool, optional
+        Set to True to draw a legend.
+    legend_args : dict, optional
+        Dict of arguments to be passed to Axes.legend().
+    
+    """
+
     ax.set(xlabel=xlabel,
            ylabel=ylabel,
            xlim=xlim,
@@ -284,6 +328,23 @@ def decorate_hm(ax, xlabel=r'$H$', ylabel=r'$M$', xlim=None, ylim=None, legend=F
 
 
 def decorate_hhr(ax, xlabel=r'$H$', ylabel=r'$H_r$', xlim=None, ylim=None):
+    """Adds labels, rescales, and adds legends for the plots in (H, Hr) space.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes which are to be decorated
+    xlabel : str, optional
+        Label of x-axis
+    ylabel : str, optional
+        Label of y-axis
+    xlim : 2-tuple of floats, optional
+        X-limits
+    ylim : 2-tuple of floats, optional
+        Y-limits
+    
+    """
+
     ax.set(xlabel=xlabel,
            ylabel=ylabel,
            xlim=xlim,
@@ -293,6 +354,22 @@ def decorate_hhr(ax, xlabel=r'$H$', ylabel=r'$H_r$', xlim=None, ylim=None):
 
 
 def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
+    """Adds labels, rescales, and adds legends for the plots in (Hc, Hb) space.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes which are to be decorated
+    xlabel : str, optional
+        Label of x-axis
+    ylabel : str, optional
+        Label of y-axis
+    xlim : 2-tuple of floats, optional
+        X-limits
+    ylim : 2-tuple of floats, optional
+        Y-limits
+    
+    """
     ax.set(xlabel=xlabel,
            ylabel=ylabel,
            xlim=xlim,
@@ -302,6 +379,22 @@ def decorate_hchb(ax, xlabel=r'$H_c$', ylabel=r'$H_b$', xlim=None, ylim=None):
 
 
 def h_axis(ax, coordinates, color='k', alpha=0.3):
+    """Draw a line showing the H-axis of an (H, Hr) or (Hc, Hb) plot.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which to draw the line
+    coordinates : str
+        Set to 'hhr' or 'hchb' accordingly
+    color : str, optional
+        Color of the axes line
+    alpha : float, optional
+        Alpha value of the axes line. Usually if this is set to 1.0, it covers up the data too much; this is
+        only meant to be a guide to the eye, and shouldn't distract the reader from the data
+    
+    """
+
     if coordinates == 'hhr':
         ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=(0, 0), color=color, alpha=alpha))
     elif coordinates == 'hchb':
@@ -313,6 +406,21 @@ def h_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hr_axis(ax, coordinates, color='k', alpha=0.3):
+    """Draw a line showing the Hr-axis of an (H, Hr) or (Hc, Hb) plot.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which to draw the line
+    coordinates : str
+        Set to 'hhr' or 'hchb' accordingly
+    color : str, optional
+        Color of the axes line
+    alpha : float, optional
+        Alpha value of the axes line. Usually if this is set to 1.0, it covers up the data too much; this is
+        only meant to be a guide to the eye, and shouldn't distract the reader from the data
+    
+    """
     if coordinates == 'hhr':
         ax.add_line(ml.Line2D(xdata=(0, 0), ydata=ax.get_ylim(), color=color, alpha=alpha))
     elif coordinates == 'hchb':
@@ -324,6 +432,21 @@ def hr_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hc_axis(ax, coordinates, color='k', alpha=0.3):
+    """Draw a line showing the Hc-axis of an (H, Hr) or (Hc, Hb) plot.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which to draw the line
+    coordinates : str
+        Set to 'hhr' or 'hchb' accordingly
+    color : str, optional
+        Color of the axes line
+    alpha : float, optional
+        Alpha value of the axes line. Usually if this is set to 1.0, it covers up the data too much; this is
+        only meant to be a guide to the eye, and shouldn't distract the reader from the data
+    
+    """
     if coordinates == 'hhr':
         ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=-1*np.array(ax.get_xlim()), color=color, alpha=alpha))
     elif coordinates == 'hchb':
@@ -335,6 +458,21 @@ def hc_axis(ax, coordinates, color='k', alpha=0.3):
 
 
 def hb_axis(ax, coordinates, color='k', alpha=0.3):
+    """Draw a line showing the Hb-axis of an (H, Hr) or (Hc, Hb) plot.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which to draw the line
+    coordinates : str
+        Set to 'hhr' or 'hchb' accordingly
+    color : str, optional
+        Color of the axes line
+    alpha : float, optional
+        Alpha value of the axes line. Usually if this is set to 1.0, it covers up the data too much; this is
+        only meant to be a guide to the eye, and shouldn't distract the reader from the data
+    
+    """
     if coordinates == 'hhr':
         ax.add_line(ml.Line2D(xdata=ax.get_xlim(), ydata=ax.get_xlim(), color=color, alpha=alpha))
     elif coordinates == 'hchb':
@@ -500,6 +638,21 @@ def hhr_to_hchb_transform():
 
 
 def set_map_limits(ax, forc, mask, coordinates):
+    """Set the limits of a plot in (H, Hr) or (Hc, Hb) space. Matplotlib does this poorly be default.
+    
+    Parameters
+    ----------
+    ax : Axes
+        Axes on which data is drawn
+    forc : Forc.FORC
+        FORC object which contains the data shown in the plot
+    mask : str or bool
+        Set to True or 'h<hr' to set the limits appropriately
+    coordinates : str
+        Can be either 'hhr' or 'hchb'. The default plot in (H, Hr) space is fine, so no adjustment is needed in that
+        case
+    
+    """
 
     if mask is True or mask.lower() == 'h<hr':
         if coordinates == 'hchb':
