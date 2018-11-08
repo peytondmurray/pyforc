@@ -10,6 +10,11 @@ import PyFORCGUI
 
 
 def parse_arguments():
+    """Instantiate the argument parser and run the appropriate code, depending on whether the user wants to
+    start the gui or load a script.
+    
+    """
+
     parser = generate_parser()
     args = vars(parser.parse_args())
 
@@ -29,6 +34,13 @@ def parse_arguments():
 
 
 def generate_parser():
+    """Generate an argument parser for CLI arguments.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parses the arguments. See argparse.ArgumentParser for additional info.
+    """
 
     parser = argparse.ArgumentParser(description="Compute FORC distributions.")
     subparsers = parser.add_subparsers(title='Mode',
@@ -58,14 +70,18 @@ def generate_parser():
 
 
 def load():
-    pass
+    raise NotImplementedError('Support for loading a script file not yet implemented.')
 
 
 def run():
-    pass
+    raise NotImplementedError
 
 
 def start_gui():
+    """Begin the PyQt5-based GUI.
+    
+    """
+
     app = PyQt5.QtWidgets.QApplication(sys.argv)
     win = PyFORCGUI.PyFORCGUI(app)
     win.setWindowTitle("PyFORC")
@@ -76,4 +92,4 @@ def start_gui():
 
 if __name__ == '__main__':
     # parse_arguments()
-    start_gui()
+    start_gui()  # For now, only the GUI is supported.
