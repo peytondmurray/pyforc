@@ -54,6 +54,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def _initialize_plots(self):
+        """Initialize the plots after the MplWidgets are first instantiated. This draws temporary axes, etc.
+        
+        """
+
         self.p_paths.axes.plot(list(), list(), '')
         self.p_map.axes.plot(list(), list(), '')
         self.p_map_in_paths.axes.plot(list(), list(), '')
@@ -75,6 +79,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def _setup_buttons(self):
+        """Connects the signals all the buttons to the corresponding slots for processing and displaying data.
+        
+        """
+
         self.b_import.clicked.connect(self.import_file)
         self.b_slope.clicked.connect(self.slope)
         self.b_normalize.clicked.connect(self.normalize)
@@ -115,14 +123,27 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def _update_extension_widgets(self, current_text):
+        """Enables or disables the widget which allows the user to input the number of points to use to fit the slope
+        for dataset extension. The widget is enabled if the user selects 'slope' for the type of dataset extension.
+
+        """
+
         self.f_extension_n_fit_points.setEnabled(current_text == 'slope')
         return
 
     def _setup_widget_triggers(self):
+        """Some of the widgets need have special triggers. Setup this functionality here.
+        
+        """
+
         self.f_extension_type.currentTextChanged.connect(self._update_extension_widgets)
         return
 
     def import_file(self):
+        """Imports a (PMC-formatted) dataset from disk.
+        
+        """
+
         path = QtWidgets.QFileDialog.getOpenFileName(self, 'Choose a data file:', './test_data/')[0]
         if pathlib.Path(path).is_file():
             self.append_job(job=[Forc.PMCForc,
@@ -139,6 +160,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def slope(self):
+        """Carry out a slope correction on the dataset; this removes a linear background.
+        
+        """
+
         if not self.f_auto_slope.isChecked():
             try:
                 value = float(self.f_slope.text())
@@ -176,6 +201,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def normalize(self):
+        """Normalize the dataset so that the min and max of the moment is at -1 and +1, respectively.
+        
+        """
+
         self.append_job(job=[Forc.PMCForc.normalize,
                              None,
                              {'method': 'minmax'}],
@@ -183,9 +212,18 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def gauss(self):
+        """Pass a gaussian filter over the dataset for smoothing.
+        
+        """
+
         raise NotImplementedError('Gaussian filtering not implemented')
 
     def compute_forc_distribution(self):
+        """Compute the FORC distribution. The computation is usually short, as it only requires a convolution, but is
+        still done in the worker thread for speed.
+        
+        """
+
         self.append_job(job=[Forc.PMCForc.compute_forc_distribution,
                              None,
                              {'sf': self.f_smoothing_factor.value(),
@@ -196,6 +234,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_paths(self):
+        """Plot the FORC dataset in (H, M) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.h_vs_m(ax=self.p_paths.axes,
                         forc=self.data_queue.get(),
@@ -206,6 +248,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_major_loop(self):
+        """Plot the major loop.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.major_loop(ax=self.p_paths.axes,
                             forc=self.data_queue.get(),
@@ -214,6 +260,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_data_points(self):
+        """Plot the location of the data points in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.plot_points(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
@@ -221,42 +271,47 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.tabWidget.setCurrentIndex(1)
         return
 
-    def plot_contours(self):
-        self.send_latest_data.emit()
-        plotting.contour_map(ax=self.p_map.axes,
-                             forc=self.data_queue.get(),
-                             data_str='m',
-                             mask=self.f_2d_mask.currentText(),
-                             coordinates=self.coordinates(),
-                             cmap=self.f_2d_cmap.text())
-        self.tabWidget.setCurrentIndex(1)
-        return
-
     def plot_hc_axis(self):
-        plotting.hc_axis(ax=self.p_map.axes,
-                         coordinates=self.coordinates())
+        """Add Hc-axis to the current 2D plot.
+
+        """
+
+        plotting.hc_axis(ax=self.p_map.axes, coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_hb_axis(self):
-        plotting.hb_axis(ax=self.p_map.axes,
-                         coordinates=self.coordinates())
+        """Add Hb-axis to the current 2D plot.
+
+        """
+
+        plotting.hb_axis(ax=self.p_map.axes, coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_h_axis(self):
-        plotting.h_axis(ax=self.p_map.axes,
-                        coordinates=self.coordinates())
+        """Add H-axis to the current 2D plot.
+
+        """
+
+        plotting.h_axis(ax=self.p_map.axes, coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_hr_axis(self):
-        plotting.hr_axis(ax=self.p_map.axes,
-                         coordinates=self.coordinates())
+        """Add Hr-axis to the current 2D plot.
+
+        """
+
+        plotting.hr_axis(ax=self.p_map.axes, coordinates=self.coordinates())
         self.tabWidget.setCurrentIndex(1)
         return
 
     def plot_heat_moment(self):
+        """Plot the moment as a heat map in (H, Hr) or (Hc, Hb) space.
+
+        """
+
         self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
                           forc=self.data_queue.get(),
@@ -268,6 +323,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_rho(self):
+        """Plot the FORC distribution as a heat map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
                           forc=self.data_queue.get(),
@@ -279,6 +338,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_rho_uncertainty(self):
+        """Plot the FORC distribution uncertainty as a heat map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
                           forc=self.data_queue.get(),
@@ -290,6 +353,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_heat_temperature(self):
+        """Plot the measurement temperature as a heat map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.heat_map(ax=self.p_map.axes,
                           forc=self.data_queue.get(),
@@ -301,6 +368,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_moment(self):
+        """Plot the moment as a contour map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
@@ -312,6 +383,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_rho(self):
+        """Plot the FORC distribution as a contour map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
@@ -323,6 +398,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_rho_uncertainty(self):
+        """Plot the FORC distribution uncertainty as a contour map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
@@ -334,6 +413,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_contour_temperature(self):
+        """Plot the measurement temperature as a contour map in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_map(ax=self.p_map.axes,
                              forc=self.data_queue.get(),
@@ -345,6 +428,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_moment(self):
+        """Plot the moment as contour levels in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
                                 forc=self.data_queue.get(),
@@ -355,6 +442,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_rho(self):
+        """Plot the FORC distribution as contour levels in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
                                 forc=self.data_queue.get(),
@@ -365,6 +456,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_rho_uncertainty(self):
+        """Plot the FORC distribution uncertainty as contour levels in (H, Hr) or (Hc, Hb) space.
+        
+        """
+        
         self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
                                 forc=self.data_queue.get(),
@@ -375,6 +470,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_levels_temperature(self):
+        """Plot the measurement temperature as contour levels in (H, Hr) or (Hc, Hb) space.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.contour_levels(ax=self.p_map.axes,
                                 forc=self.data_queue.get(),
@@ -385,6 +484,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_curves_moment(self):
+        """Plot the moment as a gouraud-shaded colormap into the reversal curves.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.map_into_curves(ax=self.p_map_in_paths.axes,
                                  forc=self.data_queue.get(),
@@ -395,6 +498,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_curves_rho(self):
+        """Plot the FORC distribution as a gouraud-shaded colormap into the reversal curves.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.map_into_curves(ax=self.p_map_in_paths.axes,
                                  forc=self.data_queue.get(),
@@ -405,6 +512,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_curves_rho_uncertainty(self):
+        """Plot the FORC distribution uncertainty as a gouraud-shaded colormap into the reversal curves.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.map_into_curves(ax=self.p_map_in_paths.axes,
                                  forc=self.data_queue.get(),
@@ -415,6 +526,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def plot_curves_temperature(self):
+        """Plot the measurement temperature as a gouraud-shaded colormap into the reversal curves.
+        
+        """
+
         self.send_latest_data.emit()
         plotting.map_into_curves(ax=self.p_map_in_paths.axes,
                                  forc=self.data_queue.get(),
@@ -425,6 +540,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def undo(self):
+        """Undoes the last computation.
+
+        """
+
         if self.d_jobs.count() > 0:
             self.worker.undo()
             self.d_jobs.takeItem(self.d_jobs.count()-1)
@@ -432,6 +551,14 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def is_job_running(self):
+        """Check whether a computation is currently running or not.
+
+        Returns
+        -------
+        bool
+            True if there are no queued jobs, otherwise False.
+        """
+
         return not self.queued_jobs.empty()
 
     def update_status(self):
@@ -444,6 +571,25 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def append_job(self, job, text):
+        """Appends a task to the job queue, which will be executed by the worker thread as soon as it is ready. Each
+        time a task is appended to the job queue, an item is added to the list of computations shown in the GUI, so
+        that the user can keep track of which computations have been done on the dataset.
+
+        Parameters
+        ----------
+        job : List
+            Each job is a list containing three objects:
+                1. The function which contains the work to be done in the worker thread
+                2. Arguments to be passed to the function
+                3. A dict of kwargs to be passed to the function
+
+            If the second item in the list is None, the worker thread simply takes the most recently processed FORC
+            data and passes it to the function.
+        text : str
+            String to put in the list of computations shown in the GUI
+
+        """
+
         self.queued_jobs.put(job)
         item = QtWidgets.QListWidgetItem(text)
         item.setToolTip(text)
@@ -452,12 +598,25 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         return
 
     def coordinates(self):
+        """Get currently selected coordinates.
+        
+        Returns
+        -------
+        str
+            'hhr' or 'hchb'
+        """
+
         if self.f_hhr.isChecked():
             return 'hhr'
         else:
             return 'hchb'
 
     def _enable_plotting_buttons(self):
+        """Enables or disables plotting buttons, depending on whether data is available to be plot. This prevents
+        users from trying to plot data they don't have.
+        
+        """
+
         self.send_latest_data.emit()
         data = self.data_queue.get()
 
