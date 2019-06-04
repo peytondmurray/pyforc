@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 import PyFORCGUIBase
+import QFileDialogExtended
 import multiprocessing as mp
 import worker
 import plotting
@@ -117,6 +118,10 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_map_curves_rho.clicked.connect(self.plot_curves_rho)
         self.b_map_curves_rho_uncertainty.clicked.connect(self.plot_curves_rho_uncertainty)
         self.b_map_curves_temperature.clicked.connect(self.plot_curves_temperature)
+
+        self.b_export_csv.clicked.connect(self.export_csv)
+        self.b_export_vtk.clicked.connect(self.export_vtk)
+        self.b_export_pmc.clicked.connect(self.export_pmc)
 
         self.b_undo.clicked.connect(self.undo)
 
@@ -649,4 +654,22 @@ class PyFORCGUI(PyFORCGUIBase.Ui_MainWindow, QtWidgets.QMainWindow):
         self.b_map_curves_rho_uncertainty.setEnabled(data.has_rho_uncertainty() and data.has_m())
         self.b_map_curves_temperature.setEnabled(data.has_temperature() and data.has_m())
 
+        return
+
+    def export_pmc(self):
+        self.send_latest_data.emit()
+        path = QtWidgets.QFileDialog.getSaveFileName(self, 'Create a save file:', './test_data/')[0]
+        self.data_queue.get().export_pmc(path)
+        return
+
+    def export_vtk(self):
+        self.send_latest_data.emit()
+        path = QtWidgets.QFileDialog.getSaveFileName(self, 'Create a save file:', './test_data/')[0]
+        self.data_queue.get().export_vtk(path)
+        return
+    
+    def export_csv(self):
+        self.send_latest_data.emit()
+        path = QtWidgets.QFileDialog.getSaveFileName(self, 'Create a save file:', './test_data/')[0]
+        self.data_queue.get().export_csv(path)
         return

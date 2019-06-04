@@ -624,6 +624,46 @@ class PMCForc(ForcBase):
     def has_temperature(self):
         return np.any(1 - np.isnan(self.m))
 
+    def export_csv(self, path):
+        """Export the data in csv format. Columns are
+
+                h,hr,m[,rho,temperature]
+
+        where the data in brackets is included if possible.
+        
+        Parameters
+        ----------
+        path : str
+            Path of save file
+        """
+
+        with open(path, 'w') as f:
+            f.write('# h,hr,m')
+
+            if self.rho is not None:
+                f.write(',rho')
+            if self.temperature is not None:
+                f.write(',temperature')
+
+            f.write('\n')
+            for i in range(self.shape[0]):
+                for j in range(self.shape[1]):
+                    f.write(f'{self.h[i, j]},{self.hr[i, j]},{self.m[i, j]}')
+                    if self.rho is not None:
+                        f.write(f',{self.rho[i, j]}')
+                    if self.temperature is not None:
+                        f.write(f',{self.temperature[i, j]}')
+                    f.write('\n')
+        return
+
+    def export_vtk(self):
+        raise NotImplementedError
+        return
+
+    def export_pmc(self):
+        raise NotImplementedError
+        return
+
 
 class ForcError(Exception):
     pass

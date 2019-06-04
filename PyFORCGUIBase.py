@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\PyFORCGUIBase.ui'
+# Form implementation generated from reading ui file 'PyFORCGUIBase.ui'
 #
-# Created by: PyQt5 UI code generator 5.10.1
+# Created by: PyQt5 UI code generator 5.12.2
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1211, 771)
+        MainWindow.resize(1211, 871)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -306,13 +307,13 @@ class Ui_MainWindow(object):
         self.b_export_vtk.setFont(font)
         self.b_export_vtk.setObjectName("b_export_vtk")
         self.verticalLayout_6.addWidget(self.b_export_vtk)
-        self.b_export_xyz = QtWidgets.QPushButton(self.groupBox_8)
+        self.b_export_csv = QtWidgets.QPushButton(self.groupBox_8)
         font = QtGui.QFont()
         font.setBold(False)
         font.setWeight(50)
-        self.b_export_xyz.setFont(font)
-        self.b_export_xyz.setObjectName("b_export_xyz")
-        self.verticalLayout_6.addWidget(self.b_export_xyz)
+        self.b_export_csv.setFont(font)
+        self.b_export_csv.setObjectName("b_export_csv")
+        self.verticalLayout_6.addWidget(self.b_export_csv)
         self.b_export_pmc = QtWidgets.QPushButton(self.groupBox_8)
         font = QtGui.QFont()
         font.setBold(False)
@@ -632,7 +633,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.tabWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1211, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1211, 28))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -707,7 +708,7 @@ class Ui_MainWindow(object):
         self.t_tabs.setTabText(self.t_tabs.indexOf(self.tab_2), _translate("MainWindow", "Plotting"))
         self.groupBox_8.setTitle(_translate("MainWindow", "Export"))
         self.b_export_vtk.setText(_translate("MainWindow", "VTK"))
-        self.b_export_xyz.setText(_translate("MainWindow", "XYZ"))
+        self.b_export_csv.setText(_translate("MainWindow", "CSV"))
         self.b_export_pmc.setText(_translate("MainWindow", "PMC Format"))
         self.t_tabs.setTabText(self.t_tabs.indexOf(self.tab_3), _translate("MainWindow", "Output"))
         self.groupBox_3.setTitle(_translate("MainWindow", "Processing"))
@@ -750,4 +751,5 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.a_load.setText(_translate("MainWindow", "Load..."))
         self.actionAdvanced_Settings.setText(_translate("MainWindow", "Advanced Settings"))
+
 
