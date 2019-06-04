@@ -1,6 +1,5 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 import PyFORCGUIBase
-import QFileDialogExtended
 import multiprocessing as mp
 import worker
 import plotting
