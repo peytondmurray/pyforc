@@ -6,13 +6,24 @@
 FORC analysis in Python. PyFORC has been developed with multithreaded GUI support from the beginning, making it fast and easy to use.
 ![forc]
 
+## Basic Information
+Documentation: I'm working on it
+
+Dependencies:
+* Python 3.6+
+* numpy
+* scipy
+* matplotlib
+* pyqt5
+* numba
+
 ## Installation
 
 Install by cloning this repo and running
 
 `python main.py`
 
-to bring up the GUI. In the future I might put this on PyPi, but the project is still in its infancy.
+to bring up the gui. In the future I might put this on PyPi, but the project is still in its infancy.
 
 ## Contributions
 
