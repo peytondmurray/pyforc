@@ -12,7 +12,7 @@ class Forc():
         self.file_name = file_name
         self.config = config
         self.ingester = ingester(self.file_name, self.config)
-        self.data = ingester.data
+
 
     def get_data(self):
         return self.data
