@@ -1,24 +1,22 @@
-import numpy as np
+"""Classes for storing, extracting, and processing FORC data."""
+from typing import Type
 
-from . import ingest
+from .config import Config
+from .ingester import IngesterBase
 
 
 class Forc():
     """
-    Class for storing, extracting, and processing FORC data.
+    Generic for storing, extracting, and processing FORC data.
+
+    Parameters
+    ----------
+    ingester: Ingester
+        Ingester class to use to ingest the raw data
+    config: Config
+        Config instance holding the ingester configuration details
     """
 
-    def __init__(self, file_name, ingester, config):
-        self.file_name = file_name
+    def __init__(self, ingester: Type[IngesterBase], config: Config):
         self.config = config
-        self.ingester = ingester(self.file_name, self.config)
-
-
-    def get_data(self):
-        return self.data
-
-    def get_config(self):
-        return self.config
-
-    def get_file_name(self):
-        return self.file_name
+        self.ingester = ingester(self.config)

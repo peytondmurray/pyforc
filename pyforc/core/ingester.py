@@ -1,30 +1,44 @@
+"""Classes for ingesting FORC data."""
 import re
 
 import numpy as np
 import scipy.interpolate as si
 
+from .config import Config
+
 
 class IngesterBase:
+    """Base class for all ingester types.
 
-    def __init__(self, file_name, config):
-        self.file_name = file_name
+    Parameters
+    ----------
+    config : Config
+        Ingester configuration to use for ingesting the raw data.
+    """
+
+    def __init__(self, config: Config):
         self.config = config
-        self.h_raw, self.m_raw, self.t_raw = [], [], []
-        self.ingest(self.file_name)
+        self.h_raw: list[np.ndarray] = []
+        self.m_raw: list[np.ndarray] = []
+        self.t_raw: list[np.ndarray] = []
+
+        self.ingest()
 
         self.h, self.hr, self.m, self.t = interpolate(
             self.h_raw,
             self.m_raw,
             self.t_raw,
             step=self.config.step,
-            method=self.config.method
+            interpolation=self.config.interpolation
         )
 
-    def ingest(self, file_name):
+    def ingest(self):
+        """Ingest the raw data."""
         raise NotImplementedError
 
 
 class PMCIngester(IngesterBase):
+    """Ingester for data measured by Princeton Measurements Corporation (now Lakeshore) VSMs."""
 
     pattern = (
         r'(?P<h>[+-]\d*\.\d*),'
@@ -32,9 +46,9 @@ class PMCIngester(IngesterBase):
         r'(,(?P<t>[+-]\d*\.\d*))?'
     )
 
-    def ingest(self, file_name):
-
-        with open(file_name, 'r') as f:
+    def ingest(self) -> None:
+        """Ingest the raw data."""
+        with open(self.config.file_name, 'r') as f:
             lines = f.readlines()
 
         # Find first data line
@@ -65,26 +79,33 @@ class PMCIngester(IngesterBase):
         return
 
 
-def interpolate(h_raw, m_raw, t_raw, step=None, method='cubic'):
+def interpolate(
+    h_raw: list[np.ndarray],
+    m_raw: list[np.ndarray],
+    t_raw: list[np.ndarray],
+    step: float = None,
+    interpolation: str = 'cubic',
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Interpolate the raw dataset.
 
     Parameters
     ----------
-    h_raw: list of np.ndarray
+    h_raw : list[np.ndarray]
         Ragged list of raw h-datapoints
-    m_raw: list of np.ndarray
+    m_raw : list[np.ndarray]
         Ragged list of raw m-datapoints
-    t_raw: list of np.ndarray
+    t_raw : list[np.ndarray]
         Ragged list of raw t-datapoints (if any)
-    step: float
-        Target step size of the interpolated data
-    method: str
-        Interpolation method; see scipy.interpolate.griddata for options
+    step : float
+        Step size along the h and hr directions to use for the interpolated dataset. Uses the same
+        units given by the raw data
+    interpolation : str
+        interpolation
 
-    -------
     Returns
-    (np.ndarray, np.ndarray, np.ndarray, np.ndarray)
-        Interpolated h, hr, m, and t arrays
+    -------
+    tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        Interpolated h, hr, m, and t arrays. If t is not measured, this array will be empty
     """
     if not step:
         step = np.median([np.diff(curve) for curve in h_raw])
@@ -104,8 +125,8 @@ def interpolate(h_raw, m_raw, t_raw, step=None, method='cubic'):
         axis=1
     ),
 
-    m = si.griddata(hhr_vals, m_vals, (h, hr), method=method)
-    t = si.griddata(hhr_vals, t_vals, (h, hr), method=method)
+    m = si.griddata(hhr_vals, m_vals, (h, hr), method=interpolation)
+    t = si.griddata(hhr_vals, t_vals, (h, hr), method=interpolation)
 
     # Mask off the portion of the interpolated data that wasn't measured
     m[h < hr] = np.nan
@@ -114,5 +135,18 @@ def interpolate(h_raw, m_raw, t_raw, step=None, method='cubic'):
     return h, hr, m, t
 
 
-def hr_vals_from_h(h):
+def hr_vals_from_h(h: list[np.ndarray]) -> list[np.ndarray]:
+    """Generate an hr dataset from a ragged set of h curves.
+
+    Parameters
+    ----------
+    h: list[np.ndarray]
+        Ragged list of h-values for each reversal curve
+
+    Returns
+    -------
+    list[np.ndarray]
+        Ragged list of hr-values for each reversal curve. Each datapoint has an hr-value equal to
+        the h-value of the first datapoint in the curve.
+    """
     return [np.full_like(curve, fill_value=curve[0]) for curve in h]
