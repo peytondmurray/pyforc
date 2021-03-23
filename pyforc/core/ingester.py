@@ -98,7 +98,8 @@ def interpolate(
         Ragged list of raw t-datapoints (if any)
     step : float
         Step size along the h and hr directions to use for the interpolated dataset. Uses the same
-        units given by the raw data
+        units given by the raw data. If None, the step will be determined from the median of the
+        steps in the h-direction.
     interpolation : str
         interpolation
 
@@ -108,16 +109,21 @@ def interpolate(
         Interpolated h, hr, m, and t arrays. If t is not measured, this array will be empty
     """
     if not step:
-        step = np.median([np.diff(curve) for curve in h_raw])
+        step = np.median(np.concatenate([np.diff(curve) for curve in h_raw]))
 
     h_vals = np.concatenate(h_raw)
     hr_vals = np.concatenate(hr_vals_from_h(h_raw))
     m_vals = np.concatenate(m_raw)
     t_vals = np.concatenate(t_raw)
 
+    h_min = np.min(h_vals)
+    h_max = np.max(h_vals)
+    hr_min = np.min(hr_vals)
+    hr_max = np.max(hr_vals)
+
     h, hr = np.meshgrid(
-        np.arange(np.min(h_vals), np.max(h_vals), step),
-        np.arange(np.min(hr_vals), np.max(hr_vals), step),
+        np.linspace(h_min, h_max, int((h_max - h_min) // step) + 1),
+        np.linspace(hr_min, hr_max, int((hr_max - hr_min) // step) + 1),
     )
 
     hhr_vals = np.concatenate(
@@ -126,11 +132,15 @@ def interpolate(
     ),
 
     m = si.griddata(hhr_vals, m_vals, (h, hr), method=interpolation)
-    t = si.griddata(hhr_vals, t_vals, (h, hr), method=interpolation)
 
     # Mask off the portion of the interpolated data that wasn't measured
     m[h < hr] = np.nan
-    t[h < hr] = np.nan
+
+    if np.isnan(t_vals).any():
+        t = np.full_like(m, fill_value=np.nan)
+    else:
+        t = si.griddata(hhr_vals, t_vals, (h, hr), method=interpolation)
+        t[h < hr] = np.nan
 
     return h, hr, m, t
 
