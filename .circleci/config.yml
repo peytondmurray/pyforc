@@ -1,21 +1,26 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@0.2.1
+    python: circleci/python@1.3.2
 
 jobs:
-  build-and-test:
-    executor: python/default
-    steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          command: pytest ./tests
-          name: Test
+    build-and-test:
+        executor:
+            name: python/default
+            tag: '3.9'
+        steps:
+            - checkout
+            - python/install-packages
+            - run:
+                  name: Run tests
+                  command: |
+                      pipenv run coverage run -m pytest ./tests
+                      pipenv run coverage json
+                      bash <(curl -s https://codecov.io/bash)
+            - store_artifacts:
+                  path: coverage
 
 workflows:
-  main:
-    jobs:
-      - build-and-test
+    main:
+        jobs:
+            - build-and-test

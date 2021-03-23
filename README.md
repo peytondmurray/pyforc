@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/peytondmurray/PyFORC.svg?branch=master)](https://travis-ci.org/peytondmurray/PyFORC)
-[![Documentation Status](https://readthedocs.org/projects/pyforc/badge/?version=latest)](http://pyforc.readthedocs.io/en/latest/?badge=latest)
-
+[![codecov](https://codecov.io/gh/peytondmurray/PyFORC/branch/develop/graph/badge.svg?token=0fxoMUIK6x)](https://codecov.io/gh/peytondmurray/PyFORC)
 
 # PyFORC
+
 FORC analysis in Python. PyFORC has been developed with multithreaded GUI support from the beginning, making it fast and easy to use.
 ![forc]
 
