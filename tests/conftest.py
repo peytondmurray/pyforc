@@ -1,5 +1,4 @@
 """Pytest configuration."""
-
 pytest_plugins = [
-    'fixtures'
+    "tests.fixtures.data"
 ]

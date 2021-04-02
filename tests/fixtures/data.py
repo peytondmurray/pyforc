@@ -7,4 +7,4 @@ import pytest
 @pytest.fixture()
 def raw_data_file():
     """Path to a PMC hc/hb data file."""
-    return pathlib.Path(__file__).parent / 'test_forc'
+    return pathlib.Path(__file__).parent / 'hchb_forc'

@@ -41,9 +41,9 @@ class PMCIngester(IngesterBase):
     """Ingester for data measured by Princeton Measurements Corporation (now Lakeshore) VSMs."""
 
     pattern = (
-        r'(?P<h>[+-]\d*\.\d*),'
-        r'(?P<m>[+-]\d*\.\d*)'
-        r'(,(?P<t>[+-]\d*\.\d*))?'
+        r'(?P<h>([+-]\d+\.\d+(E[+-]\d+)?)),'
+        r'(?P<m>([+-]\d+\.\d+(E[+-]\d+)?))'
+        r'(,(?P<t>([+-]\d+\.\d+(E[+-]\d+)?)))?'
     )
 
     def ingest(self) -> None:
