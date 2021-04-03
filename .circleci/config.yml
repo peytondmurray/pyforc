@@ -15,7 +15,7 @@ jobs:
                   name: Run tests
                   command: |
                       pipenv run coverage run -m pytest ./tests
-                      pipenv run coverage json
+                      pipenv run coverage xml
                       bash <(curl -s https://codecov.io/bash)
             - store_artifacts:
                   path: coverage
