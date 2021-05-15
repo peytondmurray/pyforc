@@ -20,4 +20,4 @@ class Forc():
     def __init__(self, ingester: Type[IngesterBase], config: Config):
         self.config = config
         self.ingester = ingester(self.config)
-        self.data = self.ingester.ingest(self.config)
+        self.data = self.ingester.run()
