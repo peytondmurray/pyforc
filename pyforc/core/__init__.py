@@ -1,5 +1,1 @@
-from .config import *
-from .forc import *
-from .forcdata import *
-from .ingester import *
-from .ops import *
+from . import config, forc, forcdata, ingester, ops

@@ -1,3 +1,4 @@
+"""Containers for holding FORC data as arrays."""
 from __future__ import annotations
 
 import numpy as np
@@ -20,7 +21,7 @@ class ForcData:
         self.h_raw = [] if h_raw is None else h_raw
         self.m_raw = [] if m_raw is None else m_raw
         self.t_raw = [] if t_raw is None else t_raw
-        self.m_drift = np.ndarray([]) if m_drift is None else m_drift
+        self.m_drift = np.array([]) if m_drift is None else m_drift
         self.h = np.array([]) if h is None else h
         self.hr = np.array([]) if hr is None else hr
         self.m = np.array([]) if m is None else m

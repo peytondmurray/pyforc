@@ -1,5 +1,5 @@
 """Tests for the Forc classes."""
-from pyforc.core import config, forc, ingester
+import pyforc.core as pfc
 
 
 def test_forc(raw_data_file: str):
@@ -10,9 +10,15 @@ def test_forc(raw_data_file: str):
     raw_data_file : str
         Raw data file to be imported.
     """
-    f = forc.Forc(
-        ingester.PMCIngester,
-        config.Config(raw_data_file)
+    f = pfc.forc.Forc(
+        pfc.ingester.PMCIngester,
+        pfc.config.Config(
+            file_name=raw_data_file,
+            pipeline=[
+                pfc.ops.correct_drift,
+                pfc.ops.interpolate,
+            ]
+        )
     )
 
     assert f

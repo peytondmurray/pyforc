@@ -1,3 +1,4 @@
+"""Transformations which operate on ForcData objects."""
 import numpy as np
 import scipy.interpolate as si
 
@@ -93,10 +94,13 @@ def correct_drift(data: ForcData, _) -> ForcData:
     ForcData
         Drift-corrected raw data; interpolated dataset is untouched.
     """
+    if len(data.m_drift) == 0:
+        raise ValueError("No drift points in dataset.")
+
     m_raw = []
     mean_m_sat = np.mean(data.m_drift)
     for curve in data.m_raw:
-        m_raw = curve - (curve[-1] - mean_m_sat)
+        m_raw.append(curve - (curve[-1] - mean_m_sat))
     return ForcData.from_existing(
         data=data,
         m_raw=m_raw

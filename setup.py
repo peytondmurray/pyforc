@@ -1,3 +1,4 @@
+"""Package setup for PyFORC."""
 import setuptools
 
 setuptools.setup(
@@ -13,4 +14,10 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.9",
+    install_requires=[
+        "numpy",
+        "scipy",
+        "pytest",
+        "coverage",
+    ]
 )
