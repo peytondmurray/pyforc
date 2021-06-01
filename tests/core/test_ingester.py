@@ -1,7 +1,9 @@
 """Tests for the ingesters."""
 import numpy as np
 
-from pyforc.core.ingester import interpolate
+from pyforc.core.config import Config
+from pyforc.core.forcdata import ForcData
+from pyforc.core.ops import interpolate
 
 
 def test_interpolate():
@@ -24,7 +26,10 @@ def test_interpolate():
         np.array([np.nan, np.nan, np.nan, np.nan, np.nan]),
     ]
 
-    h, hr, m, t = interpolate(h_raw, m_raw, t_raw)
+    data = interpolate(
+        ForcData(h_raw=h_raw, m_raw=m_raw, t_raw=t_raw),
+        config=Config(),
+    )
 
-    assert np.all(np.isnan(m[h < hr]))
-    assert np.all(np.isnan(t))
+    assert np.all(np.isnan(data.m[data.h < data.hr]))
+    assert np.all(np.isnan(data.t))
