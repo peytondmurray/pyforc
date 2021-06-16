@@ -66,3 +66,19 @@ class ForcData:
             kwargs.get('m', data.m),
             kwargs.get('t', data.t),
         )
+
+    def curves(self, masked=True) -> list[np.ndarray]:
+
+        out = []
+        for h, hr, m in zip(self.h, self.hr, self.m):
+            # hstack two column vectors
+            if masked:
+                h_vec = h[h >= hr]
+                m_vec = m[h >= hr]
+            else:
+                h_vec = h
+                m_vec = m
+
+            out.append(np.array([h_vec, m_vec]).T)
+
+        return out
