@@ -3,9 +3,31 @@ from __future__ import annotations
 
 import numpy as np
 
+from . import coordinates
+
 
 class ForcData:
-    """Container for FORC data."""
+    """Container for FORC data.
+
+    Parameters
+    ----------
+    h_raw : list[np.ndarray]
+        Raw h data
+    m_raw : list[np.ndarray]
+        Raw m data
+    t_raw : list[np.ndarray]
+        Raw t data
+    m_drift : np.ndarray
+        Values of the magnetization at the drift points.
+    h : np.ndarray
+        Processed h data
+    hr : np.ndarray
+        Processed hr data
+    m : np.ndarray
+        Processed m data
+    t : np.ndarray
+        Processed t data
+    """
 
     def __init__(
         self,
@@ -67,8 +89,19 @@ class ForcData:
             kwargs.get('t', data.t),
         )
 
-    def curves(self, masked=True) -> list[np.ndarray]:
+    def curves(self, masked: bool = True) -> list[np.ndarray]:
+        """Get the reversal curves in H-M space as a list of arrays of (H, M) pairs.
 
+        Parameters
+        ----------
+        masked : bool
+            If True, the reversal curves returned will not contain any points for which H < Hr.
+
+        Returns
+        -------
+        list[np.ndarray]
+            A list of arrays containing (H, M) points.
+        """
         out = []
         for h, hr, m in zip(self.h, self.hr, self.m):
             # hstack two column vectors
@@ -82,3 +115,43 @@ class ForcData:
             out.append(np.array([h_vec, m_vec]).T)
 
         return out
+
+    def get_extent(self, coords: coordinates.Coordinates, mask: bool = True) -> tuple[float, ...]:
+        """Get the extent of the dataset in H-Hr or Hc-Hb space.
+
+        Parameters
+        ----------
+        coords : coordinates.Coordinates
+            Coordinates to use to calculate the extent of the dataset
+        mask : bool
+            If True, data for which H < Hr will be included in the calculation of the extent
+
+        Returns
+        -------
+        tuple[float, ...]
+            [min x, max x, min y, max y]
+        """
+        if mask:
+            h = self.h[~np.isnan(self.m)]
+            hr = self.hr[~np.isnan(self.m)]
+        else:
+            h = self.h
+            hr = self.hr
+
+        transformed = coords.transform(
+            np.array(
+                [
+                    [h.min(), hr.min()],
+                    [h.max(), hr.min()],
+                    [h.min(), hr.max()],
+                    [h.max(), hr.max()],
+                ]
+            )
+        )
+
+        return (
+            transformed[:, 0].min(),
+            transformed[:, 0].max(),
+            transformed[:, 1].min(),
+            transformed[:, 1].max()
+        )

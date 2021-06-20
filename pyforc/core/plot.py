@@ -1,90 +1,75 @@
-"""
-Plotting functionality
-"""
-import matplotlib.axes as axes
+"""Plotting utilities for the FORC data."""
 import matplotlib.pyplot as plt
-import matplotlib.transforms as transforms
 import numpy as np
+from matplotlib import axes
 from matplotlib.collections import LineCollection
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from . import forc
-
-
-class Coordinates(transforms.Affine2D):
-    @staticmethod
-    def from_str(name):
-        for subc in Coordinates.__subclasses__():
-            if subc.name == name:
-                return subc()
-
-        raise ValueError(f"Invalid coordinate type {name}")
-
-
-class CoordinatesHcHb(Coordinates):
-    name = "hchb"
-
-    def __init__(self):
-        super().__init__(
-            matrix=[
-                [0.5, 0.5, 0],
-                [0.5, -0.5, 0],
-                [0, 0, 1],
-            ]
-        )
-
-
-class CoordinatesHHr(Coordinates):
-    name = "hhr"
-
-    def __init__(self):
-        super().__init__(
-            matrix=[
-                [1, 0, 0],
-                [0, 1, 0],
-                [0, 0, 1],
-            ]
-        )
+from . import coordinates, forc
 
 
 def imshow(
     fc: forc.Forc,
     interpolation: str = 'bicubic',
     ax: axes.Axes = None,
-    coordinates='hhr',
-):
+    coords: str = 'hhr',
+) -> axes.Axes:
+    """Show the FORC data as a colormap.
 
+    Parameters
+    ----------
+    fc : forc.Forc
+        Forc instance to be plotted
+    interpolation : str
+        Interpolation to use.
+    ax : axes.Axes
+        Axes on which the image is to be drawn
+    coords : str | coordinates.Coordinates
+        Coordinates in which the data is to be drawn
+
+    Returns
+    -------
+    axes.Axes
+        Axes on which the image is drawn
+    """
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(20, 10))
     else:
         fig = ax.figure
+    ax.set_aspect('equal')
 
-    t = transforms.Affine2D(
-        matrix=[
-            [0.5, 0.5, 0],
-            [0.5, -0.5, 0],
-            [0, 0, 1],
-        ]
-    )
-
-    ax.set_transform(
-        t + ax.transData  # Coordinates.from_str(coordinates)
-    )
+    if isinstance(coords, coordinates.Coordinates):
+        transform = coords
+    else:
+        transform = coordinates.Coordinates.from_str(coords)
 
     im = ax.imshow(
         fc.data.m,
         interpolation=interpolation,
         origin='lower',
-        extent=[fc.data.h.min(), fc.data.h.max(), fc.data.hr.min(), fc.data.hr.max()],
+        extent=fc.data.get_extent(transform),
+        transform=transform + ax.transData
     )
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     fig.colorbar(im, cax=cax)
-
     return ax
 
 
-def curves(fc: forc.Forc, ax: axes.Axes = None):
+def curves(fc: forc.Forc, ax: axes.Axes = None) -> axes.Axes:
+    """Plot the reversal curves in H-M space.
 
+    Parameters
+    ----------
+    fc : forc.Forc
+        Forc instance to be plotted
+    ax : axes.Axes
+        Axes on which the data is to be plotted
+
+    Returns
+    -------
+    axes.Axes
+        Axes on which the image is drawn
+    """
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(20, 10))
 
@@ -98,5 +83,4 @@ def curves(fc: forc.Forc, ax: axes.Axes = None):
     )
     ax.set_xlim(np.nanmin(fc.data.h), np.nanmax(fc.data.h))
     ax.set_ylim(np.nanmin(fc.data.m), np.nanmax(fc.data.m))
-
     return ax
