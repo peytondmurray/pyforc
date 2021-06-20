@@ -116,42 +116,53 @@ class ForcData:
 
         return out
 
-    def get_extent(self, coords: coordinates.Coordinates, mask: bool = True) -> tuple[float, ...]:
-        """Get the extent of the dataset in H-Hr or Hc-Hb space.
+    def get_extent(self, mask: bool = True) -> tuple[float, ...]:
+        """Get the extent of the dataset in H-Hr space.
 
         Parameters
         ----------
-        coords : coordinates.Coordinates
-            Coordinates to use to calculate the extent of the dataset
         mask : bool
             If True, data for which H < Hr will be included in the calculation of the extent
 
         Returns
         -------
         tuple[float, ...]
-            [min x, max x, min y, max y]
+            [min h, max h, min hr, max hr]
         """
         if mask:
-            h = self.h[~np.isnan(self.m)]
-            hr = self.hr[~np.isnan(self.m)]
+            h = self.h[self.h >= self.hr]
+            hr = self.hr[self.h >= self.hr]
         else:
             h = self.h
             hr = self.hr
 
-        transformed = coords.transform(
-            np.array(
-                [
-                    [h.min(), hr.min()],
-                    [h.max(), hr.min()],
-                    [h.min(), hr.max()],
-                    [h.max(), hr.max()],
-                ]
-            )
-        )
+        return (h.min(), h.max(), hr.min(), hr.max())
+
+    def get_limits(
+        self,
+        coords: coordinates.Coordinates,
+        mask: bool = True,
+    ) -> tuple[tuple[float, float], tuple[float, float]]:
+        """Get the x and y limits of the dataset.
+
+        Parameters
+        ----------
+        coords : coordinates.Coordinates
+            coords
+        mask : bool
+            mask
+        """
+        if mask:
+            data_mask = (self.h >= self.hr)
+            h = self.h[data_mask].flatten()
+            hr = self.hr[data_mask].flatten()
+        else:
+            h = self.h.flatten()
+            hr = self.hr.flatten()
+
+        in_coords = coords.transform(np.vstack((h, hr)).T)
 
         return (
-            transformed[:, 0].min(),
-            transformed[:, 0].max(),
-            transformed[:, 1].min(),
-            transformed[:, 1].max()
+            (in_coords[:, 0].min(), in_coords[:, 0].max()),
+            (in_coords[:, 1].min(), in_coords[:, 1].max()),
         )

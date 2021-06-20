@@ -47,8 +47,8 @@ class CoordinatesHcHb(Coordinates):
     def __init__(self):
         super().__init__(
             matrix=[
-                [0.5, 0.5, 0],
                 [0.5, -0.5, 0],
+                [0.5, 0.5, 0],
                 [0, 0, 1],
             ]
         )

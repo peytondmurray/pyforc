@@ -10,9 +10,10 @@ from . import coordinates, forc
 
 def imshow(
     fc: forc.Forc,
-    interpolation: str = 'bicubic',
+    interpolation: str = 'nearest',
     ax: axes.Axes = None,
     coords: str = 'hhr',
+    mask: bool = True,
 ) -> axes.Axes:
     """Show the FORC data as a colormap.
 
@@ -26,6 +27,8 @@ def imshow(
         Axes on which the image is to be drawn
     coords : str | coordinates.Coordinates
         Coordinates in which the data is to be drawn
+    mask : bool
+        If True, data for which H < Hr will be included in the calculation of the extent
 
     Returns
     -------
@@ -47,11 +50,16 @@ def imshow(
         fc.data.m,
         interpolation=interpolation,
         origin='lower',
-        extent=fc.data.get_extent(transform),
+        extent=fc.data.get_extent(mask),
         transform=transform + ax.transData
     )
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     fig.colorbar(im, cax=cax)
+
+    xlim, ylim = fc.data.get_limits(coords=transform, mask=mask)
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
+
     return ax
 
 
