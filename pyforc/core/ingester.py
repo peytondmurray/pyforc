@@ -73,6 +73,9 @@ class PMCIngester(IngesterBase):
         ForcData
             Raw field (h), magnetization (m), and temperature (t) (if present) values.
         """
+        if not self.config.file_name:
+            raise ValueError("No file name specified.")
+
         with open(self.config.file_name, 'r') as f:
             lines = f.readlines()
 

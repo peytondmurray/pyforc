@@ -28,7 +28,9 @@ def test_interpolate():
 
     data = interpolate(
         ForcData(h_raw=h_raw, m_raw=m_raw, t_raw=t_raw),
-        config=Config(),
+        config=Config(
+            file_name=None
+        ),
     )
 
     assert np.all(np.isnan(data.m[data.h < data.hr]))

@@ -1,11 +1,13 @@
 """Class to hold configuration details for creating and analyzing FORC data."""
 from __future__ import annotations
 
+import dataclasses
 from typing import Callable, Optional
 
 from .forcdata import ForcData
 
 
+@dataclasses.dataclass
 class Config:
     """Configuration class for analyzing FORC data.
 
@@ -18,23 +20,15 @@ class Config:
         step size used for the measurement
     interpolation: str
         Interpolation method to use; see docstring for scipy.interpolate.griddata for valid
-        interpolation methods.
+        methods.
     drift_correction: bool
         If True, drift correction will be applied before interpolation.
     pipeline: list[Callable[ForcData, Config], ForcData]
         List of operations to run upon ingestion
     """
 
-    def __init__(
-        self,
-        file_name: str,
-        step: Optional[float] = None,
-        interpolation: str = 'cubic',
-        drift_correction: bool = True,
-        pipeline: list[Callable[[ForcData, Config], ForcData]] = None,
-    ):
-        self.file_name = file_name
-        self.step = step
-        self.interpolation = interpolation
-        self.drift_correction = drift_correction
-        self.pipeline = pipeline
+    file_name: Optional[str] = None
+    step: Optional[float] = None
+    interpolation: str = 'cubic'
+    drift_correction: bool = True
+    pipeline: Optional[list[Callable[[ForcData, Config], ForcData]]] = None
