@@ -23,6 +23,8 @@ class Config:
         methods.
     drift_correction: bool
         If True, drift correction will be applied before interpolation.
+    h_sat: float
+        Saturation field beyond which the irreversible component of the magnetization is saturated.
     pipeline: list[Callable[ForcData, Config], ForcData]
         List of operations to run upon ingestion
     """
@@ -32,3 +34,4 @@ class Config:
     interpolation: str = 'cubic'
     drift_correction: bool = True
     pipeline: Optional[list[Callable[[ForcData, Config], ForcData]]] = None
+    h_sat: float = 0

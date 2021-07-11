@@ -1,6 +1,7 @@
 """Transformations which operate on ForcData objects."""
 import numpy as np
 import scipy.interpolate as si
+import scipy.optimize as so
 
 from .config import Config
 from .ingester import ForcData
@@ -122,3 +123,80 @@ def hr_vals_from_h(h: list[np.ndarray]) -> list[np.ndarray]:
         the h-value of the first datapoint in the curve.
     """
     return [np.full_like(curve, fill_value=curve[0]) for curve in h]
+
+
+def normalize(data: ForcData, _) -> ForcData:
+    """Normalize the magnetization to the range [-1, 1].
+
+    Parameters
+    ----------
+    data : ForcData
+        Data to normalize.
+
+    Returns
+    -------
+    ForcData
+        Normalized FORC data.
+    """
+    return ForcData.from_existing(
+        data=data,
+        m=1 - 2 * (data.m - np.nanmax(data.m)) / (np.nanmax(data.m) - np.nanmin(data.m))
+    )
+
+
+def correct_slope(data: ForcData, config: Config) -> ForcData:
+    """Remove contributions to the magnetization which are linear in the field.
+
+    This subtracts out para-/dia-magnetic background which is rarely of interest in magnetic
+    systems.
+
+    The fitting region is the region for which
+
+        1. |h| > h_sat (the magnetic material is saturated)
+        2. m is not NaN (ignore any NaNs introduced from interpolation)
+        3. h > hr (ignore the unmeasurable region where Hc < 0)
+
+    Parameters
+    ----------
+    data : ForcData
+        Data for which the slope is to be corrected.
+    config : Config
+        Configuration containg the saturation magnetization `h_sat`, beyond which the slope is
+        constant.
+
+    Returns
+    -------
+    ForcData
+        Data with the background subtracted out.
+    """
+    fit_region = (np.abs(data.h) > config.h_sat) & (~np.isnan(data.m)) & (data.h >= data.hr)
+
+    h = data.h[fit_region].flatten()
+    m = data.m[fit_region].flatten()
+
+    (a, b), _ = so.curve_fit(line, h, m)
+
+    return ForcData.from_existing(
+        data=data,
+        m=data.m - line(data.h, a, 0)
+    )
+
+
+def line(x: np.ndarray, a: float, b: float) -> np.ndarray:
+    """Return y-values which are a linear function of x.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Abcissa
+    a : float
+        Slope of the line
+    b : float
+        y-intercept of the line
+
+    Returns
+    -------
+    np.ndarray
+        Ordinate
+    """
+    return a * x + b
