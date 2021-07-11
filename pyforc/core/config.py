@@ -23,6 +23,13 @@ class Config:
         methods.
     drift_correction: bool
         If True, drift correction will be applied before interpolation.
+    drift_kernel_size: int
+        The size of the window used for the moving average across the drift points is
+        (2*drift_kernel_size) + 1. Larger numbers make the drift correction more smooth across the
+        saturation magnetization.
+    drift_density: int
+        Decimation density used in drift correction; larger numbers make drift correction less
+        sensitive to fluctuations in the saturation magnetization.
     h_sat: float
         Saturation field beyond which the irreversible component of the magnetization is saturated.
     pipeline: list[Callable[ForcData, Config], ForcData]
@@ -33,5 +40,7 @@ class Config:
     step: Optional[float] = None
     interpolation: str = 'cubic'
     drift_correction: bool = True
+    drift_kernel_size: int = 4
+    drift_density: int = 3
     pipeline: Optional[list[Callable[[ForcData, Config], ForcData]]] = None
     h_sat: float = 0

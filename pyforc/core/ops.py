@@ -1,6 +1,7 @@
 """Transformations which operate on ForcData objects."""
 import numpy as np
 import scipy.interpolate as si
+import scipy.ndimage as sn
 import scipy.optimize as so
 
 from .config import Config
@@ -77,13 +78,20 @@ def interpolate(
     )
 
 
-def correct_drift(data: ForcData, _) -> ForcData:
-    """
-    Correct the raw magnetization for drift.
+def correct_drift(data: ForcData, config: Config) -> ForcData:
+    """Correct the raw magnetization for drift.
 
     If the measurement space is Hc/Hb, dedicated drift points must have been measured. If the
     measurement is H/Hr, the last datapoint along each curve is used. In either case, the points
     used for drift correction must have been measured above the saturation field.
+
+    Drift correction is carried out in the following steps:
+
+        1. Calculate the average saturation magnetization, m_sat_avg
+        2. Calculate a moving average of the saturation magnetization, m_sat_mov
+        3. Use a cubic spline to interpolate between every nth point, m_sat_interp
+        4. Subtract out the difference (m_sat_avg - m_sat_interp) from the magnetization of each
+        curve
 
     Parameters
     ----------
@@ -98,13 +106,21 @@ def correct_drift(data: ForcData, _) -> ForcData:
     if len(data.m_drift) == 0:
         raise ValueError("No drift points in dataset.")
 
-    m_raw = []
-    mean_m_sat = np.mean(data.m_drift)
-    for curve in data.m_raw:
-        m_raw.append(curve - (curve[-1] - mean_m_sat))
+    m_sat_avg = np.mean(data.m_drift)
+
+    kernel_size = 2 * config.drift_kernel_size + 1
+    m_sat_mov = sn.convolve(
+        data.m_drift,
+        np.ones(kernel_size) / kernel_size,
+        mode='nearest',
+    )[::config.drift_density]
+    index_mov = np.arange(0, len(data.m_drift), step=config.drift_density)
+
+    m_sat_int = si.interp1d(index_mov, m_sat_mov, kind='cubic')
+
     return ForcData.from_existing(
         data=data,
-        m_raw=m_raw
+        m_raw=[curve - (m_sat_int(i) - m_sat_avg) for i, curve in enumerate(data.m_raw)]
     )
 
 
