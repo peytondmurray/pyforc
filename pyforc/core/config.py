@@ -34,6 +34,8 @@ class Config:
         Saturation field beyond which the irreversible component of the magnetization is saturated.
     pipeline: list[Callable[ForcData, Config], ForcData]
         List of operations to run upon ingestion
+    smoothing_factor: int
+        Smoothing factor to use for calculating the FORC distribution
     """
 
     file_name: Optional[str] = None
@@ -44,3 +46,4 @@ class Config:
     drift_density: int = 3
     pipeline: Optional[list[Callable[[ForcData, Config], ForcData]]] = None
     h_sat: float = 0
+    smoothing_factor: int = 3

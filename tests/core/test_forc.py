@@ -2,7 +2,7 @@
 import pyforc.core as pfc
 
 
-def test_forc(raw_data_file: str):
+def test_forc(raw_data_file):
     """Test that a Forc object can be instantiated from Hc/Hb data.
 
     Parameters

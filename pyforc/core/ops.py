@@ -1,4 +1,6 @@
 """Transformations which operate on ForcData objects."""
+from typing import Any, List, Union
+
 import numpy as np
 import scipy.interpolate as si
 import scipy.ndimage as sn
@@ -97,6 +99,8 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
     ----------
     data : ForcData
         Data for which drift correction is to be applied
+    config: Config
+        Configuration containing a `drift_kernel_size` entry.
 
     Returns
     -------
@@ -108,19 +112,65 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
 
     m_sat_avg = np.mean(data.m_drift)
 
-    kernel_size = 2 * config.drift_kernel_size + 1
-    m_sat_mov = sn.convolve(
-        data.m_drift,
-        np.ones(kernel_size) / kernel_size,
+    m_sat_mov = decimate(
+        moving_average(data.m_drift, config.drift_kernel_size),
+        config.drift_density
+    )
+    index_mov = decimate(
+        np.arange(0, len(data.m_drift)),
+        config.drift_density
+    )
+
+    m_sat_interp = si.interp1d(index_mov, m_sat_mov, kind='cubic')
+
+    m_raw = []
+    for i, curve in enumerate(data.m_raw):
+        m_raw.append(curve - (m_sat_interp(i) - m_sat_avg))
+    return ForcData.from_existing(data=data, m_raw=m_raw)
+
+
+def decimate(x: Union[List[Any], np.ndarray], step: int) -> np.ndarray:
+    """Return every `step` value of x, but without removing the last value in x.
+
+    The step slicing operator [::step] always returns the first element in the array, and then
+    subsequent value which are separated by `step` indices. Therefore the last element in the array
+    is included by the slice operation if `(len(x) - 1) % step == 0`; otherwise the last element
+    needs to be appended.
+
+    Parameters
+    ----------
+    x : Union[list[Any], np.ndarray]
+        List or array to be decimated
+    step : int
+        Only return the first element of the array, and every `step`th element after that (but then
+        also return the last element in the array, if it was going to be skipped).
+
+    Returns
+    -------
+    np.ndarray:
+        Decimated array, with the first and last values included from `x`.
+    """
+    x_dec = np.array(x)[::step]
+    if (len(x) - 1) % step != 0:
+        x_dec = np.append(x_dec, x[-1])
+    return x_dec
+
+
+def moving_average(data: np.ndarray, kernel_size: int):
+    """Calculate a moving average over the data.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Data for which the moving average is to be calculated.
+    kernel_size : int
+        The size of the moving average window is (2*kernel_size + 1)
+    """
+    window_size = 2 * kernel_size + 1
+    return sn.convolve(
+        data,
+        np.ones(window_size) / window_size,
         mode='nearest',
-    )[::config.drift_density]
-    index_mov = np.arange(0, len(data.m_drift), step=config.drift_density)
-
-    m_sat_int = si.interp1d(index_mov, m_sat_mov, kind='cubic')
-
-    return ForcData.from_existing(
-        data=data,
-        m_raw=[curve - (m_sat_int(i) - m_sat_avg) for i, curve in enumerate(data.m_raw)]
     )
 
 
@@ -216,3 +266,69 @@ def line(x: np.ndarray, a: float, b: float) -> np.ndarray:
         Ordinate
     """
     return a * x + b
+
+
+def compute_forc_distribution(data: ForcData, config: Config) -> ForcData:
+    """Compute the FORC distribution.
+
+    This method uses a Savitzky-Golay filter to calculate the mixed partial derivative:
+
+        ρ = -(1/2)∂²M/∂H∂Hr
+
+    This is a convolution-based method for calculating the mixed partial derivative;
+    Heslop and Muxworthy (2005) [DOI: 10.1016/j.jmmm.2004.09.002] were the first to propose using
+    this method. Mathematically speaking it is equivalent to the least-squares fitting procedure
+    originally used by Pike et. al. (1999) [DOI: 10.1063/1.370176], but it's orders of magnitude
+    faster.
+
+    Parameters
+    ----------
+    data : ForcData
+        Data for which the FORC distribution is to be calculated.
+    config : Config
+        Configuration containing the smoothing factor.
+
+    Returns
+    -------
+    ForcData
+        Data with the computed FORC distribution.
+    """
+    step = data.get_step()
+    return -0.5 * sn.convolve(
+        input=data.m,
+        weights=compute_sg_kernel(config.smoothing_factor, step, step),
+        mode='constant',
+        cval=np.nan,
+    )
+
+
+def compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
+    """
+    Compute the Savitzky-Golay kernel which pulls out the mixed second derivative.
+
+    Parameters
+    ----------
+    sf : int
+        Smoothing factor to use for the filter
+    step_x : float
+        Step size in the x-direction
+    step_y : float
+        Step size in the y-direction
+
+    Returns
+    -------
+    np.ndarray:
+        Kernel which, when colvolved with the data, will yield the coefficient of the "xy" term in
+        the least-squares fit of the data in the neighborhood of each point.
+    """
+    xx, yy = np.meshgrid(
+        np.linspace(sf * step_x, -sf * step_x, 2 * sf + 1),
+        np.linspace(sf * step_y, -sf * step_y, 2 * sf + 1)
+    )
+
+    xx = np.reshape(xx, (-1, 1))
+    yy = np.reshape(yy, (-1, 1))
+
+    coefficients = np.linalg.pinv(np.hstack((np.ones_like(xx), xx, xx ** 2, yy, yy ** 2, xx * yy)))
+
+    return np.reshape(coefficients[5, :], (2 * sf + 1, 2 * sf + 1))
