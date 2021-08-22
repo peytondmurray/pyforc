@@ -1,5 +1,5 @@
 """Transformations which operate on ForcData objects."""
-from typing import Any, List, Union
+from typing import Any, Callable, List, Union
 
 import numpy as np
 import scipy.interpolate as si
@@ -14,24 +14,23 @@ def interpolate(
     data: ForcData,
     config: Config,
 ) -> ForcData:
-    """Interpolate the raw dataset.
+    """Interpolate the raw dataset to a regularly-spaced grid of points.
 
-    m and t values for h < hr are set to np.nan.
+    Note that m and t values for h < hr are set to np.nan.
 
     Parameters
     ----------
-    step : float
-        Step size along the h and hr directions to use for the interpolated dataset. Uses the
-        same units given by the raw data. If None, the step will be determined from the median
-        of the steps in the h-direction.
-    interpolation : str
-        Interpolation method to use; see docstring for scipy.interpolate.griddata for valid
-        interpolation methods.
+    data : ForcData
+        Raw data to interpolate.
+    config : Config
+        Configuration containing the interpolation method and step to use. If the step is None, the
+        step will be determined from the median of the steps in the h-direction. See
+        scipy.interpolate.griddata for valid interpolation methods.
 
     Returns
     -------
     ForcData
-        Interpolated dataset
+        Interpolated dataset.
     """
     if not config.step:
         step = data.get_step()
@@ -106,6 +105,11 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
     -------
     ForcData
         Drift-corrected raw data; interpolated dataset is untouched.
+
+    Raises
+    ------
+    ValueError
+        Raised if no data.m_drift is empty.
     """
     if len(data.m_drift) == 0:
         raise ValueError("No drift points in dataset.")
@@ -147,7 +151,7 @@ def decimate(x: Union[List[Any], np.ndarray], step: int) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray:
+    np.ndarray
         Decimated array, with the first and last values included from `x`.
     """
     x_dec = np.array(x)[::step]
@@ -156,8 +160,8 @@ def decimate(x: Union[List[Any], np.ndarray], step: int) -> np.ndarray:
     return x_dec
 
 
-def moving_average(data: np.ndarray, kernel_size: int):
-    """Calculate a moving average over the data.
+def moving_average(data: np.ndarray, kernel_size: int) -> np.ndarray:
+    """Calculate a 1D moving average over the data.
 
     Parameters
     ----------
@@ -165,6 +169,11 @@ def moving_average(data: np.ndarray, kernel_size: int):
         Data for which the moving average is to be calculated.
     kernel_size : int
         The size of the moving average window is (2*kernel_size + 1)
+
+    Returns
+    -------
+    np.ndarray
+        Moving-averaged dataset.
     """
     window_size = 2 * kernel_size + 1
     return sn.convolve(
@@ -206,7 +215,7 @@ def normalize(data: ForcData, _) -> ForcData:
     """
     return ForcData.from_existing(
         data=data,
-        m=1 - 2 * (data.m - np.nanmax(data.m)) / (np.nanmax(data.m) - np.nanmin(data.m))
+        m=1 - 2 * (np.nanmax(data.m) - data.m) / (np.nanmax(data.m) - np.nanmin(data.m))
     )
 
 
@@ -240,12 +249,47 @@ def correct_slope(data: ForcData, config: Config) -> ForcData:
     h = data.h[fit_region].flatten()
     m = data.m[fit_region].flatten()
 
-    (a, b), _ = so.curve_fit(line, h, m)
+    (a, b1, b2), _ = so.curve_fit(
+        generate_fit_func(h, config.h_sat), h, m
+    )
 
     return ForcData.from_existing(
         data=data,
         m=data.m - line(data.h, a, 0)
     )
+
+
+def generate_fit_func(
+    h: np.ndarray,
+    h_sat: float,
+) -> Callable[[np.ndarray, float, float, float], np.ndarray]:
+    """Generate the function for fitting the linear contribution to the magnetization.
+
+    Parameters
+    ----------
+    h : np.ndarray
+        Flat array of h-values; the magnetization at these field values must not be NaN.
+    h_sat : float
+        Saturation field; for h > h_sat or h < -h_sat, the magnet is saturated and the only change
+        in the magnetization comes from the linear background.
+
+    Returns
+    -------
+    Callable[[np.ndarray, float, float, float], np.ndarray]:
+        Function to use for fitting the linear background. It's comprised of two lines: one for the
+        region h >= h_sat, and another for the region h < h_sat. These two lines have the same slope
+        but different y-intercepts. The call signature is
+
+            fit_curve(h_values, slope, intercept for h >= h_sat, intercept for h < h_sat)
+    """
+    i_upper_saturation = h >= h_sat
+
+    def fit_curve(h: np.ndarray, a: float, b1: float, b2: float) -> np.ndarray:
+        y = np.zeros(h.shape)
+        y[i_upper_saturation] = line(h[i_upper_saturation], a, b1)
+        y[~i_upper_saturation] = line(h[~i_upper_saturation], a, b2)
+        return y
+    return fit_curve
 
 
 def line(x: np.ndarray, a: float, b: float) -> np.ndarray:

@@ -1,4 +1,6 @@
 """Plotting utilities for the FORC data."""
+from typing import Union
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import axes
@@ -6,13 +8,14 @@ from matplotlib.collections import LineCollection
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from . import coordinates, forc
+from .ingester import ForcData
 
 
 def imshow(
     fc: forc.Forc,
     interpolation: str = 'nearest',
     ax: axes.Axes = None,
-    coords: str = 'hhr',
+    coords: Union[str, coordinates.Coordinates] = 'hhr',
     mask: bool = True,
 ) -> axes.Axes:
     """Show the FORC data as a colormap.
@@ -63,7 +66,7 @@ def imshow(
     return ax
 
 
-def curves(fc: forc.Forc, ax: axes.Axes = None) -> axes.Axes:
+def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
     """Plot the reversal curves in H-M space.
 
     Parameters
@@ -81,14 +84,19 @@ def curves(fc: forc.Forc, ax: axes.Axes = None) -> axes.Axes:
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(20, 10))
 
+    if isinstance(fc, ForcData):
+        data = fc
+    else:
+        data = fc.data
+
     ax.add_collection(
         LineCollection(
-            fc.data.curves(),
+            data.curves(),
             linestyles='solid',
             color='w',
             alpha=0.3,
         )
     )
-    ax.set_xlim(np.nanmin(fc.data.h), np.nanmax(fc.data.h))
-    ax.set_ylim(np.nanmin(fc.data.m), np.nanmax(fc.data.m))
+    ax.set_xlim(np.nanmin(data.h), np.nanmax(data.h))
+    ax.set_ylim(np.nanmin(data.m), np.nanmax(data.m))
     return ax
