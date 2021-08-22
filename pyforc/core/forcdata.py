@@ -27,6 +27,8 @@ class ForcData:
         Processed m data
     t : np.ndarray
         Processed t data
+    rho : np.ndarray
+        FORC distribution
     """
 
     def __init__(
@@ -39,6 +41,7 @@ class ForcData:
         hr: np.ndarray = None,
         m: np.ndarray = None,
         t: np.ndarray = None,
+        rho: np.ndarray = None,
     ):
         self.h_raw = [] if h_raw is None else h_raw
         self.m_raw = [] if m_raw is None else m_raw
@@ -48,6 +51,7 @@ class ForcData:
         self.hr = np.array([]) if hr is None else hr
         self.m = np.array([]) if m is None else m
         self.t = np.array([]) if t is None else t
+        self.rho = np.array([]) if rho is None else rho
 
     def get_step(self) -> float:
         """Get the step size of the raw dataset.
@@ -62,31 +66,59 @@ class ForcData:
         return np.median(np.concatenate([np.diff(curve) for curve in self.h_raw]))
 
     @staticmethod
-    def from_existing(data: ForcData, **kwargs) -> ForcData:
+    def from_existing(
+        data: ForcData,
+        h_raw: list[np.ndarray] = None,
+        m_raw: list[np.ndarray] = None,
+        t_raw: list[np.ndarray] = None,
+        m_drift: np.ndarray = None,
+        h: np.ndarray = None,
+        hr: np.ndarray = None,
+        m: np.ndarray = None,
+        t: np.ndarray = None,
+        rho: np.ndarray = None,
+    ) -> ForcData:
         """Generate a new ForcData instance from the input, but override fields with the kwargs.
 
         Parameters
         ----------
         data : ForcData
             Data which is to be copied over to the new instance
-        kwargs :
-            Fields which should take precedence over the values in `data`
+        h_raw : list[np.ndarray]
+            Raw magnetization data
+        m_raw : list[np.ndarray]
+            Raw magnetization data
+        t_raw : list[np.ndarray]
+            Raw temperature data
+        m_drift : np.ndarray
+            Drift magnetization measurements
+        h : np.ndarray
+            Processed field values
+        hr : np.ndarray
+            Processed reversal field values
+        m : np.ndarray
+            Processed magnetization data
+        t : np.ndarray
+            Processed temperature values
+        rho : np.ndarray
+            FORC distribution
 
         Returns
         -------
-        ForcData
+        ForcData:
             A new instance of ForcData containing the old values present in `data`; if any fields
             were specified in the kwargs, those fields replace those from `data`.
         """
         return ForcData(
-            kwargs.get('h_raw', data.h_raw),
-            kwargs.get('m_raw', data.m_raw),
-            kwargs.get('t_raw', data.t_raw),
-            kwargs.get('m_drift', data.m_drift),
-            kwargs.get('h', data.h),
-            kwargs.get('hr', data.hr),
-            kwargs.get('m', data.m),
-            kwargs.get('t', data.t),
+            h_raw or data.h_raw,
+            m_raw or data.m_raw,
+            t_raw or data.t_raw,
+            m_drift or data.m_drift,
+            h or data.h,
+            hr or data.hr,
+            m or data.m,
+            t or data.t,
+            rho or data.rho,
         )
 
     def curves(self, masked: bool = True) -> list[np.ndarray]:
@@ -151,6 +183,11 @@ class ForcData:
             coords
         mask : bool
             mask
+
+        Returns
+        -------
+        tuple[tuple[float, float], tuple[float, float]]
+            (x_min, x_max), (y_min, y_max)
         """
         if mask:
             data_mask = (self.h >= self.hr)

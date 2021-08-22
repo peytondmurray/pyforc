@@ -338,11 +338,14 @@ def compute_forc_distribution(data: ForcData, config: Config) -> ForcData:
         Data with the computed FORC distribution.
     """
     step = data.get_step()
-    return -0.5 * sn.convolve(
-        input=data.m,
-        weights=compute_sg_kernel(config.smoothing_factor, step, step),
-        mode='constant',
-        cval=np.nan,
+    return ForcData.from_existing(
+        data=data,
+        rho=-0.5 * sn.convolve(
+            input=data.m,
+            weights=compute_sg_kernel(config.smoothing_factor, step, step),
+            mode='constant',
+            cval=np.nan,
+        )
     )
 
 

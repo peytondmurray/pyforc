@@ -13,6 +13,7 @@ from .ingester import ForcData
 
 def imshow(
     fc: forc.Forc,
+    attr: str = 'm',
     interpolation: str = 'nearest',
     ax: axes.Axes = None,
     coords: Union[str, coordinates.Coordinates] = 'hhr',
@@ -24,6 +25,8 @@ def imshow(
     ----------
     fc : forc.Forc
         Forc instance to be plotted
+    attr : str
+        Data attribute to plot. Valid choices are {h, hr, m, t, rho}.
     interpolation : str
         Interpolation to use.
     ax : axes.Axes
@@ -50,7 +53,7 @@ def imshow(
         transform = coordinates.Coordinates.from_str(coords)
 
     im = ax.imshow(
-        fc.data.m,
+        getattr(fc.data, attr),
         interpolation=interpolation,
         origin='lower',
         extent=fc.data.get_extent(mask),
