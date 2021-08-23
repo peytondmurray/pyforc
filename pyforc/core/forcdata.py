@@ -110,15 +110,15 @@ class ForcData:
             were specified in the kwargs, those fields replace those from `data`.
         """
         return ForcData(
-            h_raw or data.h_raw,
-            m_raw or data.m_raw,
-            t_raw or data.t_raw,
-            m_drift or data.m_drift,
-            h or data.h,
-            hr or data.hr,
-            m or data.m,
-            t or data.t,
-            rho or data.rho,
+            data.h_raw if h_raw is None else h_raw,
+            data.m_raw if m_raw is None else m_raw,
+            data.t_raw if t_raw is None else t_raw,
+            data.m_drift if m_drift is None else m_drift,
+            data.h if h is None else h,
+            data.hr if hr is None else hr,
+            data.m if m is None else m,
+            data.t if t is None else t,
+            data.rho if rho is None else rho,
         )
 
     def curves(self, masked: bool = True) -> list[np.ndarray]:
