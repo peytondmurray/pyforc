@@ -42,7 +42,7 @@ def imshow(
         Axes on which the image is drawn
     """
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=(20, 10))
+        fig, ax = plt.subplots(1, 1, figsize=(15, 10))
     else:
         fig = ax.figure
     ax.set_aspect('equal')
@@ -85,7 +85,7 @@ def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
         Axes on which the image is drawn
     """
     if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=(20, 10))
+        _, ax = plt.subplots(1, 1, figsize=(15, 10))
 
     if isinstance(fc, ForcData):
         data = fc

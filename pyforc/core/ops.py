@@ -280,16 +280,16 @@ def generate_fit_func(
         region h >= h_sat, and another for the region h < h_sat. These two lines have the same slope
         but different y-intercepts. The call signature is
 
-            fit_curve(h_values, slope, intercept for h >= h_sat, intercept for h < h_sat)
+            fit_func(h_values, slope, intercept for h >= h_sat, intercept for h < h_sat)
     """
     i_upper_saturation = h >= h_sat
 
-    def fit_curve(h: np.ndarray, a: float, b1: float, b2: float) -> np.ndarray:
+    def fit_func(h: np.ndarray, a: float, b1: float, b2: float) -> np.ndarray:
         y = np.zeros(h.shape)
         y[i_upper_saturation] = line(h[i_upper_saturation], a, b1)
         y[~i_upper_saturation] = line(h[~i_upper_saturation], a, b2)
         return y
-    return fit_curve
+    return fit_func
 
 
 def line(x: np.ndarray, a: float, b: float) -> np.ndarray:
