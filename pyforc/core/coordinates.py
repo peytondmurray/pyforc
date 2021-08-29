@@ -9,7 +9,7 @@ import matplotlib.transforms as transforms
 class Coordinates(transforms.Affine2D):
     """Base class for coordinates."""
 
-    name: typing.Union[str, None] = None
+    name: typing.Optional[str] = None
 
     @staticmethod
     def from_str(name: str) -> Coordinates:
@@ -24,6 +24,11 @@ class Coordinates(transforms.Affine2D):
         -------
         Coordinates
             The coordinates instance with the requested name.
+
+        Raises
+        ------
+        ValueError
+            Raised if `name` is not a valid Coordinate type
         """
         for subc in Coordinates.__subclasses__():
             if subc.name == name:
