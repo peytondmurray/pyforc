@@ -11,7 +11,7 @@ FORC analysis in Python.
 
 Install by cloning this repo and running
 
-`python main.py`
+`pip install .`
 
 ## Contributions
 
