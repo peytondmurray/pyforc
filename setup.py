@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="PyFORC",
-    version="1.0.0",
+    version="1.1.0",
     author="Peyton Murray",
     author_email="peynmurray@gmail.com",
     description="FORC analysis in Python",
