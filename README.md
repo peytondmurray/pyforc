@@ -1,5 +1,4 @@
 [![codecov](https://codecov.io/gh/peytondmurray/PyFORC/branch/develop/graph/badge.svg?token=0fxoMUIK6x)](https://codecov.io/gh/peytondmurray/PyFORC)
-[![peytondmurray](https://circleci.com/gh/peytondmurray/PyFORC.svg?style=shield)](https://app.circleci.com/pipelines/github/peytondmurray/PyFORC)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
 # PyFORC
@@ -22,3 +21,21 @@ worry too much about this stuff though, we can work together to integrate your
 code.
 
 [forc]: https://github.com/peytondmurray/PyFORC/blob/develop/assets/forc.jpg
+
+### Pre-commit hooks
+
+This project makes use of [pre-commit hooks](https://pre-commit.com/) for
+linting and style checking. If you haven't used pre-commit hooks before, first
+install pre commit:
+
+```bash
+pip install pre-commit
+```
+
+Then inside the repository install the hooks themselves:
+
+```bash
+pre-commit install
+```
+
+Now, pre-commit hooks will run automatically any time you type `git commit`.
