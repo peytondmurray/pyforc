@@ -40,7 +40,7 @@ class Config:
 
     file_name: Optional[str] = None
     step: Optional[float] = None
-    interpolation: str = 'cubic'
+    interpolation: str = "cubic"
     drift_correction: bool = True
     drift_kernel_size: int = 4
     drift_density: int = 3

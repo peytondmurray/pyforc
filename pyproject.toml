@@ -11,3 +11,6 @@ ignore-init-method = true
 ignore-init-module = true
 ignore-magic = true
 ignore-module = true
+
+[tool.ruff]
+line-length = 100

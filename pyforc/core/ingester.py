@@ -60,9 +60,9 @@ class PMCIngester(IngesterBase):
     """Ingester for data measured by Princeton Measurements Corporation (now Lakeshore) VSMs."""
 
     pattern = (
-        r'(?P<h>([+-]\d+\.\d+(E[+-]\d+)?)),'
-        r'(?P<m>([+-]\d+\.\d+(E[+-]\d+)?))'
-        r'(,(?P<t>([+-]\d+\.\d+(E[+-]\d+)?)))?'
+        r"(?P<h>([+-]\d+\.\d+(E[+-]\d+)?)),"
+        r"(?P<m>([+-]\d+\.\d+(E[+-]\d+)?))"
+        r"(,(?P<t>([+-]\d+\.\d+(E[+-]\d+)?)))?"
     )
 
     def ingest(self) -> ForcData:
@@ -76,12 +76,12 @@ class PMCIngester(IngesterBase):
         if not self.config.file_name:
             raise ValueError("No file name specified.")
 
-        with open(self.config.file_name, 'r') as f:
+        with open(self.config.file_name, "r") as f:
             lines = f.readlines()
 
         # Find first data line
         i = 0
-        while i < len(lines) and lines[i][0] not in '-+':
+        while i < len(lines) and lines[i][0] not in "-+":
             i += 1
 
         header = lines[:i]
@@ -114,9 +114,9 @@ class PMCIngester(IngesterBase):
 
             if match:
                 groups = match.groupdict()
-                h_buf.append(float(groups['h']))
-                m_buf.append(float(groups['m']))
-                t_buf.append(float(groups['t']) if groups['t'] else np.nan)
+                h_buf.append(float(groups["h"]))
+                m_buf.append(float(groups["m"]))
+                t_buf.append(float(groups["t"]) if groups["t"] else np.nan)
 
             else:
                 # End of the reversal curve
@@ -148,12 +148,11 @@ class PMCIngester(IngesterBase):
             if match:
                 # Handle drift point
                 groups = match.groupdict()
-                m_drift.append(float(groups['m']))
+                m_drift.append(float(groups["m"]))
 
                 # Next line should be blank; line after is the start of the reversal curve data
-                if (
-                    re.search(self.pattern, lines[i + 1])
-                    or not re.search(self.pattern, lines[i + 2])
+                if re.search(self.pattern, lines[i + 1]) or not re.search(
+                    self.pattern, lines[i + 2]
                 ):
                     raise ValueError(f"Unexpected data format starting on line {i}")
 
@@ -228,4 +227,4 @@ class PMCIngester(IngesterBase):
         bool
             True if the header comes from a file measured across h/hr space, False otherwise.
         """
-        return not any(re.match('(Hc1|Hc2|Hb1|Hb2).*', line) for line in header)
+        return not any(re.match("(Hc1|Hc2|Hb1|Hb2).*", line) for line in header)

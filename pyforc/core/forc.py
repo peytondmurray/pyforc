@@ -5,7 +5,7 @@ from .config import Config
 from .ingester import IngesterBase
 
 
-class Forc():
+class Forc:
     """
     Generic for storing, extracting, and processing FORC data.
 

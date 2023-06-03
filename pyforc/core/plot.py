@@ -13,10 +13,10 @@ from .ingester import ForcData
 
 def imshow(
     fc: forc.Forc,
-    attr: str = 'm',
-    interpolation: str = 'nearest',
+    attr: str = "m",
+    interpolation: str = "nearest",
     ax: axes.Axes = None,
-    coords: Union[str, coordinates.Coordinates] = 'hhr',
+    coords: Union[str, coordinates.Coordinates] = "hhr",
     mask: bool = True,
 ) -> axes.Axes:
     """Show the FORC data as a colormap.
@@ -45,7 +45,7 @@ def imshow(
         fig, ax = plt.subplots(1, 1, figsize=(15, 10))
     else:
         fig = ax.figure
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
 
     if isinstance(coords, coordinates.Coordinates):
         transform = coords
@@ -55,9 +55,9 @@ def imshow(
     im = ax.imshow(
         getattr(fc.data, attr),
         interpolation=interpolation,
-        origin='lower',
+        origin="lower",
         extent=fc.data.get_extent(mask),
-        transform=transform + ax.transData
+        transform=transform + ax.transData,
     )
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     fig.colorbar(im, cax=cax)
@@ -95,8 +95,8 @@ def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
     ax.add_collection(
         LineCollection(
             data.curves(),
-            linestyles='solid',
-            color='w',
+            linestyles="solid",
+            color="w",
             alpha=0.3,
         )
     )

@@ -1,5 +1,6 @@
 """Containers for holding FORC data as arrays."""
 from __future__ import annotations
+from typing import Optional
 
 import numpy as np
 
@@ -11,11 +12,11 @@ class ForcData:
 
     Parameters
     ----------
-    h_raw : list[np.ndarray]
+    h_raw : Optional[list[np.ndarray]]
         Raw h data
-    m_raw : list[np.ndarray]
+    m_raw : Optional[list[np.ndarray]]
         Raw m data
-    t_raw : list[np.ndarray]
+    t_raw : Optional[list[np.ndarray]]
         Raw t data
     m_drift : np.ndarray
         Values of the magnetization at the drift points.
@@ -33,9 +34,9 @@ class ForcData:
 
     def __init__(
         self,
-        h_raw: list[np.ndarray] = None,
-        m_raw: list[np.ndarray] = None,
-        t_raw: list[np.ndarray] = None,
+        h_raw: Optional[list[np.ndarray]] = None,
+        m_raw: Optional[list[np.ndarray]] = None,
+        t_raw: Optional[list[np.ndarray]] = None,
         m_drift: np.ndarray = None,
         h: np.ndarray = None,
         hr: np.ndarray = None,
@@ -68,9 +69,9 @@ class ForcData:
     @staticmethod
     def from_existing(
         data: ForcData,
-        h_raw: list[np.ndarray] = None,
-        m_raw: list[np.ndarray] = None,
-        t_raw: list[np.ndarray] = None,
+        h_raw: Optional[list[np.ndarray]] = None,
+        m_raw: Optional[list[np.ndarray]] = None,
+        t_raw: Optional[list[np.ndarray]] = None,
         m_drift: np.ndarray = None,
         h: np.ndarray = None,
         hr: np.ndarray = None,
@@ -84,11 +85,11 @@ class ForcData:
         ----------
         data : ForcData
             Data which is to be copied over to the new instance
-        h_raw : list[np.ndarray]
+        h_raw : Optional[list[np.ndarray]]
             Raw magnetization data
-        m_raw : list[np.ndarray]
+        m_raw : Optional[list[np.ndarray]]
             Raw magnetization data
-        t_raw : list[np.ndarray]
+        t_raw : Optional[list[np.ndarray]]
             Raw temperature data
         m_drift : np.ndarray
             Drift magnetization measurements
@@ -190,7 +191,7 @@ class ForcData:
             (x_min, x_max), (y_min, y_max)
         """
         if mask:
-            data_mask = (self.h >= self.hr)
+            data_mask = self.h >= self.hr
             h = self.h[data_mask].flatten()
             hr = self.hr[data_mask].flatten()
         else:

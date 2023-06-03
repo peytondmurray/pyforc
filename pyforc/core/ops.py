@@ -52,10 +52,11 @@ def interpolate(
         np.linspace(hr_min, hr_max, int((hr_max - hr_min) // step) + 1),
     )
 
-    hhr_vals = np.concatenate(
-        (np.reshape(h_vals, (-1, 1)), np.reshape(hr_vals, (-1, 1))),
-        axis=1
-    ),
+    hhr_vals = (
+        np.concatenate(
+            (np.reshape(h_vals, (-1, 1)), np.reshape(hr_vals, (-1, 1))), axis=1
+        ),
+    )
 
     m = si.griddata(hhr_vals, m_vals, (h, hr), method=config.interpolation)
 
@@ -117,15 +118,11 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
     m_sat_avg = np.mean(data.m_drift)
 
     m_sat_mov = decimate(
-        moving_average(data.m_drift, config.drift_kernel_size),
-        config.drift_density
+        moving_average(data.m_drift, config.drift_kernel_size), config.drift_density
     )
-    index_mov = decimate(
-        np.arange(0, len(data.m_drift)),
-        config.drift_density
-    )
+    index_mov = decimate(np.arange(0, len(data.m_drift)), config.drift_density)
 
-    m_sat_interp = si.interp1d(index_mov, m_sat_mov, kind='cubic')
+    m_sat_interp = si.interp1d(index_mov, m_sat_mov, kind="cubic")
 
     m_raw = []
     for i, curve in enumerate(data.m_raw):
@@ -179,7 +176,7 @@ def moving_average(data: np.ndarray, kernel_size: int) -> np.ndarray:
     return sn.convolve(
         data,
         np.ones(window_size) / window_size,
-        mode='nearest',
+        mode="nearest",
     )
 
 
@@ -215,7 +212,8 @@ def normalize(data: ForcData, _) -> ForcData:
     """
     return ForcData.from_existing(
         data=data,
-        m=1 - 2 * (np.nanmax(data.m) - data.m) / (np.nanmax(data.m) - np.nanmin(data.m))
+        m=1
+        - 2 * (np.nanmax(data.m) - data.m) / (np.nanmax(data.m) - np.nanmin(data.m)),
     )
 
 
@@ -244,19 +242,16 @@ def correct_slope(data: ForcData, config: Config) -> ForcData:
     ForcData
         Data with the background subtracted out.
     """
-    fit_region = (np.abs(data.h) > config.h_sat) & (~np.isnan(data.m)) & (data.h >= data.hr)
+    fit_region = (
+        (np.abs(data.h) > config.h_sat) & (~np.isnan(data.m)) & (data.h >= data.hr)
+    )
 
     h = data.h[fit_region].flatten()
     m = data.m[fit_region].flatten()
 
-    (a, b1, b2), _ = so.curve_fit(
-        generate_fit_func(h, config.h_sat), h, m
-    )
+    (a, b1, b2), _ = so.curve_fit(generate_fit_func(h, config.h_sat), h, m)
 
-    return ForcData.from_existing(
-        data=data,
-        m=data.m - line(data.h, a, 0)
-    )
+    return ForcData.from_existing(data=data, m=data.m - line(data.h, a, 0))
 
 
 def generate_fit_func(
@@ -289,6 +284,7 @@ def generate_fit_func(
         y[i_upper_saturation] = line(h[i_upper_saturation], a, b1)
         y[~i_upper_saturation] = line(h[~i_upper_saturation], a, b2)
         return y
+
     return fit_func
 
 
@@ -340,12 +336,13 @@ def compute_forc_distribution(data: ForcData, config: Config) -> ForcData:
     step = data.get_step()
     return ForcData.from_existing(
         data=data,
-        rho=-0.5 * sn.convolve(
+        rho=-0.5
+        * sn.convolve(
             input=data.m,
             weights=compute_sg_kernel(config.smoothing_factor, step, step),
-            mode='constant',
+            mode="constant",
             cval=np.nan,
-        )
+        ),
     )
 
 
@@ -370,12 +367,14 @@ def compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
     """
     xx, yy = np.meshgrid(
         np.linspace(sf * step_x, -sf * step_x, 2 * sf + 1),
-        np.linspace(sf * step_y, -sf * step_y, 2 * sf + 1)
+        np.linspace(sf * step_y, -sf * step_y, 2 * sf + 1),
     )
 
     xx = np.reshape(xx, (-1, 1))
     yy = np.reshape(yy, (-1, 1))
 
-    coefficients = np.linalg.pinv(np.hstack((np.ones_like(xx), xx, xx ** 2, yy, yy ** 2, xx * yy)))
+    coefficients = np.linalg.pinv(
+        np.hstack((np.ones_like(xx), xx, xx**2, yy, yy**2, xx * yy))
+    )
 
     return np.reshape(coefficients[5, :], (2 * sf + 1, 2 * sf + 1))

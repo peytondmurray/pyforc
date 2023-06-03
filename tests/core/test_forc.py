@@ -17,8 +17,8 @@ def test_forc(raw_data_file):
             pipeline=[
                 pfc.ops.correct_drift,
                 pfc.ops.interpolate,
-            ]
-        )
+            ],
+        ),
     )
 
     assert f

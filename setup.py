@@ -19,5 +19,5 @@ setuptools.setup(
         "scipy",
         "pytest",
         "coverage",
-    ]
+    ],
 )

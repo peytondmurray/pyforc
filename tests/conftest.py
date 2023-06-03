@@ -1,4 +1,2 @@
 """Pytest configuration."""
-pytest_plugins = [
-    "tests.fixtures.data"
-]
+pytest_plugins = ["tests.fixtures.data"]
