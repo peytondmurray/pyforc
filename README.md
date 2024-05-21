@@ -1,7 +1,6 @@
-[![codecov](https://codecov.io/gh/peytondmurray/PyFORC/branch/develop/graph/badge.svg?token=0fxoMUIK6x)](https://codecov.io/gh/peytondmurray/PyFORC)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
-# PyFORC
+# pyforc
 
 FORC analysis in Python.
 ![A FORC distribution plot.](./assets/forc.jpg)
