@@ -1,8 +1,7 @@
 """Class to hold configuration details for creating and analyzing FORC data."""
-from __future__ import annotations
 
 import dataclasses
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from .forcdata import ForcData
 
@@ -13,9 +12,9 @@ class Config:
 
     Parameters
     ----------
-    file_name: str
+    file_name: str | None
         Name of the file containing FORC data
-    step: Optional[float]
+    step: float | None
         Step size to be used for the interpolated dataset; if None, step size is determined from the
         step size used for the measurement
     interpolation: str
@@ -38,12 +37,12 @@ class Config:
         Smoothing factor to use for calculating the FORC distribution
     """
 
-    file_name: Optional[str] = None
-    step: Optional[float] = None
+    file_name: str | None = None
+    step: float | None = None
     interpolation: str = "cubic"
     drift_correction: bool = True
     drift_kernel_size: int = 4
     drift_density: int = 3
-    pipeline: Optional[list[Callable[[ForcData, Config], ForcData]]] = None
+    pipeline: list[Callable[[ForcData, "Config"], ForcData]] | None = None
     h_sat: float = 0
     smoothing_factor: int = 3

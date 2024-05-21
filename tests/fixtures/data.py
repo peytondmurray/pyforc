@@ -1,4 +1,5 @@
 """Test fixtures of real data."""
+
 import pathlib
 
 import pytest

@@ -1,4 +1,5 @@
 """Tests for the Forc classes."""
+
 import pyforc.core as pfc
 
 

@@ -103,3 +103,5 @@ ENV/
 .idea/
 .vs/
 .pytest_cache/
+
+.virtual_documents/

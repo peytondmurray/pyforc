@@ -1,7 +1,4 @@
 """Coordinate transformations for FORC data."""
-from __future__ import annotations
-
-import typing
 
 import matplotlib.transforms as transforms
 
@@ -9,10 +6,10 @@ import matplotlib.transforms as transforms
 class Coordinates(transforms.Affine2D):
     """Base class for coordinates."""
 
-    name: typing.Optional[str] = None
+    name: str | None = None
 
     @staticmethod
-    def from_str(name: str) -> Coordinates:
+    def from_str(name: str) -> "Coordinates":
         """Get the appropriate Coordinates class instance by name.
 
         Parameters

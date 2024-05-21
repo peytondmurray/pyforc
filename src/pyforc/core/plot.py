@@ -1,5 +1,4 @@
 """Plotting utilities for the FORC data."""
-from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,7 +15,7 @@ def imshow(
     attr: str = "m",
     interpolation: str = "nearest",
     ax: axes.Axes = None,
-    coords: Union[str, coordinates.Coordinates] = "hhr",
+    coords: str | coordinates.Coordinates = "hhr",
     mask: bool = True,
 ) -> axes.Axes:
     """Show the FORC data as a colormap.
@@ -69,7 +68,7 @@ def imshow(
     return ax
 
 
-def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
+def curves(fc: forc.Forc | ForcData, ax: axes.Axes = None, **lc_kwargs) -> axes.Axes:
     """Plot the reversal curves in H-M space.
 
     Parameters
@@ -78,6 +77,8 @@ def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
         Forc instance to be plotted
     ax : axes.Axes
         Axes on which the data is to be plotted
+    **lc_kwargs
+        Extra args to pass to the LineCollection instance
 
     Returns
     -------
@@ -92,14 +93,8 @@ def curves(fc: Union[forc.Forc, ForcData], ax: axes.Axes = None) -> axes.Axes:
     else:
         data = fc.data
 
-    ax.add_collection(
-        LineCollection(
-            data.curves(),
-            linestyles="solid",
-            color="w",
-            alpha=0.3,
-        )
-    )
+    lc_kwargs = {"linestyles": "solid", "color": "k", "alpha": 0.3, **lc_kwargs}
+    ax.add_collection(LineCollection(data.curves(), **lc_kwargs))
     ax.set_xlim(np.nanmin(data.h), np.nanmax(data.h))
     ax.set_ylim(np.nanmin(data.m), np.nanmax(data.m))
     return ax

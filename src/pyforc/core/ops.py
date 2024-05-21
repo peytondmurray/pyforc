@@ -1,5 +1,7 @@
 """Transformations which operate on ForcData objects."""
-from typing import Any, Callable, List, Union
+
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 import scipy.interpolate as si
@@ -130,7 +132,7 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
     return ForcData.from_existing(data=data, m_raw=m_raw)
 
 
-def decimate(x: Union[List[Any], np.ndarray], step: int) -> np.ndarray:
+def decimate(x: list[Any] | np.ndarray, step: int) -> np.ndarray:
     """Return every `step` value of x, but without removing the last value in x.
 
     The step slicing operator [::step] always returns the first element in the array, and then
@@ -197,7 +199,7 @@ def hr_vals_from_h(h: list[np.ndarray]) -> list[np.ndarray]:
     return [np.full_like(curve, fill_value=curve[0]) for curve in h]
 
 
-def normalize(data: ForcData, _) -> ForcData:
+def normalize(data: ForcData, _config: Config) -> ForcData:
     """Normalize the magnetization to the range [-1, 1].
 
     Parameters
@@ -347,8 +349,7 @@ def compute_forc_distribution(data: ForcData, config: Config) -> ForcData:
 
 
 def compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
-    """
-    Compute the Savitzky-Golay kernel which pulls out the mixed second derivative.
+    """Compute the Savitzky-Golay kernel which pulls out the mixed second derivative.
 
     Parameters
     ----------

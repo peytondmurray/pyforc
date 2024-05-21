@@ -1,4 +1,5 @@
 """Tests for the ingesters."""
+
 import numpy as np
 
 from pyforc.core.config import Config

@@ -1,10 +1,32 @@
 [build-system]
 requires = [
     "setuptools",
-    "wheel",
-    "bump2version",
+    "setuptools_scm"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyforc"
+dynamic = ["version"]
+authors = [
+  { name="Peyton  Murray" },
+]
+description = "FORC analysis in Python"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+]
+urls = { Homepage = "https://github.com/peytondmurray/pyforc" }
+license = { file = 'LICENSE' }
+
 
 [tool.interrogate]
 ignore-init-method = true
@@ -12,5 +34,80 @@ ignore-init-module = true
 ignore-magic = true
 ignore-module = true
 
+[tool.setuptools_scm]
+
+[tool.isort]
+profile = "black"
+
+[project.optional-dependencies]
+dev = ["pre-commit>=3.6.0"]
+test = ["pytest"]
+doc = ["sphinx", "myst-parser"]
+
 [tool.ruff]
-line-length = 100
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # pep8 naming
+    "N",
+    # pydocstyle
+    "D",
+    # annotations
+    "ANN",
+    # debugger
+    "T10",
+    # flake8-pytest
+    "PT",
+    # flake8-return
+    "RET",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-fixme
+    "FIX",
+    # flake8-eradicate
+    "ERA",
+    # pandas-vet
+    "PD",
+    # numpy-specific rules
+    "NPY",
+]
+ignore = [
+    "D104", # Missing docstring in public package
+    "D100", # Missing docstring in public module
+    "D211", # No blank line before class
+    "D213", # Multiline summary second line
+    "PD901", # Avoid using 'df' for pandas dataframes. Perfectly fine in functions with limited scope
+    "ANN201", # Missing return type annotation for public function (makes no sense for NoneType return types...)
+    "ANN101", # Missing type annotation for `self`
+    "ANN204", # Missing return type annotation for special method
+    "ANN002", # Missing type annotation for `*args`
+    "ANN003", # Missing type annotation for `**kwargs`
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in __init__
+    "D203", # 1 blank line before after class docstring
+    "D204", # 1 blank line required after class docstring
+    "D413", # 1 black line after parameters
+    "SIM108", # Simplify if/else to one line; not always clearer
+    "D206", # Docstrings should be indented with spaces; unnecessary when running ruff-format
+    "E501", # Line length too long; unnecessary when running ruff-format
+    "W191", # Indentation contains tabs; unnecessary when running ruff-format
+    "B905", # zip() without an explicit strict=; incompatible with python<3.12
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"test_*.py" = ["ANN001"]

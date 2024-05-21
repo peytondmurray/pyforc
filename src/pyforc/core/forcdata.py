@@ -1,6 +1,4 @@
 """Containers for holding FORC data as arrays."""
-from __future__ import annotations
-from typing import Optional
 
 import numpy as np
 
@@ -34,9 +32,9 @@ class ForcData:
 
     def __init__(
         self,
-        h_raw: Optional[list[np.ndarray]] = None,
-        m_raw: Optional[list[np.ndarray]] = None,
-        t_raw: Optional[list[np.ndarray]] = None,
+        h_raw: list[np.ndarray] | None = None,
+        m_raw: list[np.ndarray] | None = None,
+        t_raw: list[np.ndarray] | None = None,
         m_drift: np.ndarray = None,
         h: np.ndarray = None,
         hr: np.ndarray = None,
@@ -68,17 +66,17 @@ class ForcData:
 
     @staticmethod
     def from_existing(
-        data: ForcData,
-        h_raw: Optional[list[np.ndarray]] = None,
-        m_raw: Optional[list[np.ndarray]] = None,
-        t_raw: Optional[list[np.ndarray]] = None,
+        data: "ForcData",
+        h_raw: list[np.ndarray] | None = None,
+        m_raw: list[np.ndarray] | None = None,
+        t_raw: list[np.ndarray] | None = None,
         m_drift: np.ndarray = None,
         h: np.ndarray = None,
         hr: np.ndarray = None,
         m: np.ndarray = None,
         t: np.ndarray = None,
         rho: np.ndarray = None,
-    ) -> ForcData:
+    ) -> "ForcData":
         """Generate a new ForcData instance from the input, but override fields with the kwargs.
 
         Parameters
