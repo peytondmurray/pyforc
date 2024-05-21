@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "pyforc"
 dynamic = ["version"]
 authors = [
-  { name="Peyton  Murray" },
+  { name="Peyton Murray" },
 ]
 description = "FORC analysis in Python"
 readme = "README.md"
