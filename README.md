@@ -7,7 +7,22 @@ FORC analysis in Python.
 
 ## Installation
 
-Install by cloning this repo and running
+### Install from PyPI
+
+The easiest way to get started is by installing via `pip`:
+
+`pip install pyforc`
+
+This will grab the latest published release on the Python Package Index and
+install it to your current python environment.
+
+### Installation from source
+
+Install from source by doing
+
+`pip install git+https://github.com/peytondmurray/pyforc`
+
+Alternatively you can clone this repo and run
 
 `pip install .`
 
