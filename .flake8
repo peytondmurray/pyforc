@@ -1,7 +1,0 @@
-[flake8]
-max-line-length = 100
-ignore = D107,D104,W503
-known-modules = :[pyforc.core,pyforc.gui]
-per-file-ignores = __init__.py:F401
-docstring-convention = numpy
-docstring_style = numpy

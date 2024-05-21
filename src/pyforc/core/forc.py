@@ -1,13 +1,11 @@
 """Classes for storing, extracting, and processing FORC data."""
-from typing import Type
 
 from .config import Config
 from .ingester import IngesterBase
 
 
 class Forc:
-    """
-    Generic for storing, extracting, and processing FORC data.
+    """Generic container for extracting and processing FORC data.
 
     Parameters
     ----------
@@ -17,7 +15,7 @@ class Forc:
         Config instance holding the ingester configuration details
     """
 
-    def __init__(self, ingester: Type[IngesterBase], config: Config):
+    def __init__(self, ingester: type[IngesterBase], config: Config):
         self.config = config
         self.ingester = ingester(self.config)
         self.data = self.ingester.run()

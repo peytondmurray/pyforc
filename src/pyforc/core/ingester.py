@@ -76,7 +76,7 @@ class PMCIngester(IngesterBase):
         if not self.config.file_name:
             raise ValueError("No file name specified.")
 
-        with open(self.config.file_name, "r") as f:
+        with open(self.config.file_name) as f:
             lines = f.readlines()
 
         # Find first data line
@@ -88,8 +88,7 @@ class PMCIngester(IngesterBase):
 
         if self.is_hhr(header):
             return self.ingest_from_hhr(lines, i)
-        else:
-            return self.ingest_from_hchb(lines, i)
+        return self.ingest_from_hchb(lines, i)
 
     def ingest_curve(self, lines: list[str], i: int) -> tuple[np.ndarray, ...]:
         """Ingest a single reversal curve.
@@ -173,7 +172,7 @@ class PMCIngester(IngesterBase):
             m_drift=np.array(m_drift),
         )
 
-    def ingest_from_hhr(self, lines, i):
+    def ingest_from_hhr(self, lines: list[str], i: int):
         """Ingest the PMC file assuming an h/hr measurement space.
 
         Parameters
