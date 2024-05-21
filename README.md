@@ -4,7 +4,7 @@
 # PyFORC
 
 FORC analysis in Python.
-![forc]
+![A FORC distribution plot.](./assets/forc.jpg)
 
 ## Installation
 
@@ -19,8 +19,6 @@ to stick to PEP8 as much as I can, except I'm using line lengths of 100
 characters. I'm using numpydoc formatting for the documentation as well. Don't
 worry too much about this stuff though, we can work together to integrate your
 code.
-
-[forc]: https://github.com/peytondmurray/PyFORC/blob/develop/assets/forc.jpg
 
 ### Pre-commit hooks
 
