@@ -40,7 +40,7 @@ def interpolate(
         step = config.step
 
     h_vals = np.concatenate(data.h_raw)
-    hr_vals = np.concatenate(hr_vals_from_h(data.h_raw))
+    hr_vals = np.concatenate(_hr_vals_from_h(data.h_raw))
     m_vals = np.concatenate(data.m_raw)
     t_vals = np.concatenate(data.t_raw)
 
@@ -119,10 +119,10 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
 
     m_sat_avg = np.mean(data.m_drift)
 
-    m_sat_mov = decimate(
-        moving_average(data.m_drift, config.drift_kernel_size), config.drift_density
+    m_sat_mov = _decimate(
+        _moving_average(data.m_drift, config.drift_kernel_size), config.drift_density
     )
-    index_mov = decimate(np.arange(0, len(data.m_drift)), config.drift_density)
+    index_mov = _decimate(np.arange(0, len(data.m_drift)), config.drift_density)
 
     m_sat_interp = si.interp1d(index_mov, m_sat_mov, kind="cubic")
 
@@ -132,7 +132,7 @@ def correct_drift(data: ForcData, config: Config) -> ForcData:
     return ForcData.from_existing(data=data, m_raw=m_raw)
 
 
-def decimate(x: list[Any] | np.ndarray, step: int) -> np.ndarray:
+def _decimate(x: list[Any] | np.ndarray, step: int) -> np.ndarray:
     """Return every `step` value of x, but without removing the last value in x.
 
     The step slicing operator [::step] always returns the first element in the array, and then
@@ -159,7 +159,7 @@ def decimate(x: list[Any] | np.ndarray, step: int) -> np.ndarray:
     return x_dec
 
 
-def moving_average(data: np.ndarray, kernel_size: int) -> np.ndarray:
+def _moving_average(data: np.ndarray, kernel_size: int) -> np.ndarray:
     """Calculate a 1D moving average over the data.
 
     Parameters
@@ -182,7 +182,7 @@ def moving_average(data: np.ndarray, kernel_size: int) -> np.ndarray:
     )
 
 
-def hr_vals_from_h(h: list[np.ndarray]) -> list[np.ndarray]:
+def _hr_vals_from_h(h: list[np.ndarray]) -> list[np.ndarray]:
     """Generate an hr dataset from a ragged set of h curves.
 
     Parameters
@@ -251,12 +251,12 @@ def correct_slope(data: ForcData, config: Config) -> ForcData:
     h = data.h[fit_region].flatten()
     m = data.m[fit_region].flatten()
 
-    (a, b1, b2), _ = so.curve_fit(generate_fit_func(h, config.h_sat), h, m)
+    (a, b1, b2), _ = so.curve_fit(_generate_fit_func(h, config.h_sat), h, m)
 
-    return ForcData.from_existing(data=data, m=data.m - line(data.h, a, 0))
+    return ForcData.from_existing(data=data, m=data.m - _line(data.h, a, 0))
 
 
-def generate_fit_func(
+def _generate_fit_func(
     h: np.ndarray,
     h_sat: float,
 ) -> Callable[[np.ndarray, float, float, float], np.ndarray]:
@@ -283,14 +283,14 @@ def generate_fit_func(
 
     def fit_func(h: np.ndarray, a: float, b1: float, b2: float) -> np.ndarray:
         y = np.zeros(h.shape)
-        y[i_upper_saturation] = line(h[i_upper_saturation], a, b1)
-        y[~i_upper_saturation] = line(h[~i_upper_saturation], a, b2)
+        y[i_upper_saturation] = _line(h[i_upper_saturation], a, b1)
+        y[~i_upper_saturation] = _line(h[~i_upper_saturation], a, b2)
         return y
 
     return fit_func
 
 
-def line(x: np.ndarray, a: float, b: float) -> np.ndarray:
+def _line(x: np.ndarray, a: float, b: float) -> np.ndarray:
     """Return y-values which are a linear function of x.
 
     Parameters
@@ -341,14 +341,14 @@ def compute_forc_distribution(data: ForcData, config: Config) -> ForcData:
         rho=-0.5
         * sn.convolve(
             input=data.m,
-            weights=compute_sg_kernel(config.smoothing_factor, step, step),
+            weights=_compute_sg_kernel(config.smoothing_factor, step, step),
             mode="constant",
             cval=np.nan,
         ),
     )
 
 
-def compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
+def _compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
     """Compute the Savitzky-Golay kernel which pulls out the mixed second derivative.
 
     Parameters
@@ -363,7 +363,7 @@ def compute_sg_kernel(sf: int, step_x: float, step_y: float) -> np.ndarray:
     Returns
     -------
     np.ndarray:
-        Kernel which, when colvolved with the data, will yield the coefficient of the "xy" term in
+        Kernel which, when convolved with the data, will yield the coefficient of the "xy" term in
         the least-squares fit of the data in the neighborhood of each point.
     """
     xx, yy = np.meshgrid(
