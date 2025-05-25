@@ -16,7 +16,6 @@ readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -25,7 +24,13 @@ dependencies = [
     "matplotlib",
 ]
 urls = { Homepage = "https://github.com/peytondmurray/pyforc" }
-license = { file = 'LICENSE' }
+license-files = ["LICENSE"]
+
+[tool.setuptools.package-data]
+pyforc = ["py.typed"]
+
+[tool.setuptools.package-dir]
+
 
 
 [tool.interrogate]
@@ -40,8 +45,7 @@ ignore-module = true
 profile = "black"
 
 [project.optional-dependencies]
-dev = ["pre-commit>=3.6.0"]
-test = ["pytest"]
+dev = ["pre-commit>=3.6.0", "pytest"]
 doc = ["sphinx", "myst-parser"]
 
 [tool.ruff]
