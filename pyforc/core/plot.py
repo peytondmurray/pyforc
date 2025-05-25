@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import axes
 from matplotlib.collections import LineCollection
+from matplotlib.figure import FigureBase
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from . import coordinates, forc
@@ -14,7 +15,7 @@ def imshow(
     fc: forc.Forc,
     attr: str = "m",
     interpolation: str = "nearest",
-    ax: axes.Axes = None,
+    ax: axes.Axes | None = None,
     coords: str | coordinates.Coordinates = "hhr",
     mask: bool = True,
 ) -> axes.Axes:
@@ -41,9 +42,8 @@ def imshow(
         Axes on which the image is drawn
     """
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=(15, 10))
-    else:
-        fig = ax.figure
+        _, ax = plt.subplots(1, 1, figsize=(15, 10))
+
     ax.set_aspect("equal")
 
     if isinstance(coords, coordinates.Coordinates):
@@ -59,7 +59,7 @@ def imshow(
         transform=transform + ax.transData,
     )
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-    fig.colorbar(im, cax=cax)
+    ax.figure.colorbar(im, cax=cax)
 
     xlim, ylim = fc.data.get_limits(coords=transform, mask=mask)
     ax.set_xlim(*xlim)
@@ -68,7 +68,9 @@ def imshow(
     return ax
 
 
-def curves(fc: forc.Forc | ForcData, ax: axes.Axes = None, **lc_kwargs) -> axes.Axes:
+def curves(
+    fc: forc.Forc | ForcData, ax: axes.Axes | None = None, **lc_kwargs
+) -> axes.Axes:
     """Plot the reversal curves in H-M space.
 
     Parameters
