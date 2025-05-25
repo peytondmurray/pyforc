@@ -35,12 +35,12 @@ class ForcData:
         h_raw: list[np.ndarray] | None = None,
         m_raw: list[np.ndarray] | None = None,
         t_raw: list[np.ndarray] | None = None,
-        m_drift: np.ndarray = None,
-        h: np.ndarray = None,
-        hr: np.ndarray = None,
-        m: np.ndarray = None,
-        t: np.ndarray = None,
-        rho: np.ndarray = None,
+        m_drift: np.ndarray | None = None,
+        h: np.ndarray | None = None,
+        hr: np.ndarray | None = None,
+        m: np.ndarray | None = None,
+        t: np.ndarray | None = None,
+        rho: np.ndarray | None = None,
     ):
         self.h_raw = [] if h_raw is None else h_raw
         self.m_raw = [] if m_raw is None else m_raw
@@ -70,12 +70,12 @@ class ForcData:
         h_raw: list[np.ndarray] | None = None,
         m_raw: list[np.ndarray] | None = None,
         t_raw: list[np.ndarray] | None = None,
-        m_drift: np.ndarray = None,
-        h: np.ndarray = None,
-        hr: np.ndarray = None,
-        m: np.ndarray = None,
-        t: np.ndarray = None,
-        rho: np.ndarray = None,
+        m_drift: np.ndarray | None = None,
+        h: np.ndarray | None = None,
+        hr: np.ndarray | None = None,
+        m: np.ndarray | None = None,
+        t: np.ndarray | None = None,
+        rho: np.ndarray | None = None,
     ) -> "ForcData":
         """Generate a new ForcData instance from the input, but override fields with the kwargs.
 
