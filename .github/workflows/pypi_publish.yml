@@ -9,27 +9,22 @@ on:
 jobs:
   build:
     name: build wheel
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['cp312', 'cp311']
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
 
-      - name: Build wheel for ${{ matrix.python-version }}
+      - name: Build wheel
         run: |
           pip install build
-          python -m build --wheel
+          python -m build
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.python-version }}
-          path: ./dist/*.whl
+          name: wheels
+          path: ./dist/
 
   upload:
     name: Upload wheels to PYPI
@@ -45,7 +40,6 @@ jobs:
       - name: Retrieve wheels and sdist
         uses: actions/download-artifact@v4
         with:
-          pattern: wheels-*
           merge-multiple: true
           path: wheels/
 
