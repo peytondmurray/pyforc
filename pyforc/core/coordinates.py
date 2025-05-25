@@ -31,7 +31,8 @@ class Coordinates(transforms.Affine2D):
             if subc.name == name:
                 return subc()
 
-        raise ValueError(f"Invalid coordinate type {name}")
+        names = [subc.name for name in Coordinates.__subclasses__()]
+        raise ValueError(f"Invalid coordinate type {name}. Valid names: {names}")
 
 
 class CoordinatesHcHb(Coordinates):
