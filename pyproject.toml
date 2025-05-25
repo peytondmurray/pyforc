@@ -42,7 +42,7 @@ profile = "black"
 
 [project.optional-dependencies]
 dev = ["pre-commit>=3.6.0"]
-test = ["pytest"]
+test = ["pytest", "pytest-cov"]
 doc = ["sphinx", "myst-parser"]
 
 [tool.ruff]
