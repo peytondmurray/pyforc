@@ -20,13 +20,12 @@ repos:
         - id: rst-inline-touching-normal
         - id: python-no-log-warn
         - id: python-check-mock-methods
-
-    - repo: https://github.com/pre-commit/mirrors-prettier
-      rev: v4.0.0-alpha.8
+    - repo: https://github.com/biomejs/pre-commit
+      rev: v0.6.1
       hooks:
-        - id: prettier
-          files: 'docs/'
-          types_or: [javascript, ts, tsx, html, css]
+        - id: biome-check
+        - id: biome-format
+        - id: biome-lint
     - repo: https://github.com/pre-commit/mirrors-mypy
       rev: 'v1.15.0'
       hooks:
