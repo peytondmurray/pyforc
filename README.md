@@ -3,7 +3,7 @@
 # pyforc
 
 FORC analysis in Python.
-![A FORC distribution plot.](./assets/forc.jpg)
+![A FORC distribution plot.](./forc.jpg)
 
 ## Installation
 
