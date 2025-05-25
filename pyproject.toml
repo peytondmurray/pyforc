@@ -16,7 +16,6 @@ readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -25,8 +24,10 @@ dependencies = [
     "matplotlib",
 ]
 urls = { Homepage = "https://github.com/peytondmurray/pyforc" }
-license = { file = 'LICENSE' }
+license-files = ["LICENSE"]
 
+[tool.setuptools.package-data]
+pyforc = ["py.typed"]
 
 [tool.interrogate]
 ignore-init-method = true
