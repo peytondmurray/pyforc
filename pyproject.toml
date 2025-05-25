@@ -29,10 +29,6 @@ license-files = ["LICENSE"]
 [tool.setuptools.package-data]
 pyforc = ["py.typed"]
 
-[tool.setuptools.package-dir]
-
-
-
 [tool.interrogate]
 ignore-init-method = true
 ignore-init-module = true
@@ -45,7 +41,8 @@ ignore-module = true
 profile = "black"
 
 [project.optional-dependencies]
-dev = ["pre-commit>=3.6.0", "pytest"]
+dev = ["pre-commit>=3.6.0"]
+test = ["pytest"]
 doc = ["sphinx", "myst-parser"]
 
 [tool.ruff]
