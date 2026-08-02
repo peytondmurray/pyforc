@@ -23,3 +23,15 @@ def test_forc(raw_data_file):
     )
 
     assert f
+
+
+import pandas as pd
+from preprocessing import preprocess
+
+def test_preprocessor():
+    """Check that the output config start time is the configured start time."""
+
+    run_settings = json.loads("run_settings.json")
+    preprocess(run_settings)
+    df = pd.read_csv('w2_con.csv')
+    assert df['TMSTRT'] == run_settings['start']
