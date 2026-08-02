@@ -10,3 +10,7 @@ from .ops import (
     interpolate,
     normalize,
 )
+from .plot import (
+    curves,
+    imshow,
+)
